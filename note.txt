@@ -1,0 +1,41 @@
+Folder Structure
+
+project-root/
+│
+├── frontend/                # Next.js Frontend
+│   ├── public/              # Static files (images, favicon)
+│   ├── pages/               # Next.js pages
+│   │   ├── dashboard.js
+│   │   ├── qa.js
+│   │   ├── storage.js
+│   │   └── settings.js
+│   ├── components/          # Reusable UI components
+│   │   ├── Navbar.js
+│   │   ├── FileUploader.js
+│   │   ├── QAList.js
+│   │   └── Charts.js
+│   ├── styles/              # CSS (if needed) or global styling
+│   ├── utils/               # Helper functions (API calls, formatting)
+│   ├── package.json
+│   └── next.config.js
+│
+├── backend/                 # FastAPI Backend
+│   ├── app/
+│   │   ├── main.py          # Entry point
+│   │   ├── api/             # API routes
+│   │   │   ├── qa.py
+│   │   │   ├── storage.py
+│   │   │   └── dashboard.py
+│   │   ├── models/          # DB models (Supabase/Postgres)
+│   │   ├── services/        # AI, OCR, and processing logic
+│   │   │   ├── qa_generator.py   # Hugging Face model integration
+│   │   │   └── ocr.py            # Tesseract OCR logic
+│   │   └── utils/           # Helpers, file handling, etc.
+│   ├── requirements.txt
+│   └── Dockerfile           # Optional for deployment
+│
+├── data/                    # Sample PDFs / datasets for testing
+│
+├── scripts/                 # Utility scripts (migration, preprocessing)
+│
+└── README.md
