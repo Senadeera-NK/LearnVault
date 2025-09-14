@@ -4,16 +4,24 @@ project-root/
 │
 ├── frontend/                # Next.js Frontend
 │   ├── public/              # Static files (images, favicon)
-│   ├── pages/               # Next.js pages
-│   │   ├── dashboard.js
-│   │   ├── qa.js
-│   │   ├── storage.js
-│   │   └── settings.js
-│   ├── components/          # Reusable UI components
-│   │   ├── Navbar.js
-│   │   ├── FileUploader.js
-│   │   ├── QAList.js
-│   │   └── Charts.js
+        src/
+        ├── app/
+        │    ├── dashboard/
+        │    │    └── page.tsx
+        │    ├── qa/
+        │    │    └── page.tsx
+        │    ├── storage/
+        │    │    └── page.tsx
+        │    ├── settings/
+        │    │    └── page.tsx
+        │    ├── layout.tsx
+        │    ├── page.tsx
+        │    └── globals.css
+        ├── components/
+        │    ├── Navbar.tsx
+        │    ├── FileUploader.tsx
+        │    ├── QAList.tsx
+        │    └── Charts.tsx
 │   ├── styles/              # CSS (if needed) or global styling
 │   ├── utils/               # Helper functions (API calls, formatting)
 │   ├── package.json
@@ -39,3 +47,8 @@ project-root/
 ├── scripts/                 # Utility scripts (migration, preprocessing)
 │
 └── README.md
+
+
+VERSION CONTROL
+- Chakra UI v2.x
+- react@18.3.1 react-dom@18.3.1
