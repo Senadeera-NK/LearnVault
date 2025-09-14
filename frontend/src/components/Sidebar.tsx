@@ -25,7 +25,7 @@ export default function Sidebar() {
         <DrawerOverlay />
         <DrawerContent>
           <DrawerCloseButton />
-          <DrawerHeader>📚 Menu</DrawerHeader>
+          <DrawerHeader></DrawerHeader>
 
           <DrawerBody>
             <VStack align="stretch" spacing={4}>
