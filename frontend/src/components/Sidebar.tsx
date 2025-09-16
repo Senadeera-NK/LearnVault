@@ -1,11 +1,19 @@
 "use client"
 
-import { useDisclosure, Box, Drawer, DrawerBody, DrawerHeader, DrawerOverlay, DrawerContent, DrawerCloseButton, Button, IconButton, VStack } from "@chakra-ui/react"
+import { useDisclosure, Box, Drawer, DrawerBody, DrawerHeader, DrawerOverlay, DrawerContent, DrawerCloseButton, Button, IconButton, VStack, ScaleFade } from "@chakra-ui/react"
 import { HamburgerIcon, AddIcon, AttachmentIcon, EditIcon} from "@chakra-ui/icons"
 import Link from "next/link"
+import { useState } from "react"
+import { useRef } from "react"
+import AttachmentButton from "./AttachmentButton"
+import EditButton from "./EditButton"
+
 
 export default function Sidebar() {
   const { isOpen, onOpen, onClose } = useDisclosure()
+  const [showActions, setShowActions] = useState(false)
+  
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   return (
     <>
@@ -57,33 +65,14 @@ export default function Sidebar() {
         borderRadius="full"
         size="lg"
         zIndex="1000"
-        onClick={() => alert("Add new item")}
+        onClick={() => setShowActions(!showActions)}
       />
 
-      <IconButton
-        icon={<EditIcon />}
-        aria-label="Add new item"
-        colorScheme="teal"
-        position="fixed"
-        bottom="4 rem"
-        right="1.5rem"
-        borderRadius="full"
-        size="lg"
-        zIndex="1000"
-        onClick={() => alert("Add new item")}
-      />
-      <IconButton
-        icon={<AttachmentIcon />}
-        aria-label="Add new item"
-        colorScheme="teal"
-        position="fixed"
-        bottom="1.5rem"
-        right="4 rem"
-        borderRadius="full"
-        size="lg"
-        zIndex="1000"
-        onClick={() => alert("Add new item")}
-      />
+      {showActions && 
+      <>
+      <AttachmentButton/>
+      <EditButton/>
+      </>}
     </>
   )
 }
