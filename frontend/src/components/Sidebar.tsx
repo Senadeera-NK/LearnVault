@@ -1,7 +1,7 @@
 "use client"
 
 import { useDisclosure, Box, Drawer, DrawerBody, DrawerHeader, DrawerOverlay, DrawerContent, DrawerCloseButton, Button, IconButton, VStack } from "@chakra-ui/react"
-import { HamburgerIcon, AddIcon } from "@chakra-ui/icons"
+import { HamburgerIcon, AddIcon, AttachmentIcon, EditIcon} from "@chakra-ui/icons"
 import Link from "next/link"
 
 export default function Sidebar() {
@@ -54,6 +54,31 @@ export default function Sidebar() {
         position="fixed"
         bottom="1.5rem"
         right="1.5rem"
+        borderRadius="full"
+        size="lg"
+        zIndex="1000"
+        onClick={() => alert("Add new item")}
+      />
+
+      <IconButton
+        icon={<EditIcon />}
+        aria-label="Add new item"
+        colorScheme="teal"
+        position="fixed"
+        bottom="4 rem"
+        right="1.5rem"
+        borderRadius="full"
+        size="lg"
+        zIndex="1000"
+        onClick={() => alert("Add new item")}
+      />
+      <IconButton
+        icon={<AttachmentIcon />}
+        aria-label="Add new item"
+        colorScheme="teal"
+        position="fixed"
+        bottom="1.5rem"
+        right="4 rem"
         borderRadius="full"
         size="lg"
         zIndex="1000"
