@@ -1,0 +1,18 @@
+image: gitpod/workspace-full
+
+tasks:
+
+  - name: Frontend
+    init: |
+      cd frontend
+      npm install
+      npm install next react react-dom
+
+    command: |
+      cd frontend
+      npm start
+
+ports:
+
+  - port: 3000
+    onOpen: open-preview
