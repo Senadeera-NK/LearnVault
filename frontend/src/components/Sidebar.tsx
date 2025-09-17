@@ -1,12 +1,13 @@
 "use client"
 
-import { useDisclosure, Box, Drawer, DrawerBody, DrawerHeader, DrawerOverlay, DrawerContent, DrawerCloseButton, Button, IconButton, VStack, ScaleFade } from "@chakra-ui/react"
+import { useDisclosure, Box, Drawer, DrawerBody, DrawerHeader, DrawerOverlay, DrawerContent, DrawerCloseButton, Button, IconButton, VStack, ScaleFade  } from "@chakra-ui/react"
 import { HamburgerIcon, AddIcon, AttachmentIcon, EditIcon} from "@chakra-ui/icons"
 import Link from "next/link"
 import { useState } from "react"
 import { useRef } from "react"
 import AttachmentButton from "./AttachmentButton"
 import EditButton from "./EditButton"
+import UserAvatar from "./UserAvatar"
 
 
 export default function Sidebar() {
@@ -17,6 +18,7 @@ export default function Sidebar() {
 
   return (
     <>
+      <UserAvatar/>
       {/* Hamburger Button (Top Left) */}
       <IconButton
         icon={<HamburgerIcon />}
