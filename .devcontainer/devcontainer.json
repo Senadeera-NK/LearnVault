@@ -1,8 +1,8 @@
 {
   "name": "Frontend",
-  "image": "mcr.microsoft.com/devcontainers/javascript-node:0-20",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:20",
 
-  "postCreateCommand": "cd frontend && npm install && npm install next react react-dom && npm run build",
+  "postCreateCommand": "cd frontend && npm install && npm install next react react-dom",
 
   "forwardPorts": [3000],
 
@@ -13,5 +13,5 @@
     }
   },
 
-  "postStartCommand": "cd frontend && npm start"
+  "postStartCommand": "cd frontend && npm run dev"
 }
