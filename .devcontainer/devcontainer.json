@@ -1,0 +1,17 @@
+{
+  "name": "Frontend",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:0-20",
+
+  "postCreateCommand": "cd frontend && npm install && npm install next react react-dom && npm run build",
+
+  "forwardPorts": [3000],
+
+  "portsAttributes": {
+    "3000": {
+      "label": "Frontend",
+      "onAutoForward": "openPreview"
+    }
+  },
+
+  "postStartCommand": "cd frontend && npm start"
+}
