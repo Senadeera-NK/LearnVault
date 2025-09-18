@@ -2,6 +2,9 @@ Folder Structure
 
 project-root/
 │
+├── db/  
+│   ├── migrations/              # Static files (images, favicon)
+│   └── 001_init.sql
 ├── frontend/                # Next.js Frontend
 │   ├── public/              # Static files (images, favicon)
         src/
