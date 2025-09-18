@@ -1,47 +1,30 @@
+// src/components/SignInButton.tsx
 "use client";
 
-import { useEffect, useState } from "react";
-import { Button, VStack, Input } from "@chakra-ui/react";
+import { useSession, signIn, signOut } from "next-auth/react";
 
-interface GoogleSignInProps{
-  onUser:(data:{userName:String;userEmail:string})=>void;
-}
-export default function Googlesignin({ onUser }: GoogleSignInProps) {
-  const [showButton, setShowButton] = useState(false);
-  const [userName, setUserName] = useState("");
-  const [userEmail, setUserEmail] = useState("");
+export default function Googlesignin() {
+  const { data: session } = useSession();
 
-  // Show button after 3 seconds
-  useEffect(() => {
-    const timer = setTimeout(() => setShowButton(true), 3000);
-    return () => clearTimeout(timer);
-  }, []);
-
-  const handleGoogleSignIn = () => {
-    // For now, just store values in variables
-    const name = "Test User"; // simulate getting name from Google
-    const email = "test@example.com"; // simulate getting email from Google
-
-    setUserName(name);
-    setUserEmail(email);
-
-    // send back to parent
-    onUser({ userName: name, userEmail: email });
-  };
-
-  if (!showButton) return null;
+  if (session) {
+    return (
+      <div style={{ display: "flex", gap: "1rem" }}>
+        <p>
+          Logged in as: <b>{session.user?.name}</b>
+        </p>
+        <button onClick={() => signOut()}>Sign Out</button>
+      </div>
+    );
+  }
 
   return (
-    <VStack spacing={4}>
-      <Button colorScheme="blue" onClick={handleGoogleSignIn}>
-        Sign in with Google
-      </Button>
-      {userName && userEmail && (
-        <div>
-          <p>Name: {userName}</p>
-          <p>Email: {userEmail}</p>
-        </div>
-      )}
-    </VStack>
+    <button onClick={() => signIn("google")}>
+      <img
+        src="https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_92x30dp.png"
+        alt="Google logo"
+        style={{ width: "20px", marginRight: "10px" }}
+      />
+      Continue with Google
+    </button>
   );
 }
