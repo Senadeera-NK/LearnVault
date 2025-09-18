@@ -1,21 +1,21 @@
 // src/app/layout.tsx
+"use client";
+
 import { Providers } from "./providers";
 import Sidebar from "@/components/Sidebar";
-import Googlesignin from "./googlesignin/page";
-import { useSession } from "next-auth/react"
-import Google from "next-auth/providers/google";
 import AuthModal from "@/components/AuthModal";
 import { useEffect } from "react";
 import { useDisclosure } from "@chakra-ui/react";
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
-  const {isOpen, onOpen, onClose} = useDisclosure();
+  const { isOpen, onOpen, onClose } = useDisclosure();
+
   useEffect(() => {
     const timer = setTimeout(() => {
       onOpen();
-  }, 5000);
+    }, 5000);
 
-  return () => clearTimeout(timer);
+    return () => clearTimeout(timer); // ✅ cleanup inside effect
   }, [onOpen]);
 
   return (
@@ -25,9 +25,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <Sidebar />
           <main style={{ padding: "1rem" }}>
             {children}
-            </main>
+          </main>
+        {/* Modal gets triggered after 5s */}
+        <AuthModal isOpen={isOpen} onClose={onClose} />
         </Providers>
-        <AuthModal isOpen={isOpen} onClose={onClose}/>
       </body>
     </html>
   );

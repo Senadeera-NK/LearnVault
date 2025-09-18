@@ -71,10 +71,6 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
             </TabPanels>
           </Tabs>
         </ModalBody>
-
-        <ModalFooter>
-          <Button onClick={onClose}>Close</Button>
-        </ModalFooter>
       </ModalContent>
     </Modal>
   );
