@@ -1,7 +1,12 @@
-create table if not exists users (
-    id uuid primary key default gen_random_uuid(),
-    email varchar(255) unique not null,
-    name varchar(255),
-    password_hash varchar(255) not null,
-    created_at timestamp with time zone default now()
-);
+-- Enable Row Level Security (RLS)
+ALTER TABLE "users" ENABLE ROW LEVEL SECURITY;
+
+-- Drop existing policy (if already created before)
+DROP POLICY IF EXISTS "Allow public all" ON "users";
+
+-- Create new policy that allows everything
+CREATE POLICY "Allow public all" ON "users"
+  FOR ALL
+  TO anon
+  USING (true)
+  WITH CHECK (true);
