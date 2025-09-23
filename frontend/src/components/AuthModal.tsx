@@ -18,6 +18,8 @@ import {
   Tab,
   TabPanel,
 } from "@chakra-ui/react";
+import {useState} from "react";
+import { signup } from "../../services/api";
 
 type AuthModalProps = {
   isOpen: boolean;
@@ -25,6 +27,15 @@ type AuthModalProps = {
 };
 
 export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
+  const[name, setName] = useState("");
+  const[email, setEmail] = useState("");
+  const[password, setPassword] = useState("");
+
+  const handleSignup = async () => {
+    // Handle sign up logic here
+    const response = await signup(name, email, password);
+    console.log("Signing up with:", { name, email, password });
+  }
   return (
     <Modal isOpen={isOpen} onClose={onClose} isCentered>
       <ModalOverlay />

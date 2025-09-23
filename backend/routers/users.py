@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-from services.auth_service import signup_user
+from services.supabase_service_users import signup_user
 
 router = APIRouter()
 
