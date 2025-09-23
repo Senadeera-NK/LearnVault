@@ -9,13 +9,13 @@ def hash_password(password: str) -> str:
   return hashlib.sha256(password.encode()).hexdigest() 
 
 async def signup_user(name: str, email: str, password: str):
-  existing_user = supabase.table("users").select("*").eq("email", email).execute()
+  existing_user = supabase.table("Users").select("*").eq("email", email).execute()
   if existing_user.data:
     return {"error": "User already exists"}
   
   hashed_password = hash_password(password)
 
-  new_user = supabase.table("users").insert({
+  new_user = supabase.table("Users").insert({
     "name": name,
     "email": email,
     "password": hashed_password
@@ -26,7 +26,7 @@ async def signup_user(name: str, email: str, password: str):
 async def signin_user(email: str, password: str):
     hashed_password = hash_password(password)
     
-    user = supabase.table("users").select("*").eq("email", email).eq("password", hashed_password).execute()  
+    user = supabase.table("Users").select("*").eq("email", email).eq("password", hashed_password).execute()  
 
     if user.data:
         return {"success": True, "user": user.data[0]}
