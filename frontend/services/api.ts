@@ -1,7 +1,9 @@
-const API_URL = "http://127.0.0.1:8000"
+// services/api.ts
+
+const API_URL = "http://localhost:8000"; // FastAPI backend base URL
 
 export async function signup(name: string, email: string, password: string) {
-  const response = await fetch(`${API_URL}/signup`, {
+  const response = await fetch(`${API_URL}/signup`, { // match endpoint in main.py
     method: "POST",
     headers: {
       "Content-Type": "application/json",

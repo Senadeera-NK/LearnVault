@@ -82,7 +82,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                   <FormLabel>Password</FormLabel>
                   <Input value={password} onChange={(e)=> setPassword(e.target.value)} type="password" placeholder="Create password" />
                 </FormControl>
-                <Button colorScheme="teal" width="100%">
+                <Button colorScheme="teal" width="100%" onClick={handleSignup}>
                   Sign Up
                 </Button>
               </TabPanel>
