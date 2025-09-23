@@ -33,9 +33,15 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
 
   const handleSignup = async () => {
     // Handle sign up logic here
+    try {
     const response = await signup(name, email, password);
     console.log("Signing up with:", { name, email, password });
-  }
+    if(response.message) alert(response.message);
+    } catch (err: any){
+      alert(err.message || "signup failed");
+    }
+  };
+
   return (
     <Modal isOpen={isOpen} onClose={onClose} isCentered>
       <ModalOverlay />
@@ -63,17 +69,18 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
                 </Button>
               </TabPanel>
               <TabPanel>
+
                 <FormControl mb={4}>
                   <FormLabel>Full Name</FormLabel>
-                  <Input placeholder="Your name" />
+                  <Input value={name} onChange={(e)=> setName(e.target.value)} placeholder="Your name" />
                 </FormControl>
                 <FormControl mb={4}>
                   <FormLabel>Email</FormLabel>
-                  <Input type="email" placeholder="Enter email" />
+                  <Input value={email} onChange={(e)=> setEmail(e.target.value)} type="email" placeholder="Enter email" />
                 </FormControl>
                 <FormControl mb={4}>
                   <FormLabel>Password</FormLabel>
-                  <Input type="password" placeholder="Create password" />
+                  <Input value={password} onChange={(e)=> setPassword(e.target.value)} type="password" placeholder="Create password" />
                 </FormControl>
                 <Button colorScheme="teal" width="100%">
                   Sign Up

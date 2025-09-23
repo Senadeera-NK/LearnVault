@@ -1,21 +1,34 @@
-# backend/services/supabase_service.py
-import requests
+# backend
 import hashlib
-from services.supabase_config import SUPABASE_URL, SUPABASE_KEY, HEADERS
+from supabase import create_client
+from services.supabase_config import SUPABASE_URL, SUPABASE_KEY
 
-TABLE_NAME = "Users";
+supabase = create_client(SUPABASE_URL, SUPABASE_KEY)    
 
-async def signup_user(name:str, email:str, password:str):
-    existing_user = supabase.table("users").select("*").eq("email", email).execute()
-    if existing_user.data:
-        return {"success": False, "error": "Email already registered"}
+def hash_password(password: str) -> str:
+  return hashlib.sha256(password.encode()).hexdigest() 
+
+async def signup_user(name: str, email: str, password: str):
+  existing_user = supabase.table("users").select("*").eq("email", email).execute()
+  if existing_user.data:
+    return {"error": "User already exists"}
+  
+  hashed_password = hash_password(password)
+
+  new_user = supabase.table("users").insert({
+    "name": name,
+    "email": email,
+    "password": hashed_password
+  }).execute()
+
+  return {"success": True, "user": new_user.data}
+
+async def signin_user(email: str, password: str):
+    hashed_password = hash_password(password)
     
-    hashed_password = hashed_password(password)
+    user = supabase.table("users").select("*").eq("email", email).eq("password", hashed_password).execute()  
 
-    new_user = supabase.table("users").insert({
-        "name": name,
-        "email": email,
-        "password": hashed_password
-    }).execute()
-
-    return {"success": True, "user": new_user.data}
+    if user.data:
+        return {"success": True, "user": user.data[0]}
+    else:   
+        return {"error": "Invalid email or password"}
