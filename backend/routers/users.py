@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from services.supabase_service_users import signup_user
+from services import supabase_service_users
 
 router = APIRouter()
 
@@ -17,3 +18,9 @@ async def signup(request: SignupRequest):
         return {"message": "User created successfully"}
     else:
         raise HTTPException(status_code=400, detail=result["error"])
+
+
+@router.get("/users")
+async def get_users():
+    users = supabase_service_users.supabase.table("Users").select("*").execute()
+    return {"users": users.data}

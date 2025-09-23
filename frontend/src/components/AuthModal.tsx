@@ -18,8 +18,8 @@ import {
   Tab,
   TabPanel,
 } from "@chakra-ui/react";
-import {useState} from "react";
-import { signup } from "../../services/api";
+import {useState, useEffect} from "react";
+import { signup, fetchUsers} from "../../services/api";
 
 type AuthModalProps = {
   isOpen: boolean;
@@ -30,6 +30,19 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
   const[name, setName] = useState("");
   const[email, setEmail] = useState("");
   const[password, setPassword] = useState("");
+
+   useEffect(() => {
+    const loadUsers = async () => {
+      try {
+        const data = await fetchUsers();
+        console.log("📌 Users from backend:", data.users);
+      } catch (err) {
+        console.error("❌ Failed to fetch users:", err);
+      }
+    };
+
+    loadUsers();
+  }, []);
 
   const handleSignup = async () => {
     // Handle sign up logic here

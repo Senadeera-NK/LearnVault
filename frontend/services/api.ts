@@ -1,9 +1,11 @@
 // services/api.ts
 
-const API_URL = "https://bookish-space-spoon-q69vx4j4qr42696p-8000.app.github.dev/"; // FastAPI backend base URL
+// Use your Codespaces-provided forwarded URL here
+const API_URL = "https://bookish-space-spoon-q69vx4j4qr42696p-8000.app.github.dev";
+// "proxy": "http://localhost:8000"
 
 export async function signup(name: string, email: string, password: string) {
-  const response = await fetch(`${API_URL}/signup`, { // match endpoint in main.py
+  const response = await fetch(`${API_URL}/signup`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -12,8 +14,18 @@ export async function signup(name: string, email: string, password: string) {
   });
 
   if (!response.ok) {
-    throw new Error("Failed to sign up");
+    const errData = await response.json().catch(() => ({}));
+    throw new Error(errData.error || "Failed to sign up");
   }
 
   return response.json();
+}
+
+export async function fetchUsers() {
+  const res = await fetch(`${API_URL}/users`);
+  if (!res.ok) {
+    const errData = await res.json().catch(() => ({}));
+    throw new Error(errData.error || "Failed to fetch users");
+  }
+  return res.json();
 }
