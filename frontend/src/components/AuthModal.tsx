@@ -117,6 +117,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
             duration: 3000,
             isClosable: true,
           });
+          resetFields();
         }
       } catch (err: any) {
         toast({
@@ -126,6 +127,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
           duration: 3000,
           isClosable: true,
         });
+          resetFields();
       }
     };
 
@@ -145,13 +147,13 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
               <TabPanel>
                 <FormControl mb={4}>
                   <FormLabel>Email</FormLabel>
-                  <Input type="email" placeholder="Enter email" />
+                  <Input value={email} onChange={(e)=>setEmail(e.target.value)} type="email" placeholder="Enter email" />
                 </FormControl>
                 <FormControl mb={4}>
                   <FormLabel>Password</FormLabel>
-                  <Input type="password" placeholder="Enter password" />
+                  <Input value={password} onChange={(e)=>setPassword(e.target.value)}type="password" placeholder="Enter password" />
                 </FormControl>
-                <Button colorScheme="teal" width="100%">
+                <Button colorScheme="teal" width="100%" onClick={handleSignin}>
                   Login
                 </Button>
               </TabPanel>
