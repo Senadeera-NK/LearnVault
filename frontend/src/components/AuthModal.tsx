@@ -50,6 +50,12 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
     const response = await signup(name, email, password);
     console.log("Signing up with:", { name, email, password });
     if(response.message) alert(response.message);
+      if(response.success){
+        onClose();
+        setName("");
+        setEmail("");
+        setPassword("");
+      }
     } catch (err: any){
       alert(err.message || "signup failed");
     }

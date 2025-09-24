@@ -22,5 +22,5 @@ async def signup(request: SignupRequest):
 
 @router.get("/users")
 async def get_users():
-    users = supabase_service_users.supabase.table("Users").select("*").execute()
+    users = supabase_service_users.supabase.table("users").select("*").execute()
     return {"users": users.data}
