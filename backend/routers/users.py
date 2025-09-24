@@ -21,6 +21,14 @@ def signup(request: SignupRequest):
         print("Signup failed", result)
         raise HTTPException(status_code=400, detail=result["error"])
 
+@router.get("/signin")
+def signin(email: str, password: str):
+    result = supabase_service_users.signin_user(email, password)
+    if result.get('success'):
+        return {"message": "signin successful", "user": result['user']}
+    else:
+        raise HTTPException(status_code=401, detail=result.get("error", "Signin failed"))
+
 
 @router.get("/users")
 def get_users():

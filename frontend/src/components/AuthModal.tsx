@@ -19,7 +19,7 @@ import {
   TabPanel,useToast,
 } from "@chakra-ui/react";
 import {useState, useEffect} from "react";
-import { signup, fetchUsers} from "../../services/api";
+import { signup, signin, fetchUsers} from "../../services/api";
 
 type AuthModalProps = {
   isOpen: boolean;
@@ -66,10 +66,10 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
           });
           onClose();
           resetFields();
-        } else if(response.error=='user already exists') {
+        } else if(response.error && response.error.includes("already exists")) {
           toast({
-            title: "Signup failed",
-            description: response.error || "Please try again",
+            title: "user already exists, try login",
+            description: "Please try login instead",
             status: "error",
             duration: 3000,
             isClosable: true,
@@ -94,6 +94,40 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
       }
     };
 
+    const handleSignin = async () => {
+      try {
+        const response = await signin(email, password);
+        console.log("Signin response:", response);
+
+        if (response.message=='signin successful') {
+          toast({
+            title: "Login successful.",
+            description: "You have logged in successfully!",
+            status: "success",
+            duration: 3000,
+            isClosable: true,
+          });
+          onClose();
+          resetFields();
+        } else {
+          toast({
+            title: "Login failed",
+            description: response.error || "Please try again",
+            status: "error",
+            duration: 3000,
+            isClosable: true,
+          });
+        }
+      } catch (err: any) {
+        toast({
+          title: "Error",
+          description: err.message || "Login failed",
+          status: "error",
+          duration: 3000,
+          isClosable: true,
+        });
+      }
+    };
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} isCentered>

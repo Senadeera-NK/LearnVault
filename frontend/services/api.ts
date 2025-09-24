@@ -15,7 +15,27 @@ export async function signup(name: string, email: string, password: string) {
 
   if (!response.ok) {
     const errData = await response.json().catch(() => ({}));
-    throw new Error(errData.error || "Failed to sign up");
+    console.log("❌ Signup failed:", errData);
+    const message = errData.detail || errData.error || "Failed to sign up";
+    throw new Error(message);
+  }
+
+  return response.json();
+}
+
+export async function signin(email: string, password: string) {
+  const response = await fetch(`${API_URL}/signin?email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  if (!response.ok) {
+    const errData = await response.json().catch(() => ({}));
+    console.log("❌ Signin failed:", errData);
+    const message = errData.detail || errData.error || "Failed to sign in";
+    throw new Error(message);
   }
 
   return response.json();
