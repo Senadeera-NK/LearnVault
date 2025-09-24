@@ -16,7 +16,7 @@ import {
   TabList,
   TabPanels,
   Tab,
-  TabPanel,
+  TabPanel,useToast,
 } from "@chakra-ui/react";
 import {useState, useEffect} from "react";
 import { signup, fetchUsers} from "../../services/api";
@@ -30,6 +30,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
   const[name, setName] = useState("");
   const[email, setEmail] = useState("");
   const[password, setPassword] = useState("");
+  const toast = useToast();
 
    useEffect(() => {
     const loadUsers = async () => {
@@ -43,23 +44,56 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
 
     loadUsers();
   }, []);
+  
+  const resetFields = () => {
+    setName("");
+    setEmail("");
+    setPassword("");
+  };
 
   const handleSignup = async () => {
-    // Handle sign up logic here
-    try {
-    const response = await signup(name, email, password);
-    console.log("Signing up with:", { name, email, password });
-    if(response.message) alert(response.message);
-      if(response.success){
-        onClose();
-        setName("");
-        setEmail("");
-        setPassword("");
+      try {
+        const response = await signup(name, email, password);
+        console.log("Signup response:", response);
+
+        if (response.message=='user created successfully') {
+          toast({
+            title: "Account created.",
+            description: "You have signed up successfully!",
+            status: "success",
+            duration: 3000,
+            isClosable: true,
+          });
+          onClose();
+          resetFields();
+        } else if(response.error=='user already exists') {
+          toast({
+            title: "Signup failed",
+            description: response.error || "Please try again",
+            status: "error",
+            duration: 3000,
+            isClosable: true,
+          });
+        } else {
+          toast({
+            title: "Signup failed",
+            description: response.error || "Please try again",
+            status: "error",
+            duration: 3000,
+            isClosable: true,
+          });
+        }
+      } catch (err: any) {
+        toast({
+          title: "Error",
+          description: err.message || "Signup failed",
+          status: "error",
+          duration: 3000,
+          isClosable: true,
+        });
       }
-    } catch (err: any){
-      alert(err.message || "signup failed");
-    }
-  };
+    };
+
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} isCentered>

@@ -2,28 +2,35 @@
 import hashlib
 from supabase import create_client
 from services.supabase_config import SUPABASE_URL, SUPABASE_KEY
+import logging
 
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)    
 
 def hash_password(password: str) -> str:
     return hashlib.sha256(password.encode()).hexdigest() 
 
-async def signup_user(name: str, email: str, password: str):
-    existing_user = supabase.table("users").select("*").eq("email", email).execute()
-    if existing_user.data:
-        return {"error": "User already exists"}
-    
-    hashed_password = hash_password(password)
+def signup_user(name: str, email: str, password: str):
+    try:
+        existing_user = supabase.table("users").select("*").eq("email", email).execute()
+        if existing_user.data:
+            return {"success": False, "error": "user already exists"}
 
-    new_user = supabase.table("users").insert({
-        "name": name,
-        "email": email,
-        "password": hashed_password
-    }).execute()
+        hashed_password = hashlib.sha256(password.encode()).hexdigest()
 
-    return {"success": True, "user": new_user.data}
+        new_user = supabase.table("users").insert({
+            "name": name,
+            "email": email,
+            "password": hashed_password
+        }).execute()
+        logging.info(f"New user created: {new_user.data}")
+        return {"success": True, "user": new_user.data}
 
-async def signin_user(email: str, password: str):
+    except Exception as e:
+        # Always return a dict with success key
+        logging.error(f"Error during signup: {str(e)}")
+        return {"success": False, "error": str(e)}
+
+def signin_user(email: str, password: str):
     hashed_password = hash_password(password)
     
     user = supabase.table("users").select("*").eq("email", email).eq("password", hashed_password).execute()  
