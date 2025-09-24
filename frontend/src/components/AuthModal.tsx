@@ -20,6 +20,7 @@ import {
 } from "@chakra-ui/react";
 import {useState, useEffect} from "react";
 import { signup, signin, fetchUsers} from "../../services/api";
+import {useAuth} from "./AuthContext";
 
 type AuthModalProps = {
   isOpen: boolean;
@@ -27,10 +28,17 @@ type AuthModalProps = {
 };
 
 export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
-  const[name, setName] = useState("");
-  const[email, setEmail] = useState("");
-  const[password, setPassword] = useState("");
+  const[signupName, setSignupName] = useState("");
+  const[signupEmail, setSignupEmail] = useState("");
+  const[signupPassword, setSignupPassword] = useState("");
+
+  const[signinPassword, setSigninPassword] = useState("");
+  const[signinEmail, setSigninEmail] = useState("");
+
   const toast = useToast();
+
+  // creating a variable for AuthContext
+  const {login} = useAuth();
 
    useEffect(() => {
     const loadUsers = async () => {
@@ -45,15 +53,19 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
     loadUsers();
   }, []);
   
-  const resetFields = () => {
-    setName("");
-    setEmail("");
-    setPassword("");
+  const SignupResetFields = () => {
+    setSignupName("");
+    setSignupEmail("");
+    setSignupPassword("");
+  };
+  const SigninResetFields = () => {
+    setSigninEmail("");
+    setSigninPassword("");
   };
 
   const handleSignup = async () => {
       try {
-        const response = await signup(name, email, password);
+        const response = await signup(signupName, signupEmail, signupPassword);
         console.log("Signup response:", response);
 
         if (response.message=='user created successfully') {
@@ -64,8 +76,9 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
             duration: 3000,
             isClosable: true,
           });
+          login({name:response.user.name, email:response.user.email})
           onClose();
-          resetFields();
+          SignupResetFields();
         } else if(response.error && response.error.includes("already exists")) {
           toast({
             title: "user already exists, try login",
@@ -96,7 +109,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
 
     const handleSignin = async () => {
       try {
-        const response = await signin(email, password);
+        const response = await signin(signinEmail, signinPassword);
         console.log("Signin response:", response);
 
         if (response.message=='signin successful') {
@@ -107,8 +120,9 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
             duration: 3000,
             isClosable: true,
           });
+          login({name:response.user.name, email:response.user.email})
           onClose();
-          resetFields();
+          SigninResetFields();
         } else {
           toast({
             title: "Login failed",
@@ -117,7 +131,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
             duration: 3000,
             isClosable: true,
           });
-          resetFields();
+          SigninResetFields();
         }
       } catch (err: any) {
         toast({
@@ -127,7 +141,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
           duration: 3000,
           isClosable: true,
         });
-          resetFields();
+          SigninResetFields();
       }
     };
 
@@ -147,11 +161,11 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
               <TabPanel>
                 <FormControl mb={4}>
                   <FormLabel>Email</FormLabel>
-                  <Input value={email} onChange={(e)=>setEmail(e.target.value)} type="email" placeholder="Enter email" />
+                  <Input value={signinEmail} onChange={(e)=>setSigninEmail(e.target.value)} type="email" placeholder="Enter email" />
                 </FormControl>
                 <FormControl mb={4}>
                   <FormLabel>Password</FormLabel>
-                  <Input value={password} onChange={(e)=>setPassword(e.target.value)}type="password" placeholder="Enter password" />
+                  <Input value={signinPassword} onChange={(e)=>setSigninPassword(e.target.value)}type="password" placeholder="Enter password" />
                 </FormControl>
                 <Button colorScheme="teal" width="100%" onClick={handleSignin}>
                   Login
@@ -161,15 +175,15 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
 
                 <FormControl mb={4}>
                   <FormLabel>Full Name</FormLabel>
-                  <Input value={name} onChange={(e)=> setName(e.target.value)} placeholder="Your name" />
+                  <Input value={signupName} onChange={(e)=> setSignupName(e.target.value)} placeholder="Your name" />
                 </FormControl>
                 <FormControl mb={4}>
                   <FormLabel>Email</FormLabel>
-                  <Input value={email} onChange={(e)=> setEmail(e.target.value)} type="email" placeholder="Enter email" />
+                  <Input value={signupEmail} onChange={(e)=> setSignupEmail(e.target.value)} type="email" placeholder="Enter email" />
                 </FormControl>
                 <FormControl mb={4}>
                   <FormLabel>Password</FormLabel>
-                  <Input value={password} onChange={(e)=> setPassword(e.target.value)} type="password" placeholder="Create password" />
+                  <Input value={signupPassword} onChange={(e)=> setSignupPassword(e.target.value)} type="password" placeholder="Create password" />
                 </FormControl>
                 <Button colorScheme="teal" width="100%" onClick={handleSignup}>
                   Sign Up

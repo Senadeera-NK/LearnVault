@@ -6,6 +6,7 @@ import Sidebar from "@/components/Sidebar";
 import AuthModal from "@/components/AuthModal";
 import { useEffect } from "react";
 import { useDisclosure } from "@chakra-ui/react";
+import { AuthProvider } from "@/components/AuthContext";
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -22,12 +23,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <body>
         <Providers>
+          <AuthProvider>
           <Sidebar />
           <main style={{ padding: "1rem" }}>
             {children}
           </main>
         {/* Modal gets triggered after 5s */}
         <AuthModal isOpen={isOpen} onClose={onClose} />
+        </AuthProvider>
         </Providers>
       </body>
     </html>
