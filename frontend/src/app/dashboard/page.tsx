@@ -153,6 +153,7 @@ export default function Dashboard() {
           height="250px"
           marginTop="480px"
           padding="0 10px"
+          zIndex={0}   // <-- use camelCase, lower value puts it below floating button
         >
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={dailyUsageData} margin={{ left: 10, right: 10 }}>
@@ -167,12 +168,12 @@ export default function Dashboard() {
               <Bar
                 dataKey="hours"
                 fill={dailyBarColor}
-                // Calculate bar size dynamically
                 barSize={Math.floor(window.innerWidth / dailyUsageData.length) - 5}
               />
             </BarChart>
           </ResponsiveContainer>
         </Box>
+
 
     </div>
   );

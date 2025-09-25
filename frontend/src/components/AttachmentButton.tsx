@@ -32,6 +32,7 @@ export default function AttachmentButton() {
         right="6rem"
         borderRadius="full"
         size="md"
+        zIndex={9999} // <-- add this
         onClick={handleAttachmentClick}
       />
 

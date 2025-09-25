@@ -61,12 +61,12 @@ export default function Sidebar() {
               </Button>
               <Button
                 as={Link}
-                href="/storage"
+                href="/shelf"
                 onClick={onClose}
-                colorScheme={isActive("/storage") ? "teal" : undefined}
-                variant={isActive("/storage") ? "solid" : "ghost"}
+                colorScheme={isActive("/shelf") ? "teal" : undefined}
+                variant={isActive("/shelf") ? "solid" : "ghost"}
               >
-                Storage
+                Shelf
               </Button>
               <Button
                 as={Link}
