@@ -38,48 +38,57 @@ export default function Dashboard() {
       <Heading position="absolute" top={5}>Welcome, Back! {userName}</Heading>
 
       {/* PIE CHART  => For the categorized files from the uploaded files */}
-      <Box width="100%" height="400px" marginTop="400px" display="flex" justifyContent="flex-start" paddingLeft="100px">
-        <ResponsiveContainer width={500} height="100%">
-          <PieChart>
-            <Pie
-              data={data}
-              cx="45%"
-              cy="50%"
-              labelLine={false}
-              label={renderCustomizedLabel}
-              outerRadius={150}
-              fill="#8884d8"
-              dataKey="value"
-            >
-              {data.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-              ))}
-            </Pie>
-            <Legend layout="vertical" verticalAlign="middle" align="right" wrapperStyle={{marginLeft:'150px'}}/>
-          </PieChart>
-        </ResponsiveContainer>
-      </Box>
+     <Box
+      width="100%"
+      height="400px"
+      marginTop="400px"
+      display="flex"
+      justifyContent="center"   // pushes items apart
+      alignItems="center"
+      gap="400px"   // space between charts
+>
+  {/* PIE CHART */}
+  <ResponsiveContainer width={500} height="100%">
+    <PieChart style={{ marginLeft: "60px" }}>
+      <Pie
+        data={data}
+        cx="40%"
+        cy="50%"
+        labelLine={false}
+        label={renderCustomizedLabel}
+        outerRadius={150}
+        fill="#8884d8"
+        dataKey="value"
+      >
+        {data.map((entry, index) => (
+          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+        ))}
+      </Pie>
+      <Legend layout="vertical" verticalAlign="middle" align="right" />
+    </PieChart>
+  </ResponsiveContainer>
 
-      {/* BAR CHART => For the usage of the site's sections of the user */}
-      <Box width="100%" height="400px" marginTop="400px" display="flex" justifyContent="flex-start" paddingRight="100px">
-        <ResponsiveContainer width={600} height="100%">
-             <BarChart
-          data={data}
-          layout="vertical"  // horizontal bars
-          margin={{ top: 20, right: 30, left: 50, bottom: 20 }}
-        >
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis type="number" />
-          <YAxis type="category" dataKey="name" />
-          <Tooltip />
-          <Bar dataKey="value">
-            {data.map((entry, index) => (
-              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-            ))}
-          </Bar>
-        </BarChart>
-        </ResponsiveContainer>    
-      </Box>
+  {/* BAR CHART */}
+  <ResponsiveContainer width={500} height="100%">
+    <BarChart
+      data={data}
+      layout="vertical"
+      style={{ marginRight: "60px" }}
+      margin={{ top: 20, right: 30, left: 50, bottom: 20 }}
+    >
+      <CartesianGrid strokeDasharray="3 3" />
+      <XAxis type="number" />
+      <YAxis type="category" dataKey="name" />
+      <Tooltip />
+      <Bar dataKey="value">
+        {data.map((entry, index) => (
+          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+        ))}
+      </Bar>
+    </BarChart>
+  </ResponsiveContainer>
+</Box>
+
 
       {/* DAILY USAGE BAR CHART -> For the users's to show their hours of daily usage for 30 days */}
     </div>
