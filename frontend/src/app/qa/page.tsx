@@ -10,6 +10,6 @@ export default function QA() {
             flexDirection="column"
             justifyContent="flex-start"
             pt="10px" >
-      <Heading mb="20px" alignItems="center">Q & A</Heading>
+      <Heading mb="20px" textAlign="center" w="100%">Q & A</Heading>
       </Box>
   );}

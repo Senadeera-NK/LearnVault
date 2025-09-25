@@ -10,6 +10,7 @@ export default function Settings() {
             flexDirection="column"
             justifyContent="flex-start"
             pt="10px" >
-      <Heading mb="20px" alignItems="center">Settings</Heading>
+      <Heading mb="20px" textAlign="center" w="100%">
+Settings</Heading>
       </Box>
   );}
