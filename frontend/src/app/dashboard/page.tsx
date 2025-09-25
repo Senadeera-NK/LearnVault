@@ -45,59 +45,62 @@ export default function Dashboard() {
     <div className={styles.page}>
       <Heading position="absolute" top={5}>Welcome, Back! {userName}</Heading>
 
-  <Box
-  width="100%"
-  height="auto"
-  marginTop="400px"
-  display="flex"
-  justifyContent="center"
-  alignItems="center"
-  gap="60px"
-  flexWrap="wrap"   // ✅ allows stacking on small screens
->
-  {/* PIE CHART */}
-  <Box flex="1 1 400px" height="400px">
-    <ResponsiveContainer width="100%" height="100%">
-      <PieChart>
-        <Pie
-          data={data}
-          cx="45%"
-          cy="50%"
-          labelLine={false}
-          label={renderCustomizedLabel}
-          outerRadius={180}   // ✅ scale down for smaller screens
-          fill="#8884d8"
-          dataKey="value"
-        >
-          {data.map((entry, index) => (
-            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-          ))}
-        </Pie>
-        <Legend layout="vertical" verticalAlign="middle" align="right" />
-      </PieChart>
-    </ResponsiveContainer>
-  </Box>
+    <Box
+    width="100%"
+    height="auto"
+    marginTop="400px"
+    display="flex"
+    justifyContent="center"
+    alignItems="center"
+    gap="60px"
+    flexWrap="wrap"   // ✅ allows stacking on small screens
+  >
+    {/* PIE CHART */}
+    <Box flex="1 1 400px" height="400px">
+      <ResponsiveContainer width="100%" height="100%">
+        <PieChart>
+          <Pie
+            data={data}
+            cx="45%"
+            cy="50%"
+            labelLine={false}
+            label={renderCustomizedLabel}
+            outerRadius={180}   // ✅ scale down for smaller screens
+            fill="#8884d8"
+            dataKey="value"
+          >
+            {data.map((entry, index) => (
+              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+            ))}
+          </Pie>
+          <Legend layout="vertical" verticalAlign="middle" align="right" wrapperStyle={{
+        paddingRight: "-30px",   // ✅ remove extra padding
+        marginLeft: "-40px",  // ✅ pull legend closer to pie
+      }}/>
+        </PieChart>
+      </ResponsiveContainer>
+    </Box>
 
-  {/* BAR CHART */}
-  <Box flex="1 1 400px" height="400px">
-    <ResponsiveContainer width="100%" height="100%">
-      <BarChart
-        data={barData}
-        layout="vertical"
-        margin={{ top: 20, right: 30, left: 30, bottom: 20 }}
-      >
-        <CartesianGrid strokeDasharray="3 3" />
-        <XAxis type="number" />
-        <YAxis type="category" dataKey="name" />
-        <Tooltip />
-        <Bar dataKey="value">
-          {data.map((entry, index) => (
-            <Cell key={`cell-${index}`} fill={barCOLORS[index % barCOLORS.length]} />
-          ))}
-        </Bar>
-      </BarChart>
-    </ResponsiveContainer>
-  </Box>
+    {/* BAR CHART */}
+    <Box flex="1 1 400px" height="400px">
+      <ResponsiveContainer width="100%" height="100%">
+        <BarChart
+          data={barData}
+          layout="vertical"
+          margin={{ top: 20, right: 30, left: 30, bottom: 20 }}
+        >
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis type="number" />
+          <YAxis type="category" dataKey="name" />
+          <Tooltip />
+          <Bar dataKey="value">
+            {data.map((entry, index) => (
+              <Cell key={`cell-${index}`} fill={barCOLORS[index % barCOLORS.length]} />
+            ))}
+          </Bar>
+        </BarChart>
+      </ResponsiveContainer>
+    </Box>
 </Box>
 
 
