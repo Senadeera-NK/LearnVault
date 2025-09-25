@@ -15,6 +15,14 @@ const data = [
   { name: 'Group D', value: 200 },
 ];
 
+const barData = [
+  {name: 'Q & A', value:500},
+  {name: 'Dashboard', value:300},
+  {name: 'Settings', value:200},
+  {name: 'Shelf', value:100},
+]
+
+const barCOLORS =  ['#0e6abbff', '#29917eff', '#d33852ff', '#e91fc7ff'];
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
 const RADIAN = Math.PI / 180;
 
@@ -37,57 +45,61 @@ export default function Dashboard() {
     <div className={styles.page}>
       <Heading position="absolute" top={5}>Welcome, Back! {userName}</Heading>
 
-      {/* PIE CHART  => For the categorized files from the uploaded files */}
-     <Box
-      width="100%"
-      height="400px"
-      marginTop="400px"
-      display="flex"
-      justifyContent="center"   // pushes items apart
-      alignItems="center"
-      gap="400px"   // space between charts
+  <Box
+  width="100%"
+  height="auto"
+  marginTop="400px"
+  display="flex"
+  justifyContent="center"
+  alignItems="center"
+  gap="60px"
+  flexWrap="wrap"   // ✅ allows stacking on small screens
 >
   {/* PIE CHART */}
-  <ResponsiveContainer width={500} height="100%">
-    <PieChart style={{ marginLeft: "60px" }}>
-      <Pie
-        data={data}
-        cx="40%"
-        cy="50%"
-        labelLine={false}
-        label={renderCustomizedLabel}
-        outerRadius={150}
-        fill="#8884d8"
-        dataKey="value"
-      >
-        {data.map((entry, index) => (
-          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-        ))}
-      </Pie>
-      <Legend layout="vertical" verticalAlign="middle" align="right" />
-    </PieChart>
-  </ResponsiveContainer>
+  <Box flex="1 1 400px" height="400px">
+    <ResponsiveContainer width="100%" height="100%">
+      <PieChart>
+        <Pie
+          data={data}
+          cx="45%"
+          cy="50%"
+          labelLine={false}
+          label={renderCustomizedLabel}
+          outerRadius={180}   // ✅ scale down for smaller screens
+          fill="#8884d8"
+          dataKey="value"
+        >
+          {data.map((entry, index) => (
+            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+          ))}
+        </Pie>
+        <Legend layout="vertical" verticalAlign="middle" align="right" />
+      </PieChart>
+    </ResponsiveContainer>
+  </Box>
 
   {/* BAR CHART */}
-  <ResponsiveContainer width={500} height="100%">
-    <BarChart
-      data={data}
-      layout="vertical"
-      style={{ marginRight: "60px" }}
-      margin={{ top: 20, right: 30, left: 50, bottom: 20 }}
-    >
-      <CartesianGrid strokeDasharray="3 3" />
-      <XAxis type="number" />
-      <YAxis type="category" dataKey="name" />
-      <Tooltip />
-      <Bar dataKey="value">
-        {data.map((entry, index) => (
-          <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-        ))}
-      </Bar>
-    </BarChart>
-  </ResponsiveContainer>
+  <Box flex="1 1 400px" height="400px">
+    <ResponsiveContainer width="100%" height="100%">
+      <BarChart
+        data={barData}
+        layout="vertical"
+        margin={{ top: 20, right: 30, left: 30, bottom: 20 }}
+      >
+        <CartesianGrid strokeDasharray="3 3" />
+        <XAxis type="number" />
+        <YAxis type="category" dataKey="name" />
+        <Tooltip />
+        <Bar dataKey="value">
+          {data.map((entry, index) => (
+            <Cell key={`cell-${index}`} fill={barCOLORS[index % barCOLORS.length]} />
+          ))}
+        </Bar>
+      </BarChart>
+    </ResponsiveContainer>
+  </Box>
 </Box>
+
 
 
       {/* DAILY USAGE BAR CHART -> For the users's to show their hours of daily usage for 30 days */}
