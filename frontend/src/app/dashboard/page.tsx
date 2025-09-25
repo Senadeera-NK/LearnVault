@@ -34,12 +34,11 @@ export default function Dashboard() {
       const {user} = useAuth();
       const userName = user?.name || "Guest";
   return (
-    <Box className={styles.page} padding="20px">
+    <div className={styles.page}>
       <Heading position="absolute" top={5}>Welcome, Back! {userName}</Heading>
 
-      <Box display="flex" gap="50px" mb={10}>
       {/* PIE CHART  => For the categorized files from the uploaded files */}
-      <Box width="400px" height="400px" marginTop="400px" display="flex" justifyContent="flex-start" paddingRight="100px">
+      <Box width="100%" height="400px" marginTop="400px" display="flex" justifyContent="flex-start" paddingLeft="100px">
         <ResponsiveContainer width={500} height="100%">
           <PieChart>
             <Pie
@@ -62,7 +61,7 @@ export default function Dashboard() {
       </Box>
 
       {/* BAR CHART => For the usage of the site's sections of the user */}
-      <Box width="400px" height="400px" marginTop="400px">
+      <Box width="100%" height="400px" marginTop="400px" display="flex" justifyContent="flex-start" paddingRight="100px">
         <ResponsiveContainer width={600} height="100%">
              <BarChart
           data={data}
@@ -81,11 +80,8 @@ export default function Dashboard() {
         </BarChart>
         </ResponsiveContainer>    
       </Box>
-      </Box>
+
       {/* DAILY USAGE BAR CHART -> For the users's to show their hours of daily usage for 30 days */}
-      <Box width="100%" height="300px">  
-      
-      </Box>
-    </Box>
+    </div>
   );
 }
