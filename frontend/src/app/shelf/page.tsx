@@ -15,15 +15,17 @@ export default function Shelf() {
 
   return (
     <Box
-      className="styles.page"
-      display="flex"
-      flexDirection="column"
-      alignItems="center"
-      justifyContent="flex-start"
-      pt="10px" // padding from top
-    >
+            className="styles.page"
+            display="flex"
+            flexDirection="column"
+            justifyContent="flex-start"
+            pt="10px" // padding from top
+      >
       <Heading mb="20px" alignItems="center">Shelf</Heading>
-      <Progress alignItems="center" value={progress} max={100} w="400px" size="lg" />
+       <Box position="absolute" top="600px">
+        <Heading mb="15px" alignItems="center">Loading.....</Heading>
+        <Progress alignItems="center" value={progress} max={100} w="800px" size="lg" />
+      </Box>
     </Box>
   );
 }
