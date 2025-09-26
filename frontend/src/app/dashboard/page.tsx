@@ -5,6 +5,7 @@ import styles from "../page.module.css";
 import { useAuth } from "./../../components/AuthContext";
 import { Heading } from "@chakra-ui/react";
 import {usePageTimer} from "../../components/UsePageTimer";
+import {recordUsage} from "../../../services/api";
 import {
   Cell,
   Pie,
@@ -74,6 +75,18 @@ const renderCustomizedLabel = ({
 export default function Dashboard() {
   const { user } = useAuth();
   const userName = user?.name || "Guest";
+
+  // Using the custom hook to track time spent on this page
+  usePageTimer("Dashboard", async (duration) => {
+    if(!user) return; // no user, no record{
+      try {
+        await recordUsage(user.id, "Dashboard", duration);
+        console.log(`⏱️ Recorded ${duration} seconds on Dashboard for user ${user.id}`);
+      } catch (err) {
+        console.error("❌ Failed to record usage:", err);
+      }
+    });
+
 
   return (
     <div className={styles.page}>
