@@ -39,7 +39,7 @@ export default function Home() {
           transition: "opacity 10s ease, transform 5s ease",
         }}
       >
-        Welcome to LearnVault!
+        LearnVault!
       </span>
     </div>
   );
