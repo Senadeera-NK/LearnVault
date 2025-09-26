@@ -49,3 +49,23 @@ export async function fetchUsers() {
   }
   return res.json();
 }
+
+// function for recoding the usage of the user
+export async function recordUsage(userId: string, pageName: string, durationseconds: number ) {
+  const response = await fetch (`${API_URL}/users_usage`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ user_id: userId, page_name: pageName, duration_seconds: durationseconds }),
+  });
+
+  if (!response.ok) {
+    const errData = await response.json().catch(() => ({}));
+    console.log("❌ Recording usage failed:", errData);
+    const message = errData.detail || errData.error || "Failed to record usage";
+    throw new Error(message);
+  }
+
+  return response.json();
+}

@@ -4,6 +4,7 @@ import Image from "next/image";
 import styles from "../page.module.css";
 import { useAuth } from "./../../components/AuthContext";
 import { Heading } from "@chakra-ui/react";
+import {usePageTimer} from "../../components/UsePageTimer";
 import {
   Cell,
   Pie,

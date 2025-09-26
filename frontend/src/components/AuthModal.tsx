@@ -76,7 +76,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
             duration: 3000,
             isClosable: true,
           });
-          login({name:response.user.name, email:response.user.email})
+          login({name:response.user.name, email:response.user.email, id:response.user.id})
           onClose();
           SignupResetFields();
         } else if(response.error && response.error.includes("already exists")) {
@@ -120,7 +120,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
             duration: 3000,
             isClosable: true,
           });
-          login({name:response.user.name, email:response.user.email})
+          login({name:response.user.name, email:response.user.email, id:response.user.id})
           onClose();
           SigninResetFields();
         } else {
