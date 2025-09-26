@@ -5,10 +5,15 @@ from services import supabase_service_users_usage
 
 router = APIRouter()
 
+class UsageRequest(BaseModel):
+    user_id:str
+    page_name:str
+    duration_seconds:int
+
 @router.post("/insert_user_usage")
-def insert_users_usage(user_id:str, pageName:str, durationseconds:int):
-    result = supabase_service_users_usage.insert_user_usage(user_id, pageName, durationseconds)
+def insert_user_usage(payload:UsageRequest):
+    result = supabase_service_users_usage.insert_user_usage(payload.user_id, payload.page_name, payload.duration_seconds)
     if result.get('success'):
-        return {"message": "usage inserted successful", "user": result['user']}
+        return {"message": "usage inserted successful", "usage": result['usage']}
     else:
         raise HTTPException(status_code=401, detail=result.get("error", "usage uploading failed"))

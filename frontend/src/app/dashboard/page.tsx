@@ -86,6 +86,7 @@ export default function Dashboard() {
         console.error("❌ Failed to record usage:", err);
       }
     });
+  console.log("Rendering Dashboard for user:", user);
 
 
   return (
