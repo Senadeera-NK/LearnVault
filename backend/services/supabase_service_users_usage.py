@@ -8,8 +8,8 @@ def insert_user_usage(user_id:str, pageName:str, durationseconds:int):
     try:
         new_usage = supabase.table("users_usage").insert({
             "user_id": user_id,
-            "pageName": pageName,
-            "durationseconds": durationseconds
+            "page_name": pageName,
+            "hours": durationseconds
         }).execute()
         logging.info(f"New usage record created: {new_usage.data}")
         return {"success": True, "usage": new_usage.data}
