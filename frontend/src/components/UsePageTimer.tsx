@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 
-export function usePageTimer(paneName:string, onTimeUpdate:(seconds:number)=>void) {
+export function usePageTimer(pageName:string, onTimeUpdate:(seconds:number)=>void) {
   const startTime = useRef<number>(Date.now());
 
   useEffect(() => {

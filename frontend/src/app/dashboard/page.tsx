@@ -78,7 +78,8 @@ export default function Dashboard() {
 
   // Using the custom hook to track time spent on this page
   usePageTimer("Dashboard", async (duration) => {
-    if(!user) return; // no user, no record{
+    if(!user) return; // no user, no record
+    console.log(`starting to records the usage of the user ${user.id}`);
       try {
         await recordUsage(user.id, "Dashboard", duration);
         console.log(`⏱️ Recorded ${duration} seconds on Dashboard for user ${user.id}`);

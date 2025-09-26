@@ -7,7 +7,7 @@ supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 def insert_user_usage(user_id:str, pageName:str, durationseconds:int):
     try:
         new_usage = supabase.table("users_usage").insert({
-            "user_id": user_id,
+            "user_id": int(user_id),
             "page_name": pageName,
             "hours": durationseconds
         }).execute()

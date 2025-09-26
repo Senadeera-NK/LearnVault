@@ -6,7 +6,7 @@ from services import supabase_service_users_usage
 router = APIRouter()
 
 class UsageRequest(BaseModel):
-    user_id:str
+    user_id:int
     page_name:str
     duration_seconds:int
 

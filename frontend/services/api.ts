@@ -52,7 +52,7 @@ export async function fetchUsers() {
 
 
 // function for recoding the usage of the user
-export async function recordUsage(userId: string, pageName: string, durationseconds: number ) {
+export async function recordUsage(userId: number, pageName: string, durationseconds: number ) {
   const response = await fetch (`${API_URL}/insert_user_usage`, {
     method: "POST",
     headers: {
