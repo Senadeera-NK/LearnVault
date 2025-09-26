@@ -77,16 +77,18 @@ export default function Dashboard() {
   const userName = user?.name || "Guest";
 
   // Using the custom hook to track time spent on this page
+  // Track page usage
   usePageTimer("Dashboard", async (duration) => {
-    if(!user) return; // no user, no record
-    console.log(`starting to records the usage of the user ${user.id}`);
-      try {
-        await recordUsage(user.id, "Dashboard", duration);
-        console.log(`⏱️ Recorded ${duration} seconds on Dashboard for user ${user.id}`);
-      } catch (err) {
-        console.error("❌ Failed to record usage:", err);
-      }
-    });
+    if (!user) return; // skip if not logged in
+    console.log("user logged in, recording usage...");
+    try {
+      await recordUsage(user.id, "Dashboard", duration);
+      console.log("✅ Recorded usage:", duration, "seconds");
+    } catch (err) {
+      console.error("❌ Failed to record usage", err);
+    }
+  });
+
   console.log("Rendering Dashboard for user:", user);
 
 
