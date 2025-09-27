@@ -1,8 +1,27 @@
 "use client";
 import { useEffect, useState } from "react";
 import { Box, Heading, Progress } from "@chakra-ui/react";
+import {usePageTimer} from "../../components/UsePageTimer";
+import {recordUsage} from "../../../services/api";
+import { useAuth } from "@/components/AuthContext";
 
 export default function Shelf() {
+   const { user } = useAuth();
+    // Track page usage
+  usePageTimer("Shelf", async (duration) => {
+    if (!user) return; // skip if not logged in
+    console.log("Shelf page timer callback, duration:", duration);
+    console.log("user logged in, recording usage...");
+    try {
+      await recordUsage(user.id, "Shelf", duration);
+      console.log("✅ Recorded usage:", duration, "seconds");
+    } catch (err) {
+      console.error("❌ Failed to record usage", err);
+    }
+  });
+
+  console.log("Rendering Shelf for user:", user);
+  
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
