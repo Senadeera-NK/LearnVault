@@ -11,7 +11,7 @@ export function usePageTimer(pageName: string, onTimeUpdate: (seconds: number) =
       onTimeUpdate(duration);
     };
 
-    window.addEventListener("beforeunload", handleBeforeUnload);
+     window.addEventListener("beforeunload", handleBeforeUnload);
 
     return () => {
       const endTime = Date.now();
