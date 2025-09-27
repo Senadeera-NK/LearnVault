@@ -80,6 +80,7 @@ export default function Dashboard() {
   // Track page usage
   usePageTimer("Dashboard", async (duration) => {
     if (!user) return; // skip if not logged in
+    console.log("Dashboard page timer callback, duration:", duration);
     console.log("user logged in, recording usage...");
     try {
       await recordUsage(user.id, "Dashboard", duration);
