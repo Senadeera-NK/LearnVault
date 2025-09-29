@@ -70,3 +70,31 @@ export async function recordUsage(userId: number, pageName: string, durationseco
 
   return response.json();
 }
+
+export async function fetchUserUsage(userId: number) {
+  const response = await fetch(`${API_URL}/user_usage/${userId}`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  if (!response.ok) {
+    const errData = await response.json().catch(() => ({}));
+    console.log("❌ Fetching user usage failed:", errData);
+    const message = errData.detail || errData.error || "Failed to fetch user usage";
+    throw new Error(message);
+  }
+
+  return response.json();
+}
+
+// Example usage:
+// (async () => {
+//   try {
+//     const signupData = await signup("Alice", "alice@example.com", "password123");
+//     console.log("✅ Signup successful:", signupData);
+//   } catch (error) {
+//     console.error("❌ Signup failed:", error);
+//   }
+// })();  

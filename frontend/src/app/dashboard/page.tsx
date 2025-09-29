@@ -5,7 +5,7 @@ import styles from "../page.module.css";
 import { useAuth } from "./../../components/AuthContext";
 import { Heading } from "@chakra-ui/react";
 import {usePageTimer} from "../../components/UsePageTimer";
-import {recordUsage} from "../../../services/api";
+import {recordUsage, fetchUserUsage} from "../../../services/api";
 import {
   Cell,
   Pie,
@@ -40,8 +40,10 @@ const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"];
 const RADIAN = Math.PI / 180;
 
 // Example 30-day usage data
+const today = new Date();
+const day = today.getDate();
 const dailyUsageData = Array.from({ length: 30 }, (_, i) => ({
-  day: `Day ${i + 1}`,
+  day: `Day ${day - 1}`,
   hours: Math.floor(Math.random() * 5),
 }));
 const dailyBarColor = "#1528dbff";
@@ -76,6 +78,12 @@ export default function Dashboard() {
   const { user } = useAuth();
   const userName = user?.name || "Guest";
 
+  if(user){
+  const fetched_user_duration = fetchUserUsage(user.id);
+  fetched_user_duration.then((data) => {
+    console.log("Fetched user usage data:", data);
+  });
+}
   // Using the custom hook to track time spent on this page
   // Track page usage
   usePageTimer("Dashboard", async (duration) => {

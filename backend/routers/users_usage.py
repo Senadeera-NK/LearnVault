@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-from services.supabase_service_users_usage import insert_user_usage
+from services.supabase_service_users_usage import insert_user_usage, user_usage
 from services import supabase_service_users_usage
 
 router = APIRouter()
@@ -17,3 +17,12 @@ def insert_user_usage(payload:UsageRequest):
         return {"message": "usage inserted successful", "usage": result['usage']}
     else:
         raise HTTPException(status_code=401, detail=result.get("error", "usage uploading failed"))
+
+
+@router.get("/user_usage/{user_id}")
+def get_user_usage(user_id: int):
+    result = user_usage(user_id)
+    if result.get('success'):
+        return {"message": "usage fetched successful", "usage": result['usage']}
+    else:
+        raise HTTPException(status_code=401, detail=result.get("error", "usage fetching failed"))

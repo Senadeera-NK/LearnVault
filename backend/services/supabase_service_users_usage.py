@@ -57,7 +57,7 @@ def insert_user_usage(user_id: str, pageName: str, durationseconds: int):
         return {"success": False, "error": str(e)}
 
 
-def user_usage(user_id: str):
+def user_usage(user_id: int):
     try:
         usage = supabase.table("users_usage").select("*").eq("user_id", user_id).execute()
         if usage.data:
