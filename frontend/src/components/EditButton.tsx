@@ -50,7 +50,7 @@ export default function EditNotepad() {
               Cancel
             </Button>
             <Button colorScheme="teal" onClick={handleSave}>
-              Save
+              Add
             </Button>
           </ModalFooter>
         </ModalContent>
