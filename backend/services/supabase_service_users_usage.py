@@ -15,7 +15,7 @@ def insert_user_usage(user_id: str, pageName: str, durationseconds: int):
             "hours": durationseconds / 3600.0  # store as float hours
         }
 
-        # 👀 Print to console before sending to Supabase
+        # Print to console before sending to Supabase
         print("📤 Sending payload to Supabase:", payload)
 
         # First check if a record exists for (user, page, date)
