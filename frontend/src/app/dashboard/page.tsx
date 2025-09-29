@@ -20,6 +20,7 @@ import {
   Tooltip,
 } from "recharts";
 import { Box } from "@chakra-ui/react";
+import DailyUsageChart from "./components/DailyUsageChart";
 
 const data = [
   { name: "Group A", value: 400 },
@@ -182,26 +183,9 @@ export default function Dashboard() {
           padding="0 10px"
           zIndex={0}   // <-- use camelCase, lower value puts it below floating button
         >
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={dailyUsageData} margin={{ left: 10, right: 10 }}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis
-                dataKey="day"
-                tick={{ fontSize: 10 }}
-                interval={0} // show all labels
-              />
-              <YAxis tick={{ fontSize: 10 }} />
-              <Tooltip />
-              <Bar
-                dataKey="hours"
-                fill={dailyBarColor}
-                barSize={Math.floor(window.innerWidth / dailyUsageData.length) - 5}
-              />
-            </BarChart>
-          </ResponsiveContainer>
+          {user && <DailyUsageChart userId={user.id} />}
+          <Heading size="sm" paddingTop={30} paddingLeft={80}>Daily Usage</Heading>
         </Box>
-
-
     </div>
   );
 }
