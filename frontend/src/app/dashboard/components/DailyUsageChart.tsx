@@ -8,7 +8,6 @@ import { Heading } from "@chakra-ui/react/typography";
 // Type for usage data
 interface Usage {
   day: string;       // For X-axis
-  display: string;   // For tooltip: "1st September"
   hours: number;
 }
 

@@ -21,6 +21,7 @@ import {
 } from "recharts";
 import { Box } from "@chakra-ui/react";
 import DailyUsageChart from "./components/DailyUsageChart";
+import PageUsageChart from "./components/PageUsageChart";
 
 const data = [
   { name: "Group A", value: 400 },
@@ -29,14 +30,6 @@ const data = [
   { name: "Group D", value: 200 },
 ];
 
-const barData = [
-  { name: "Q & A", value: 500 },
-  { name: "Dashboard", value: 300 },
-  { name: "Settings", value: 200 },
-  { name: "Shelf", value: 100 },
-];
-
-const barCOLORS = ["#0e6abbff", "#29917eff", "#d33852ff", "#e91fc7ff"];
 const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"];
 const RADIAN = Math.PI / 180;
 
@@ -153,26 +146,7 @@ export default function Dashboard() {
 
         {/* BAR CHART */}
         <Box flex="1 1 400px" height="400px">
-          <ResponsiveContainer width="100%" height="100%">
-            <BarChart
-              data={barData}
-              layout="vertical"
-              margin={{ top: 20, right: 30, left: 30, bottom: 20 }}
-            >
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis type="number" />
-              <YAxis type="category" dataKey="name" />
-              <Tooltip />
-              <Bar dataKey="value">
-                {barData.map((entry, index) => (
-                  <Cell
-                    key={`cell-${index}`}
-                    fill={barCOLORS[index % barCOLORS.length]}
-                  />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
+         {user && <PageUsageChart userId={user.id} />}
         </Box>
       </Box>
         {/* Bottom half: 30-day daily usage chart */}
@@ -184,7 +158,7 @@ export default function Dashboard() {
           zIndex={0}   // <-- use camelCase, lower value puts it below floating button
         >
           {user && <DailyUsageChart userId={user.id} />}
-          <Heading size="sm" paddingTop={30} paddingLeft={80}>Daily Usage</Heading>
+          {/* <Heading size="sm" paddingTop={30} paddingLeft={50}>Daily Usage</Heading> */}
         </Box>
     </div>
   );
