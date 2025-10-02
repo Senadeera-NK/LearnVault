@@ -89,6 +89,29 @@ export async function fetchUserUsage(userId: number) {
   return response.json();
 }
 
+export async function insertPdfFiles(userId: number, files: File[]) {
+  const formData = new FormData();
+  formData.append("user_id", userId.toString());
+  for (let i = 0; i < files.length; i++) {
+    formData.append("file_names", files[i]);
+  }
+
+  const response = await fetch(`${API_URL}/insert_pdf_files`, {
+    method: "POST",
+    body: formData,
+  });
+
+  if (!response.ok) {
+    const errData = await response.json().catch(() => ({}));
+    console.log("❌ Inserting PDF files failed:", errData);
+    const message = errData.detail || errData.error || "Failed to insert PDF files";
+    throw new Error(message);
+  }
+
+  return response.json();
+}
+
+
 // Example usage:
 // (async () => {
 //   try {

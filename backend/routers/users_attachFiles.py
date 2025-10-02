@@ -8,7 +8,7 @@ class FilesRequest(BaseModel):
     user_id: int
     file_names: list[str]
 
-@router.post("/user_attach_files")
+@router.post("/insert_pdf_files")
 async def user_attach_files(request: FilesRequest):
     if not request.file_names:
         raise HTTPException(status_code=400, detail="No files provided")
