@@ -89,20 +89,25 @@ export async function fetchUserUsage(userId: number) {
   return response.json();
 }
 
-export async function insertPdfFile(userId: number, file: File) {
+export async function insertPdfFiles(userId: number, files: File[]) {
   const formData = new FormData();
-  formData.append("file", file)
-  formData.append("user_id", String(userId))
+  files.forEach(file => formData.append("files", file));
+  formData.append("user_id", String(userId));
 
-  const response = await fetch(`{API_URL}/insert_pdf_file`, {
-    method:'POST',
+  const response = await fetch(`${API_URL}/insert_pdf_file`, {
+    method: 'POST',
     body: formData,
-  })
-  if(!response.ok){
-    const errData = await response.json().catch(()=>{})
-    const message = errData.detail || errData.error || "Failed to upload PDF"
-    throw new Error(message)
+  });
+
+  if (!response.ok) {
+    let message = "Failed to upload PDF";
+    try {
+      const errData = await response.json();
+      message = errData?.detail || errData?.error || message;
+    } catch {}
+    throw new Error(message);
   }
+
   return response.json();
 }
 

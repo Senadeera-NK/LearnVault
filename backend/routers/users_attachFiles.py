@@ -1,22 +1,19 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, File, Form, UploadFile
 from pydantic import BaseModel
 from services.supabase_service_users_attachFiles import insert_user_files
+from typing import List
 
 router = APIRouter()
 
-class FilesRequest(BaseModel):
-    user_id: int
-    file_names: list[str]
 
-@router.post("/insert_pdf_files")
-async def user_attach_files(request: FilesRequest):
-    if not request.file_names:
-        raise HTTPException(status_code=400, detail="No files provided")
-
-    files_payload = [{"name": name} for name in request.file_names]
-    result = insert_user_files(request.user_id, files_payload)
-
-    if result['success']:
-        return {"message": "Files attached successfully"}
-    else:
-        raise HTTPException(status_code=400, detail=result["error"])
+@router.post("/insert_pdf_file")
+async def user_attach_files(user_id:int = Form(...), files:List[UploadFile] = File(...)):
+  if not files:
+    raise HTTPException(status_code=400, detail="Now files provided")
+  
+  result = insert_user_files(user_id, files)
+  if result["success"]:
+    return {"message":"Files uploaded successully", "files_url":result["file_urls"]}
+  else:
+    raise HTTPException(status_code=400, detail=result["error"])
+    
