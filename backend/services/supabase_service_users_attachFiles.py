@@ -11,9 +11,9 @@ async def insert_user_files(user_id: str, files: list):
         for file in files:
             file_path = f"user_{user_id}/{file.filename}"
             content = await file.read()  # async read
-            supabase.storage.from_("user_pdfs").upload(file_path, content, {"upsert": True})
+            supabase.storage.from_("user_pdfs").upload(file_path, content, {"upsert": "true"})
             file_url = supabase.storage.from_("user_pdfs").get_public_url(file_path)
-            supabase.table("user_pdfs").insert({"user_id": user_id, "file_url": file_url}).execute()
+            supabase.table("users_pdfs").insert({"user_id": user_id, "file_url": file_url}).execute()
             file_urls.append(file_url)
         return {"success": True, "file_urls": file_urls}
     except Exception as e:
