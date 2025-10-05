@@ -1,5 +1,5 @@
 SUPABASE_URL = "https://uomksagzyiittforjxsb.supabase.co"
-SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVvbWtzYWd6eWlpdHRmb3JqeHNiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgwODk4MjIsImV4cCI6MjA3MzY2NTgyMn0.uLk0ypA11b46pQeeXWVzH33nraGzalprte7ATmrgcxU"  # better to load via .env
+SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVvbWtzYWd6eWlpdHRmb3JqeHNiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1ODA4OTgyMiwiZXhwIjoyMDczNjY1ODIyfQ.xJqTnjtOBinSBMrRZbdKEvi_obGbPspx6hJmw33mrp4"  # better to load via .env
 
 HEADERS = {
     "apikey":SUPABASE_KEY,

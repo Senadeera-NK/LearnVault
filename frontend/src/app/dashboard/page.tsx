@@ -20,6 +20,7 @@ import {
   Tooltip,
 } from "recharts";
 import { Box } from "@chakra-ui/react";
+import { Suspense } from 'react'
 import DailyUsageChart from "./components/DailyUsageChart";
 import PageUsageChart from "./components/PageUsageChart";
 
@@ -145,11 +146,14 @@ export default function Dashboard() {
         </Box>
 
         {/* BAR CHART */}
+        <Suspense fallback={<p>Loading...</p>}>
         <Box flex="1 1 400px" height="400px">
          {user && <PageUsageChart userId={user.id} />}
         </Box>
+        </Suspense>
       </Box>
         {/* Bottom half: 30-day daily usage chart */}
+        <Suspense fallback={<p>Loading...</p>}>
         <Box
           width="100%"
           height="250px"
@@ -160,6 +164,7 @@ export default function Dashboard() {
           {user && <DailyUsageChart userId={user.id} />}
           {/* <Heading size="sm" paddingTop={30} paddingLeft={50}>Daily Usage</Heading> */}
         </Box>
+        </Suspense>
     </div>
   );
 }
