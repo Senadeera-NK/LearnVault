@@ -1,32 +1,38 @@
-"use client"
+"use client";
 
-import { useRef } from "react"
-import { IconButton } from "@chakra-ui/react"
-import { AttachmentIcon } from "@chakra-ui/icons"
-import { insertPdfFiles } from "../../services/api"
-import { useAuth } from "./AuthContext"
-
+import { useRef, useState } from "react";
+import { IconButton, Spinner, Box } from "@chakra-ui/react";
+import { AttachmentIcon } from "@chakra-ui/icons";
+import { insertPdfFiles } from "../../services/api";
+import { useAuth } from "./AuthContext";
 
 export default function AttachmentButton() {
-  const fileInputRef = useRef<HTMLInputElement>(null)
-  const { user } = useAuth()
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { user } = useAuth();
+  const [loading, setLoading] = useState(false);
 
   const handleAttachmentClick = () => {
-    fileInputRef.current?.click()
-  }
+    fileInputRef.current?.click();
+  };
 
- const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-  const files = event.target.files;
-  if (!files || !user) return;
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (!files || !user) return;
 
-  insertPdfFiles(user.id, Array.from(files))
-    .then(data => console.log("Files uploaded successfully", data))
-    .catch(error => console.error("Error uploading files", error));
-};
-
+    setLoading(true);
+    try {
+      await insertPdfFiles(user.id, Array.from(files));
+      console.log("✅ Files uploaded successfully");
+    } catch (error) {
+      console.error("❌ Error uploading files", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <>
+      {/* Upload Button */}
       <IconButton
         icon={<AttachmentIcon />}
         aria-label="Attach file"
@@ -36,10 +42,11 @@ export default function AttachmentButton() {
         right="6rem"
         borderRadius="full"
         size="md"
-        zIndex={9999} // <-- add this
+        zIndex={9999}
         onClick={handleAttachmentClick}
       />
 
+      {/* Hidden File Input */}
       <input
         type="file"
         ref={fileInputRef}
@@ -48,6 +55,30 @@ export default function AttachmentButton() {
         multiple
         onChange={handleFileChange}
       />
+
+      {/* Fullscreen Spinner Overlay */}
+      {loading && (
+        <Box
+          position="fixed"
+          top="0"
+          left="0"
+          width="100vw"
+          height="100vh"
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+          backdropFilter="blur(6px)"
+          backgroundColor="rgba(0, 0, 0, 0.05)" // very light overlay
+          zIndex={10000}
+        >
+          <Spinner
+            size="xl"
+            thickness="5px"
+            speed="0.65s"
+            color="blue.500"
+          />
+        </Box>
+      )}
     </>
-  )
+  );
 }

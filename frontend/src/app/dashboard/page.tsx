@@ -20,9 +20,9 @@ import {
   Tooltip,
 } from "recharts";
 import { Box } from "@chakra-ui/react";
-import { Suspense } from 'react'
-import DailyUsageChart from "./components/DailyUsageChart";
-import PageUsageChart from "./components/PageUsageChart";
+import { Suspense, lazy } from 'react';
+const DailyUsageChart = lazy(()=>import("./components/DailyUsageChart"));
+const PageUsageChart = lazy(()=>import("./components/PageUsageChart"));
 
 const data = [
   { name: "Group A", value: 400 },
@@ -147,23 +147,23 @@ export default function Dashboard() {
 
         {/* BAR CHART */}
         <Suspense fallback={<p>Loading...</p>}>
-        <Box flex="1 1 400px" height="400px">
-         {user && <PageUsageChart userId={user.id} />}
-        </Box>
+          <Box flex="1 1 400px" height="400px">
+            {user && <PageUsageChart userId={user.id} />}
+          </Box>
         </Suspense>
       </Box>
         {/* Bottom half: 30-day daily usage chart */}
         <Suspense fallback={<p>Loading...</p>}>
-        <Box
-          width="100%"
-          height="250px"
-          marginTop="480px"
-          padding="0 10px"
-          zIndex={0}   // <-- use camelCase, lower value puts it below floating button
-        >
-          {user && <DailyUsageChart userId={user.id} />}
-          {/* <Heading size="sm" paddingTop={30} paddingLeft={50}>Daily Usage</Heading> */}
-        </Box>
+          <Box
+            width="100%"
+            height="250px"
+            marginTop="480px"
+            padding="0 10px"
+            zIndex={0}   // <-- use camelCase, lower value puts it below floating button
+          >
+              {user && <DailyUsageChart userId={user.id} />}
+              {/* <Heading size="sm" paddingTop={30} paddingLeft={50}>Daily Usage</Heading> */}
+          </Box>
         </Suspense>
     </div>
   );
