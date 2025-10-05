@@ -3,7 +3,7 @@
 import { useDisclosure, Box, Drawer, DrawerBody, DrawerHeader, DrawerOverlay, DrawerContent, DrawerCloseButton, Button, IconButton, VStack } from "@chakra-ui/react";
 import { HamburgerIcon, AddIcon } from "@chakra-ui/icons";
 import Link from "next/link";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import AttachmentButton from "./AttachmentButton";
 import EditButton from "./EditButton";
@@ -12,12 +12,30 @@ import UserAvatar from "./UserAvatar";
 export default function Sidebar() {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [showActions, setShowActions] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const actionsRef = useRef<HTMLInputElement>(null);
   const pathname = usePathname(); // get current route
 
   // Helper function to determine active link
   const isActive = (href: string) => pathname === href;
 
+  useEffect(()=>{
+    function handleClickOutside(event: MouseEvent){
+      if(actionsRef.current && !actionsRef.current.contains(event.target as Node)){
+        setShowActions(false);
+      }
+    }
+        if (showActions) {
+            // Detect both click and hover outside
+            document.addEventListener("mousedown", handleOutside);
+            document.addEventListener("mousemove", handleOutside);
+          }
+
+          return () => {
+            document.removeEventListener("mousedown", handleOutside);
+            document.removeEventListener("mousemove", handleOutside);
+          };
+        }, [showActions]);
+        
   return (
     <>
       <UserAvatar />
@@ -97,10 +115,10 @@ export default function Sidebar() {
       />
 
       {showActions && (
-        <>
+        <Box ref={actionsRef}>
           <AttachmentButton />
           <EditButton />
-        </>
+        </Box>
       )}
     </>
   );
