@@ -18,23 +18,28 @@ export default function Sidebar() {
   // Helper function to determine active link
   const isActive = (href: string) => pathname === href;
 
-  useEffect(()=>{
-    function handleClickOutside(event: MouseEvent){
-      if(actionsRef.current && !actionsRef.current.contains(event.target as Node)){
-        setShowActions(false);
+    useEffect(() => {
+      function handleOutside(event: MouseEvent) {
+        if (
+          actionsRef.current &&
+          !actionsRef.current.contains(event.target as Node)
+        ) {
+          setShowActions(false);
+        }
       }
-    }
-        if (showActions) {
-            // Detect both click and hover outside
-            document.addEventListener("mousedown", handleOutside);
-            document.addEventListener("mousemove", handleOutside);
-          }
 
-          return () => {
-            document.removeEventListener("mousedown", handleOutside);
-            document.removeEventListener("mousemove", handleOutside);
-          };
-        }, [showActions]);
+      if (showActions) {
+        // Detect both click and hover outside
+        document.addEventListener("mousedown", handleOutside);
+      //  document.addEventListener("mousemove", handleOutside);
+      }
+
+      return () => {
+        document.removeEventListener("mousedown", handleOutside);
+   //     document.removeEventListener("mousemove", handleOutside);
+      };
+    }, [showActions]);
+
         
   return (
     <>
