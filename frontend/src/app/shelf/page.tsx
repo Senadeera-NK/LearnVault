@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState, useCallback } from "react";
-import { Box, Heading, Progress } from "@chakra-ui/react";
+import { Box, Heading, Progress, SimpleGrid, Text } from "@chakra-ui/react";
 import { usePageTimer } from "../../components/UsePageTimer";
 import { recordUsage } from "../../../services/api";
 import { useAuth } from "@/components/AuthContext";
@@ -9,7 +9,8 @@ import { fetch_user_pdfs } from "../../../services/api";
 
 export default function Shelf() {
   const { user } = useAuth();
-  const [progress, setProgress] = useState(0);
+  // const [progress, setProgress] = useState(0);
+  const[pdfs, setPdfs] = useState<any[]>([]);
 
   // Memoize the callback so usePageTimer doesn't re-subscribe on every render
   const recordShelfUsage = useCallback(
@@ -29,17 +30,24 @@ export default function Shelf() {
   // Track page usage
   usePageTimer("Shelf", recordShelfUsage);
 
-  // Progress bar animation
+  // fetch user PDFs
   useEffect(() => {
-    const interval = setInterval(() => {
-      setProgress((prev) => (prev >= 100 ? 0 : prev + 1));
-    }, 20);
+    const fetchData = async() =>{
+      if(!user) return;
+      try{
+        const res = await fetch_user_pdfs(user.id);
+        console.log("PDFS fetched: ", res.details)
+        setPdfs(res.details || []);
+      }catch(err){
+        console.error("Error fetching PDFs: ", err);
+      }
+    };
+    fetchData();
+  }, [user]);
 
-    return () => clearInterval(interval);
-  }, []);
-
-  console.log("Rendering Shelf for user:", user);
-
+const handleBoxClick = (file:any) =>{
+  alert(`clicked on category: ${file.category || "uncategorized"}`);
+}
   return (
     <Box
       className="styles.page"
@@ -51,7 +59,41 @@ export default function Shelf() {
       <Heading mb="20px" textAlign="center" w="100%">
         Shelf
       </Heading>
-      <Box
+
+{/* grid categories */}
+    <SimpleGrid>
+     {pdfs.map((file)=>(
+ <Box
+            key={file.id}
+            border="2px solid"
+            borderColor="gray.300"
+            borderRadius="md"
+            p="20px"
+            h="120px"
+            display="flex"
+            alignItems="center"
+            justifyContent="center"
+            cursor="pointer"
+            _hover={{ bg: "gray.100", transform: "scale(1.03)" }}
+            transition="all 0.2s ease"
+            onClick={() => handleBoxClick(file)}
+          >
+            <Text
+              fontWeight="semibold"
+              textAlign="center"
+              color="gray.700"
+              noOfLines={2}
+            >
+              {file.category || "Uncategorized"}
+            </Text>
+          </Box>
+          ))}
+    </SimpleGrid>
+
+     
+     
+     
+      {/* <Box
         position="absolute"
         top="600px"
         left="50%"
@@ -61,7 +103,7 @@ export default function Shelf() {
           Loading.....
         </Heading>
         <Progress alignItems="center" value={progress} max={100} w="800px" size="lg" />
-      </Box>
+      </Box> */}
     </Box>
   );
 }
