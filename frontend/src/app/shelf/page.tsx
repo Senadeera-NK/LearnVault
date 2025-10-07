@@ -4,6 +4,8 @@ import { Box, Heading, Progress } from "@chakra-ui/react";
 import { usePageTimer } from "../../components/UsePageTimer";
 import { recordUsage } from "../../../services/api";
 import { useAuth } from "@/components/AuthContext";
+import { fetch_user_pdfs } from "../../../services/api";
+
 
 export default function Shelf() {
   const { user } = useAuth();

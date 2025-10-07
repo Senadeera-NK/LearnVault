@@ -1,10 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from routers import users
 from services import supabase_service_users  # ✅ import here
-from routers import users_usage
 from services import supabase_service_users_usage
-from routers import users_attachFiles
+from routers import users_files_classification, users_attachFiles, users, users_usage
 
 app = FastAPI()
 
@@ -21,6 +19,7 @@ app.add_middleware(
 app.include_router(users.router)
 app.include_router(users_usage.router)
 app.include_router(users_attachFiles.router)
+app.include_router(users_files_classification)
 
 # ✅ Run Supabase connection + print users when server starts
 @app.on_event("startup")

@@ -50,7 +50,6 @@ export async function fetchUsers() {
   return res.json();
 }
 
-
 // function for recoding the usage of the user
 export async function recordUsage(userId: number, pageName: string, durationseconds: number ) {
   const response = await fetch (`${API_URL}/insert_user_usage`, {
@@ -111,7 +110,15 @@ export async function insertPdfFiles(userId: number, files: File[]) {
   return response.json();
 }
 
-
+// function to get users saved pdfs with categories
+export async function fetch_user_pdfs(user_id:number){
+  const res = await fetch(`${API_URL}/get_user_pdfs/${user_id}`);
+  if(!res.ok){
+    const errData = await res.json().catch(()=>({}));
+    throw new Error(errData.error || "Failed to fetch users pdfs")
+  }
+  return res.json();
+}
 // Example usage:
 // (async () => {
 //   try {
