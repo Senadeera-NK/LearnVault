@@ -39,3 +39,16 @@ async def classify_user_files(user_id:int):
 
   except Exception as e:
     return {"success": False, "error": str(e)}
+  
+# function to retreive the data of the already classified files of the user
+def get_user_files(user_id):
+  try:
+    res = supabase.table("users_pdfs").select("*").eq("user_id", user_id).execute()
+    if res.data:
+      return {"success":True, "message":"retreived the data", "data":res.data}
+    else:
+      return {"success":False, "message":"Not successful", "data":[]}
+  
+  except Exception as e:
+    return {"success":False, "error":str(e)}
+
