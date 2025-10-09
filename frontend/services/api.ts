@@ -119,6 +119,21 @@ export async function fetch_user_pdfs(user_id:number){
   }
   return res.json();
 }
+
+// Call this after user uploads a file
+export async function classifyUserFiles(userId: number) {
+  const res = await fetch(`${API_URL}/classify_user_files/${userId}`, {
+    method: "POST"
+  });
+
+  if (!res.ok) {
+    const errData = await res.json().catch(() => ({}));
+    throw new Error(errData?.error || "Failed to classify user files");
+  }
+
+  return res.json();
+}
+
 // Example usage:
 // (async () => {
 //   try {
