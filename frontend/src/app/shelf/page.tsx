@@ -48,6 +48,10 @@ export default function Shelf() {
 const handleBoxClick = (file:any) =>{
   alert(`clicked on category: ${file.category || "uncategorized"}`);
 }
+const uniqueCategories = Array.from(
+  new Set(pdfs.map(file=> file.category || "uncategorized"))
+);
+
   return (
     <Box
       className="styles.page"
@@ -61,10 +65,10 @@ const handleBoxClick = (file:any) =>{
       </Heading>
 
 {/* grid categories */}
-    <SimpleGrid>
-     {pdfs.map((file)=>(
+    <SimpleGrid column={[2, null, 3]} spacing="20px">
+     {uniqueCategories.map((category)=>(
  <Box
-            key={file.id}
+            key={category}
             border="2px solid"
             borderColor="gray.300"
             borderRadius="md"
@@ -76,7 +80,12 @@ const handleBoxClick = (file:any) =>{
             cursor="pointer"
             _hover={{ bg: "gray.100", transform: "scale(1.03)" }}
             transition="all 0.2s ease"
-            onClick={() => handleBoxClick(file)}
+            onClick={() =>{
+              const filesCategory = pdfs.filter(
+                (file) => (file.category || "uncategorized") === category
+              );
+              alert(`category: ${category}\nFiles:\n${filesCategory.map((f)=>f.file_name || f.file_url).join("\n")}`);
+            }}
           >
             <Text
               fontWeight="semibold"
@@ -84,7 +93,7 @@ const handleBoxClick = (file:any) =>{
               color="gray.700"
               noOfLines={2}
             >
-              {file.category || "Uncategorized"}
+              {category}
             </Text>
           </Box>
           ))}
