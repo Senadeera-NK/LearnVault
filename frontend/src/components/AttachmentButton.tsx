@@ -5,6 +5,7 @@ import { IconButton, Spinner, Box } from "@chakra-ui/react";
 import { AttachmentIcon } from "@chakra-ui/icons";
 import { insertPdfFiles } from "../../services/api";
 import { useAuth } from "./AuthContext";
+import {fetch_user_pdfs,classifyUserFiles} from "../../services/api";
 
 export default function AttachmentButton() {
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -23,8 +24,11 @@ export default function AttachmentButton() {
     try {
       await insertPdfFiles(user.id, Array.from(files));
       console.log("✅ Files uploaded successfully");
+      const classificationResult = await classifyUserFiles(user.id);
+      console.log("Triggerig classification for user: ", user.id);
+      console.log("files classified successfully", classificationResult);
     } catch (error) {
-      console.error("❌ Error uploading files", error);
+      console.error("❌ Error uploading files or classifying files", error);
     } finally {
       setLoading(false);
     }

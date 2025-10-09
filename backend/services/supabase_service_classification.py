@@ -32,15 +32,17 @@ async def classify_user_files(user_id: int):
     try:
         # Get uncategorized files
         res = supabase.table("users_pdfs").select("*").eq("user_id", user_id)\
-               .or_("category.eq.NULL,category.eq.''").execute()
+               .or_("category.is.NULL,category.eq.").execute()
         files_to_classify = res.data
 
+        print(f"Found{len(res.data)} uncategorized files: ", res.data)
         if not files_to_classify:
             return {"success": True, "message": "All files already categorized"}
 
         for file in files_to_classify:
             file_url = file["file_url"]
             category = classify_file_with_colab(file_url)
+            print(f"File {file['id']} classified as", category)
 
             # Update Supabase table
             supabase.table("users_pdfs").update({"category": category})\
@@ -49,6 +51,7 @@ async def classify_user_files(user_id: int):
         return {"success": True, "classified_files": len(files_to_classify)}
 
     except Exception as e:
+        print("classification error", str(e))
         return {"success": False, "error": str(e)}
     
 
