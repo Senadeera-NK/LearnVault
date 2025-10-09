@@ -4,29 +4,37 @@ import requests
 import os
 import tempfile
 from requests import post
+from requests.models import RequestEncodingMixin
 
 
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
-# Call your Colab model for classification
 def classify_file_with_colab(file_url):
-
-    # Download file temporarily
-    tmp_dir = tempfile.gettempdir()
-    local_path = os.path.join(tmp_dir, os.path.basename(file_url))
-    r = requests.get(file_url)
-    with open(local_path, "wb") as f:
-        f.write(r.content)
-
-    # Send file to Colab Flask server
-    colab_api_url = "https://kristeen-wholehearted-quotably.ngrok-free.dev/classify_file"
-    with open(local_path, "rb") as f:
-        files = {"file": f}
-        resp = post(colab_api_url, files=files)
+    """
+    Send the raw Supabase file URL to Colab.
+    """
+    colab_api_url = "https://kristeen-wholehearted-quotably.ngrok-free.dev/classify_url"
+    
+    # Remove trailing ? if exists
+    if file_url.endswith('?'):
+        file_url = file_url[:-1]
+    
+    print("DEBUG: Sending URL to Colab:", file_url)
+    print("DEBUG: Type of file_url:", type(file_url))
+    
+    try:
+        resp = requests.post(colab_api_url, json={"url": file_url}, timeout=30)
         if resp.ok:
             return resp.json().get("category")
         else:
+            print("DEBUG: Colab response:", resp.status_code, resp.text)
             return "ERROR"
+    except Exception as e:
+        print("DEBUG: Colab request error:", str(e))
+        return "ERROR"
+
+
+
 
 # Classify all uncategorized files for a user
 async def classify_user_files(user_id: int):
