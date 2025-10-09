@@ -3,12 +3,13 @@ from supabase import create_client
 import requests
 import os
 import tempfile
+from requests import post
+
 
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 # Call your Colab model for classification
 def classify_file_with_colab(file_url):
-    from requests import post
 
     # Download file temporarily
     tmp_dir = tempfile.gettempdir()
@@ -18,7 +19,7 @@ def classify_file_with_colab(file_url):
         f.write(r.content)
 
     # Send file to Colab Flask server
-    colab_api_url = "https://kristeen-wholehearted-quotably.ngrok-free.dev/classify"
+    colab_api_url = "https://kristeen-wholehearted-quotably.ngrok-free.dev/classify_file"
     with open(local_path, "rb") as f:
         files = {"file": f}
         resp = post(colab_api_url, files=files)

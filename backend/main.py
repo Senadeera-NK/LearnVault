@@ -25,3 +25,14 @@ app.include_router(users_files_classification.router)
 @app.on_event("startup")
 def startup_event():
     supabase_service_users.test_connection_and_users()
+
+# # in main.py or routes file
+# from services.supabase_service_classification import classify_file_with_colab
+# from fastapi import FastAPI, Body
+
+# app = FastAPI()
+
+# @app.post("/test_colab")
+# def test_colab(file_url: str = Body(..., embed=True)):
+#     result = classify_file_with_colab(file_url)
+#     return {"category": result}
