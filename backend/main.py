@@ -19,7 +19,7 @@ app.add_middleware(
 app.include_router(users.router)
 app.include_router(users_usage.router)
 app.include_router(users_attachFiles.router)
-app.include_router(users_files_classification)
+app.include_router(users_files_classification.router)
 
 # ✅ Run Supabase connection + print users when server starts
 @app.on_event("startup")
