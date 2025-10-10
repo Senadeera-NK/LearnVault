@@ -5,12 +5,16 @@ import { usePageTimer } from "../../components/UsePageTimer";
 import { recordUsage } from "../../../services/api";
 import { useAuth } from "@/components/AuthContext";
 import { fetch_user_pdfs } from "../../../services/api";
+import FileListWindow from "./components/FileListWindow";
 
 
 export default function Shelf() {
   const { user } = useAuth();
   // const [progress, setProgress] = useState(0);
   const[pdfs, setPdfs] = useState<any[]>([]);
+  const[isOpen, setIsOpen] = useState(false);
+  const[selectedCategory, setSelectedCategory] = useState("");
+  const[selectedFiles, setSelectedFiles] = useState<any[]>([]);
 
   // Memoize the callback so usePageTimer doesn't re-subscribe on every render
   const recordShelfUsage = useCallback(
@@ -45,13 +49,17 @@ export default function Shelf() {
     fetchData();
   }, [user]);
 
-const handleBoxClick = (file:any) =>{
-  alert(`clicked on category: ${file.category || "uncategorized"}`);
-}
+
 const uniqueCategories = Array.from(
   new Set(pdfs.map(file=> file.category || "uncategorized"))
 );
 
+const handleCategoryClick = (category:string) =>{
+  const filesCategory = pdfs.filter((file)=>(file.category || "uncategorized")=== category);
+  setSelectedCategory(category);
+  setSelectedFiles(filesCategory);
+  setIsOpen(true);
+}
   return (
     <Box
       className="styles.page"
@@ -65,7 +73,7 @@ const uniqueCategories = Array.from(
       </Heading>
 
 {/* grid categories */}
-    <SimpleGrid column={[2, null, 3]} spacing="20px">
+    <SimpleGrid columns={{base:2, sm:3, md:4, lg:5}} spacing="20px">
      {uniqueCategories.map((category)=>(
  <Box
             key={category}
@@ -73,19 +81,15 @@ const uniqueCategories = Array.from(
             borderColor="gray.300"
             borderRadius="md"
             p="20px"
-            h="120px"
+            h="90px"
+            w="200px"
             display="flex"
-            alignItems="center"
+            alignItems="left"
             justifyContent="center"
             cursor="pointer"
             _hover={{ bg: "gray.100", transform: "scale(1.03)" }}
             transition="all 0.2s ease"
-            onClick={() =>{
-              const filesCategory = pdfs.filter(
-                (file) => (file.category || "uncategorized") === category
-              );
-              alert(`category: ${category}\nFiles:\n${filesCategory.map((f)=>f.file_name || f.file_url).join("\n")}`);
-            }}
+            onClick={() =>handleCategoryClick(category)}
           >
             <Text
               fontWeight="semibold"
@@ -99,7 +103,13 @@ const uniqueCategories = Array.from(
           ))}
     </SimpleGrid>
 
-     
+     <FileListWindow
+     isOpen={isOpen}
+     onClose={()=> setIsOpen(false)}
+     category={selectedCategory}
+     files={selectedFiles}
+     >
+     </FileListWindow>
      
      
       {/* <Box
