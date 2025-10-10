@@ -36,7 +36,13 @@ export default function FileListWindow({ isOpen, onClose, category, files }: any
     URL.revokeObjectURL(link.href);
   }
   const handleDownloadAll =()=>{
-    console.log("clicked handle download all");
+      if(files.length===0){
+        console.log("No files to download");
+        return;
+      }
+      files.forEach((file:any)=>{
+        downloadFile(file.file_url, getFileName(file.file_url));
+      });
   };
 
   return (
@@ -74,9 +80,6 @@ export default function FileListWindow({ isOpen, onClose, category, files }: any
                       <IconButton
                         aria-label="Download file"
                         icon={<DownloadIcon />}
-                        as="a"
-                        href={file.file_url}
-                        target="_blank"
                         onClick={()=>downloadFile(file.file_url, getFileName(file.file_url))}
                         colorScheme="blue"
                         variant="ghost"

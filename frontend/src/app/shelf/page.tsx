@@ -67,13 +67,15 @@ const handleCategoryClick = (category:string) =>{
       flexDirection="column"
       justifyContent="flex-start"
       pt="10px"
+      paddingLeft={5}
+      paddingRight={5}
     >
       <Heading mb="20px" textAlign="center" w="100%">
         Shelf
       </Heading>
 
 {/* grid categories */}
-    <SimpleGrid columns={{base:2, sm:3, md:4, lg:5}} spacing="20px">
+    <SimpleGrid       paddingTop={30} columns={{base:2, sm:3, md:4, lg:5}} spacing="30px">
      {uniqueCategories.map((category)=>(
  <Box
             key={category}
