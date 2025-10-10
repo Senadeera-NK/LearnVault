@@ -26,6 +26,19 @@ export default function FileListWindow({ isOpen, onClose, category, files }: any
     }
   };
 
+  const downloadFile=async(url:string, filename:string)=>{
+    const res = await fetch(url);
+    const blob = await res.blob();
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = filename;
+    link.click();
+    URL.revokeObjectURL(link.href);
+  }
+  const handleDownloadAll =()=>{
+    console.log("clicked handle download all");
+  };
+
   return (
     <Box>
       <Modal isOpen={isOpen} onClose={onClose} isCentered size="4xl">
@@ -64,7 +77,7 @@ export default function FileListWindow({ isOpen, onClose, category, files }: any
                         as="a"
                         href={file.file_url}
                         target="_blank"
-                        download
+                        onClick={()=>downloadFile(file.file_url, getFileName(file.file_url))}
                         colorScheme="blue"
                         variant="ghost"
                         size="sm"
@@ -78,7 +91,10 @@ export default function FileListWindow({ isOpen, onClose, category, files }: any
             )}
           </ModalBody>
 
-          <ModalFooter>
+          <ModalFooter justifyContent="space-between">
+            <Button colorScheme="blue" onClick={handleDownloadAll}>
+              Download All
+            </Button>
             <Button colorScheme="blue" onClick={onClose}>
               Close
             </Button>
