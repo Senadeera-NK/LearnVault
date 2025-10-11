@@ -143,3 +143,26 @@ export async function classifyUserFiles(userId: number) {
 //     console.error("❌ Signup failed:", error);
 //   }
 // })();  
+
+// ------ neon auth -----------
+export async function neon_signup(name:string, email:string, password:string){
+  const res = await fetch(`${API_URL}/neon/signup`,{
+    method:"POST",
+    headers:{"content-type":"application/json"},
+    body:JSON.stringify({ name, email, password})
+  });
+  return res.json();
+}
+
+export async function neon_signin(email:string, password:string){
+  const res = await fetch(`${API_URL}/neon/signin`,{
+  method : "POST",
+  headers: {"content-type":"application/json"},
+  body:JSON.stringify({email,password})
+  });
+  return res.json();
+}
+
+export function neon_oauth(provider: string) {
+  window.location.href = `${API_URL}/neon/oauth/${provider}`;
+}

@@ -4,6 +4,7 @@
 import { Providers } from "./providers";
 import Sidebar from "@/components/Sidebar";
 import AuthModal from "@/components/AuthModal";
+import NeonAuthModel from "@/components/NeonAuthModel";
 import { useEffect } from "react";
 import { useDisclosure } from "@chakra-ui/react";
 import { AuthProvider } from "@/components/AuthContext";
@@ -29,7 +30,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             {children}
           </main>
         {/* Modal gets triggered after 5s */}
-        <AuthModal isOpen={isOpen} onClose={onClose} />
+        <NeonAuthModel isOpen={isOpen} onClose={onClose} />
         </AuthProvider>
         </Providers>
       </body>
