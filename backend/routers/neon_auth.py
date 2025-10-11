@@ -13,6 +13,7 @@ NEON_AUTH_URL = os.getenv("NEON_AUTH_URL")  # e.g. https://api.stack-auth.com
 NEON_CLIENT_KEY = os.getenv("NEON_CLIENT_KEY")
 NEON_SECRET_KEY = os.getenv("NEON_SECRET_KEY")
 REDIRECT_URI = os.getenv("NEON_REDIRECT_URI")
+NEON_PROJECT_ID = os.getenv("NEON_PROJECT_ID")
 
 @router.post("/signup")
 def neon_signup(name: str, email: str, password: str):
@@ -44,7 +45,7 @@ def neon_signin(email: str, password: str):
 def oauth_redirect(provider: str):
     """Redirect user to Google or GitHub login."""
     auth_url = (
-        f"{NEON_AUTH_URL}/v1/oauth/authorize"
+        f"{NEON_AUTH_URL}/oauth/authorize"
         f"?client_id={NEON_CLIENT_KEY}"
         f"&provider={provider}"
         f"&redirect_uri={REDIRECT_URI}"
@@ -56,7 +57,7 @@ def oauth_redirect(provider: str):
 @router.get("/oauth/callback")
 def oauth_callback(code: str, state: str = None):
     """Handle callback from OAuth provider."""
-    token_url = f"{NEON_AUTH_URL}/v1/oauth/token"
+    token_url = f"{NEON_AUTH_URL}/api/v1/projects/{NEON_PROJECT_ID}/oauth/token"
 
     data = {
         "client_id": NEON_CLIENT_KEY,
