@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-//import { useUser } from "@stackframe/stack";
+import { useUser } from "@stackframe/stack";
 import { Button, Modal, ModalOverlay, ModalContent, ModalHeader, ModalBody, ModalCloseButton, Text } from "@chakra-ui/react";
 
 interface NeonAuthModalProps {
