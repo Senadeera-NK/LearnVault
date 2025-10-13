@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Box, Heading, Progress } from "@chakra-ui/react";
 import {usePageTimer} from "../../components/UsePageTimer";
-import {recordUsage} from "../../../services/api";
+import {recordUsage} from "../../../api/api";
 import { useAuth } from "@/components/AuthContext";
 
 export default function Settings() { 

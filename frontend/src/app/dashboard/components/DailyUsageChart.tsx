@@ -2,7 +2,7 @@
 
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 import { useEffect, useState } from "react";
-import { fetchUserUsage } from "../../../../services/api";
+import { fetchUserUsage } from "../../../../api/api";
 import { Heading } from "@chakra-ui/react/typography";
 
 // Type for usage data

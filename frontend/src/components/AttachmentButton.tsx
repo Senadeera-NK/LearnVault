@@ -3,9 +3,9 @@
 import { useRef, useState } from "react";
 import { IconButton, Spinner, Box } from "@chakra-ui/react";
 import { AttachmentIcon } from "@chakra-ui/icons";
-import { insertPdfFiles } from "../../services/api";
+import { insertPdfFiles } from "../../api/api";
 import { useAuth } from "./AuthContext";
-import {fetch_user_pdfs,classifyUserFiles} from "../../services/api";
+import {fetch_user_pdfs,classifyUserFiles} from "../../api/api";
 
 export default function AttachmentButton() {
   const fileInputRef = useRef<HTMLInputElement>(null);

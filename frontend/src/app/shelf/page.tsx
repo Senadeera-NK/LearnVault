@@ -2,9 +2,9 @@
 import { useEffect, useState, useCallback } from "react";
 import { Box, Heading, Progress, SimpleGrid, Text } from "@chakra-ui/react";
 import { usePageTimer } from "../../components/UsePageTimer";
-import { recordUsage } from "../../../services/api";
+import { recordUsage } from "../../../api/api";
 import { useAuth } from "@/components/AuthContext";
-import { fetch_user_pdfs } from "../../../services/api";
+import { fetch_user_pdfs } from "../../../api/api";
 import FileListWindow from "./components/FileListWindow";
 
 

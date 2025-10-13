@@ -5,7 +5,7 @@ import styles from "../page.module.css";
 import { useAuth } from "./../../components/AuthContext";
 import { Heading } from "@chakra-ui/react";
 import {usePageTimer} from "../../components/UsePageTimer";
-import {recordUsage, fetchUserUsage} from "../../../services/api";
+import {recordUsage, fetchUserUsage} from "../../../api/api";
 import {
   Cell,
   Pie,

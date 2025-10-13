@@ -1,7 +1,7 @@
 "use client";
 import { ResponsiveContainer, BarChart, CartesianGrid, XAxis, YAxis, Tooltip, Bar, Cell } from 'recharts';
 import { useEffect, useState } from "react";
-import { fetchUserUsage } from "../../../../services/api";
+import { fetchUserUsage } from "../../../../api/api";
 
 const barCOLORS = ['#8884d8', '#82ca9d', '#ffc658', '#ff8042', '#8dd1e1'];
 

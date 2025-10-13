@@ -19,7 +19,7 @@ import {
   TabPanel,useToast,
 } from "@chakra-ui/react";
 import {useState, useEffect} from "react";
-import { signup, signin, fetchUsers} from "../../services/api";
+import { signup, signin, fetchUsers} from "../../api/api";
 import {useAuth} from "./AuthContext";
 
 type AuthModalProps = {
