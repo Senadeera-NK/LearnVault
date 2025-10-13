@@ -1,37 +1,15 @@
 // src/app/layout.tsx
-"use client";
-
 import { Providers } from "./providers";
-import Sidebar from "@/components/Sidebar";
-import AuthModal from "@/components/AuthModal";
-import NeonAuthModel from "@/components/NeonAuthModel";
-import { useEffect } from "react";
-import { useDisclosure } from "@chakra-ui/react";
-import { AuthProvider } from "@/components/AuthContext";
+import ClientLayout from "./client-layout";
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
-  const { isOpen, onOpen, onClose } = useDisclosure();
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      onOpen();
-    }, 5000);
-
-    return () => clearTimeout(timer); // ✅ cleanup inside effect
-  }, [onOpen]);
-
   return (
     <html lang="en">
       <body>
         <Providers>
-          <AuthProvider>
-          <Sidebar />
-          <main style={{ padding: "1rem" }}>
+          <ClientLayout>
             {children}
-          </main>
-        {/* Modal gets triggered after 5s */}
-        <NeonAuthModel isOpen={isOpen} onClose={onClose} />
-        </AuthProvider>
+          </ClientLayout>
         </Providers>
       </body>
     </html>
