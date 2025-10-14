@@ -1,17 +1,20 @@
 "use client";
 
-import { useEffect } from "react";
-import { useDisclosure } from "@chakra-ui/react";
-import Sidebar from "@/components/Sidebar";
-import { AuthProvider } from "@/components/AuthContext";
+import { signIn, signOut, useSession } from "next-auth/react";
 
-export default function ClientLayout({ children }: { children: React.ReactNode }) {
+export default function AuthButtons() {
+  const { data: session } = useSession();
+
   return (
-    <AuthProvider>
-      <Sidebar />
-      <main style={{ padding: "1rem" }}>
-        {children}
-      </main>
-    </AuthProvider>
+    <div>
+      {!session ? (
+        <button onClick={() => signIn("google")}>Sign in with Google</button>
+      ) : (
+        <>
+          <p>Signed in as {session.user?.email}</p>
+          <button onClick={() => signOut()}>Sign out</button>
+        </>
+      )}
+    </div>
   );
 }
