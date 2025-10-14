@@ -1,25 +1,25 @@
 "use client";
 
-import {createContext, useState, useContext, ReactNode} from "react";
+import { createContext, useState, useContext, ReactNode } from "react";
 
 type User = {
   name: string;
   email: string;
   id: number;
-}
+};
 
 type AuthContextType = {
   user: User | null;
-  login: (user:User) => void;
+  login: (user: User) => void;
   logout: () => void;
-}
+};
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export function AuthProvider({ children }: { children: ReactNode }) {
+export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
 
-  const login = (user: User) => setUser(user);
+  const login = (newUser: User) => setUser(newUser);
   const logout = () => setUser(null);
 
   return (
@@ -27,7 +27,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       {children}
     </AuthContext.Provider>
   );
-}
+};
 
 export function useAuth() {
   const context = useContext(AuthContext);
