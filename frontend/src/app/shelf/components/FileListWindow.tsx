@@ -12,7 +12,6 @@ import {
   VStack,
   HStack,
   Text,
-  Link,
 } from "@chakra-ui/react";
 
 interface FileListWindowProps {
@@ -28,6 +27,17 @@ export default function FileListWindow({
   category,
   files,
 }: FileListWindowProps) {
+  // Helper to download file
+  const downloadFile = (url: string, filename: string) => {
+    if (!url) return;
+    const link = document.createElement("a");
+    link.href = url.trim().replace(/\r?\n/g, ""); // clean URL
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <Modal isOpen={isOpen} onClose={onClose} size="lg" scrollBehavior="inside">
       <ModalOverlay />
@@ -48,11 +58,13 @@ export default function FileListWindow({
                   p={2}
                 >
                   <Text>{file.name}</Text>
-                  <Link href={file.url} isExternal>
-                    <Button size="sm" colorScheme="teal">
-                      Download
-                    </Button>
-                  </Link>
+                  <Button
+                    size="sm"
+                    colorScheme="teal"
+                    onClick={() => downloadFile(file.url, file.name)}
+                  >
+                    Download
+                  </Button>
                 </HStack>
               ))
             )}

@@ -1,26 +1,23 @@
 "use client";
 import { useEffect, useState, useCallback } from "react";
-import { Box, Heading, Progress, SimpleGrid, Text } from "@chakra-ui/react";
+import { Box, Heading, SimpleGrid, Text } from "@chakra-ui/react";
 import { usePageTimer } from "../../components/UsePageTimer";
 import { recordUsage } from "../../../api/api";
 import { useAuth } from "@/components/AuthContext";
 import { fetch_user_pdfs } from "../../../api/api";
 import FileListWindow from "./components/FileListWindow";
 
-
 export default function Shelf() {
   const { user } = useAuth();
-  // const [progress, setProgress] = useState(0);
-  const[pdfs, setPdfs] = useState<any[]>([]);
-  const[isOpen, setIsOpen] = useState(false);
-  const[selectedCategory, setSelectedCategory] = useState("");
-  const[selectedFiles, setSelectedFiles] = useState<any[]>([]);
+  const [pdfs, setPdfs] = useState<any[]>([]);
+  const [isOpen, setIsOpen] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState("");
+  const [selectedFiles, setSelectedFiles] = useState<any[]>([]);
 
-  // Memoize the callback so usePageTimer doesn't re-subscribe on every render
+  // Memoized page usage recorder
   const recordShelfUsage = useCallback(
-    async (duration:number) => {
+    async (duration: number) => {
       if (!user) return;
-      console.log("Shelf page timer callback, duration:", duration);
       try {
         await recordUsage(user.id, "Shelf", duration);
         console.log("✅ Recorded usage:", duration, "seconds");
@@ -34,32 +31,53 @@ export default function Shelf() {
   // Track page usage
   usePageTimer("Shelf", recordShelfUsage);
 
-  // fetch user PDFs
+  // Fetch user PDFs and map to correct shape
   useEffect(() => {
-    const fetchData = async() =>{
-      if(!user) return;
-      try{
+    const fetchData = async () => {
+      if (!user) return;
+      try {
         const res = await fetch_user_pdfs(user.id);
-        console.log("PDFS fetched: ", res.details)
-        setPdfs(res.details || []);
-      }catch(err){
+        console.log("PDFS fetched: ", res.details);
+
+        const formattedPdfs = (res.details || []).map((file: any) => ({
+          id: file.id,
+          name: extractFileName(file.file_url), // extract file name from URL
+          url: file.file_url.trim(), // remove extra whitespace/newlines
+          category: file.category || "Uncategorized",
+        }));
+
+        setPdfs(formattedPdfs);
+      } catch (err) {
         console.error("Error fetching PDFs: ", err);
       }
     };
+
     fetchData();
   }, [user]);
 
+  // Helper function to get file name from URL
+const extractFileName = (url: string) => {
+  if (!url) return "unknown.pdf";
+  // Remove leading/trailing whitespace and newlines
+  const cleanUrl = url.trim().replace(/\r?\n/g, "");
+  const parts = cleanUrl.split("/");
+  // Take the last part and remove query string if exists
+  return parts[parts.length - 1].replace(/\?.*$/, "");
+};
 
-const uniqueCategories = Array.from(
-  new Set(pdfs.map(file=> file.category || "uncategorized"))
-);
+  // Get unique categories
+  const uniqueCategories = Array.from(
+    new Set(pdfs.map((file) => file.category))
+  );
 
-const handleCategoryClick = (category:string) =>{
-  const filesCategory = pdfs.filter((file)=>(file.category || "uncategorized")=== category);
-  setSelectedCategory(category);
-  setSelectedFiles(filesCategory);
-  setIsOpen(true);
-}
+  // When a category is clicked
+  const handleCategoryClick = (category: string) => {
+    const filesCategory = pdfs.filter((file) => file.category === category);
+    setSelectedCategory(category);
+    setSelectedFiles(filesCategory);
+    setIsOpen(true);
+  };
+
   return (
     <Box
       className="styles.page"
@@ -74,10 +92,14 @@ const handleCategoryClick = (category:string) =>{
         Shelf
       </Heading>
 
-{/* grid categories */}
-    <SimpleGrid       paddingTop={30} columns={{base:2, sm:3, md:4, lg:5}} spacing="30px">
-     {uniqueCategories.map((category)=>(
- <Box
+      {/* Grid of categories */}
+      <SimpleGrid
+        paddingTop={30}
+        columns={{ base: 2, sm: 3, md: 4, lg: 5 }}
+        spacing="30px"
+      >
+        {uniqueCategories.map((category) => (
+          <Box
             key={category}
             border="2px solid"
             borderColor="gray.300"
@@ -91,7 +113,7 @@ const handleCategoryClick = (category:string) =>{
             cursor="pointer"
             _hover={{ bg: "gray.100", transform: "scale(1.03)" }}
             transition="all 0.2s ease"
-            onClick={() =>handleCategoryClick(category)}
+            onClick={() => handleCategoryClick(category)}
           >
             <Text
               fontWeight="semibold"
@@ -102,29 +124,16 @@ const handleCategoryClick = (category:string) =>{
               {category}
             </Text>
           </Box>
-          ))}
-    </SimpleGrid>
+        ))}
+      </SimpleGrid>
 
-     <FileListWindow
-     isOpen={isOpen}
-     onClose={()=> setIsOpen(false)}
-     category={selectedCategory}
-     files={selectedFiles}
-     >
-     </FileListWindow>
-     
-     
-      {/* <Box
-        position="absolute"
-        top="600px"
-        left="50%"
-        transform="translateX(-50%)"
-      >
-        <Heading mb="15px" alignItems="center">
-          Loading.....
-        </Heading>
-        <Progress alignItems="center" value={progress} max={100} w="800px" size="lg" />
-      </Box> */}
+      {/* File list modal */}
+      <FileListWindow
+        isOpen={isOpen}
+        onClose={() => setIsOpen(false)}
+        category={selectedCategory}
+        files={selectedFiles}
+      />
     </Box>
   );
 }
