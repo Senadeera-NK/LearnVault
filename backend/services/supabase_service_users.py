@@ -4,10 +4,10 @@ from supabase import create_client
 from services.supabase_config import SUPABASE_URL, SUPABASE_KEY
 import logging
 
-supabase = create_client(SUPABASE_URL, SUPABASE_KEY)    
+supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 def hash_password(password: str) -> str:
-    return hashlib.sha256(password.encode()).hexdigest() 
+    return hashlib.sha256(password.encode()).hexdigest()
 
 def signup_user(name: str, email: str, password: str):
     try:

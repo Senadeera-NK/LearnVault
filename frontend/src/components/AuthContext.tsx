@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useState, useContext, ReactNode } from "react";
+import { createContext, useState, useContext, ReactNode, useEffect } from "react";
 
 type User = {
   name: string;
@@ -19,8 +19,25 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
 
-  const login = (newUser: User) => setUser(newUser);
-  const logout = () => setUser(null);
+  // ✅ Load user from localStorage when app starts
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+  }, []);
+
+  // ✅ When login happens, store user in both state + localStorage
+  const login = (newUser: User) => {
+    setUser(newUser);
+    localStorage.setItem("user", JSON.stringify(newUser));
+  };
+
+  // ✅ When logout happens, remove from both
+  const logout = () => {
+    setUser(null);
+    localStorage.removeItem("user");
+  };
 
   return (
     <AuthContext.Provider value={{ user, login, logout }}>

@@ -29,8 +29,7 @@ app.include_router(neon_auth_router)
 # ✅ Run Supabase connection + print users when server starts
 @app.on_event("startup")
 def startup_event():
-    # supabase_service_users.test_connection_and_users()
-    pass
+    supabase_service_users.test_connection_and_users()
 
 
 # # in main.py or routes file

@@ -1,20 +1,15 @@
 "use client";
 
-import { signIn, signOut, useSession } from "next-auth/react";
+import { ReactNode } from "react";
+import Sidebar from "../components/Sidebar";
 
-export default function AuthButtons() {
-  const { data: session } = useSession();
-
+export default function ClientLayout({ children }: { children: ReactNode }) {
   return (
-    <div>
-      {!session ? (
-        <button onClick={() => signIn("google")}>Sign in with Google</button>
-      ) : (
-        <>
-          <p>Signed in as {session.user?.email}</p>
-          <button onClick={() => signOut()}>Sign out</button>
-        </>
-      )}
+    <div style={{ display: "flex" }}>
+      <Sidebar />
+      <main style={{ flex: 1, minHeight: "100vh", padding: "1rem" }}>
+        {children}
+      </main>
     </div>
   );
 }

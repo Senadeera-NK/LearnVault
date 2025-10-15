@@ -1,7 +1,7 @@
 // services/api.ts
 
 // Use your Codespaces-provided forwarded URL here
-const API_URL = "https://bookish-space-spoon-q69vx4j4qr42696p-8000.app.github.dev";
+const API_URL = "https://nhkxvn9q-8000.asse.devtunnels.ms";
 // "proxy": "http://localhost:8000"
 
 export async function signup(name: string, email: string, password: string) {
