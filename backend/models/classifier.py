@@ -1,4 +1,4 @@
-from ..utils import extract_text, rule_based_check
+from utils import extract_text, rule_based_check
 
 # Install sentence-transformers at runtime if not present
 import sys, subprocess
