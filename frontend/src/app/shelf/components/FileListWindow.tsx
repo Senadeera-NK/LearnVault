@@ -14,6 +14,7 @@ import {
   Text,
 } from "@chakra-ui/react";
 
+import { DownloadIcon } from "@chakra-ui/icons";
 interface FileListWindowProps {
   isOpen: boolean;
   onClose: () => void;
@@ -27,16 +28,34 @@ export default function FileListWindow({
   category,
   files,
 }: FileListWindowProps) {
+
   // Helper to download file
-  const downloadFile = (url: string, filename: string) => {
-    if (!url) return;
+const downloadFile = async (url: string, filename: string) => {
+  if (!url) return;
+
+  let cleanUrl = url.trim().replace(/\r?\n/g, "");
+  if (cleanUrl.endsWith("?")) cleanUrl = cleanUrl.slice(0, -1);
+
+  try {
+    const response = await fetch(cleanUrl);
+    if (!response.ok) throw new Error("Network response was not ok");
+
+    const blob = await response.blob(); // fetch binary data
+    const blobUrl = URL.createObjectURL(blob);
+
     const link = document.createElement("a");
-    link.href = url.trim().replace(/\r?\n/g, ""); // clean URL
-    link.download = filename;
+    link.href = blobUrl;
+    link.setAttribute("download", filename || "file.pdf");
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-  };
+
+    URL.revokeObjectURL(blobUrl); // clean up
+  } catch (err) {
+    console.error("❌ Failed to download file:", err);
+  }
+};
+
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} size="lg" scrollBehavior="inside">
@@ -58,13 +77,13 @@ export default function FileListWindow({
                   p={2}
                 >
                   <Text>{file.name}</Text>
-                  <Button
+                  <Box
                     size="sm"
                     colorScheme="teal"
                     onClick={() => downloadFile(file.url, file.name)}
                   >
-                    Download
-                  </Button>
+                    <DownloadIcon/>
+                  </Box>
                 </HStack>
               ))
             )}
