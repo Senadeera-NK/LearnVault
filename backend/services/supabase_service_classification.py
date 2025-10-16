@@ -1,7 +1,7 @@
 from services.supabase_config import SUPABASE_KEY, SUPABASE_URL
 from supabase import create_client
-from models.classifier import classify_document, download_file_from_url
-
+from models.classifier import classify_document
+from utils import download_file_from_url
 
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
