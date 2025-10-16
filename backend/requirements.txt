@@ -10,3 +10,4 @@ pdfplumber
 pdf2image
 pytesseract
 docx2txt
+PyMuPDF
