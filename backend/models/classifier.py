@@ -1,9 +1,16 @@
-from sentence_transformers import SentenceTransformer, util
-from utils import extract_text,rule_based_check
+from utils import extract_text, rule_based_check
+
+# Install sentence-transformers at runtime if not present
+import sys, subprocess
+try:
+    from sentence_transformers import SentenceTransformer, util
+except ImportError:
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "sentence-transformers"])
+    from sentence_transformers import SentenceTransformer, util
 
 # categories
 categories = {
-  "Math Notes": "Mathematics, formulas, algebra, geometry, calculus, theorems",
+    "Math Notes": "Mathematics, formulas, algebra, geometry, calculus, theorems",
     "Physics Paper": "Physics, mechanics, thermodynamics, optics, electricity, waves",
     "Chemistry Notes": "Chemistry, reactions, elements, periodic table, organic, inorganic",
     "Biology Notes": "Biology, genetics, anatomy, ecology, cell biology",
@@ -37,9 +44,8 @@ def classify_text_with_embeddings(text):
 
     text_embedding = model.encode(text[:1500], convert_to_tensor=True)
     similarity_scores = util.cos_sim(text_embedding, category_embeddings)
-    bext_idx = similarity_scores.argmax()
-    return category_names[bext_idx]
-
+    best_idx = similarity_scores.argmax()
+    return category_names[best_idx]
 
 def classify_document(fle_path):
     text = extract_text(fle_path)

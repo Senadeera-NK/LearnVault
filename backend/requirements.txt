@@ -3,11 +3,10 @@ uvicorn[standard]
 supabase
 python-multipart
 requests
-sentence-transformers
-pdfplumber
+python-dotenv
+passlib[bcrypt]
 pillow
+pdfplumber
 pdf2image
 pytesseract
 docx2txt
-passlib[bcrypt]
-python-dotenv
