@@ -1,0 +1,13 @@
+fastapi
+uvicorn[standard]
+supabase
+python-multipart
+requests
+sentence-transformers
+pdfplumber
+pillow
+pdf2image
+pytesseract
+docx2txt
+passlib[bcrypt]
+python-dotenv
