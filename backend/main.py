@@ -3,9 +3,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from services import supabase_service_users  # ✅ import here
 from services import supabase_service_users_usage
 from routers import users_files_classification, users_attachFiles, users, users_usage
-from services.neon_config import get_db_connection
-from routers.neon_test import router as neon_test_router
-from routers.neon_auth import router as neon_auth_router
+# from services.neon_config import get_db_connection
+# from routers.neon_test import router as neon_test_router
+# from routers.neon_auth import router as neon_auth_router
 
 app = FastAPI()
 
@@ -23,8 +23,8 @@ app.include_router(users.router)
 app.include_router(users_usage.router)
 app.include_router(users_attachFiles.router)
 app.include_router(users_files_classification.router)
-app.include_router(neon_test_router)
-app.include_router(neon_auth_router)
+# app.include_router(neon_test_router)
+# app.include_router(neon_auth_router)
 
 # ✅ Run Supabase connection + print users when server starts
 @app.on_event("startup")
