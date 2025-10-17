@@ -1,17 +1,20 @@
 # models/classifier.py
+
+import os
 from utils import extract_text, rule_based_check
-from sentence_transformers import SentenceTransformer, util
-import threading
-import subprocess, sys
+from huggingface_hub import InferenceClient
 
-# Install sentence-transformers at runtime if not present
-try:
-    import sentence_transformers
-except ImportError:
-    subprocess.check_call([sys.executable, "-m", "pip", "install", "sentence-transformers"])
-    import sentence_transformers
+# Initialize Hugging Face client
+HF_TOKEN = os.environ.get("HF_TOKEN")
+if not HF_TOKEN:
+    raise RuntimeError("HF_TOKEN environment variable is not set.")
 
-# Categories mapping
+hf_client = InferenceClient(
+    provider="hf-inference",
+    api_key=HF_TOKEN
+)
+
+# Define categories
 categories = {
     "Math Notes": "Mathematics, formulas, algebra, geometry, calculus, theorems",
     "Physics Paper": "Physics, mechanics, thermodynamics, optics, electricity, waves",
@@ -32,44 +35,40 @@ categories = {
     "General Document": "Miscellaneous text, general notes"
 }
 
-category_texts = list(categories.values())
 category_names = list(categories.keys())
+category_texts = list(categories.values())
 
-# Thread-safe lazy loading
-model = None
-category_embeddings = None
-load_lock = threading.Lock()
 
-def load_model():
-    """Load the SentenceTransformer model and encode categories if not loaded yet."""
-    global model, category_embeddings
-    with load_lock:
-        if model is None:
-            print("⚡ Loading SentenceTransformer model...")
-            model = SentenceTransformer('all-MiniLM-L6-v2')
-            category_embeddings = model.encode(category_texts, convert_to_tensor=True)
-            print("✅ Model loaded successfully!")
+def classify_text_with_hf(text: str):
+    """
+    Use Hugging Face sentence-transformers API to classify text
+    """
+    try:
+        response = hf_client.sentence_similarity(
+            {
+                "source_sentence": text[:1500],  # truncate long text for API
+                "sentences": category_texts
+            },
+            model="sentence-transformers/all-MiniLM-L6-v2"
+        )
+        # response is a list of dicts with 'score'
+        best_idx = max(range(len(response)), key=lambda i: response[i]['score'])
+        return category_names[best_idx]
+    except Exception as e:
+        print("❌ Hugging Face classification error:", str(e))
+        return "HF_ERROR"
 
-def classify_text_with_embeddings(text):
-    """Classify text using embeddings, with rule-based fallback."""
-    global model, category_embeddings
-    # Load model lazily
-    if model is None:
-        load_model()
 
-    # First check rule-based
+def classify_document(file_path: str):
+    """
+    Classify a document:
+    1. Extract text
+    2. Apply rule-based check
+    3. If rule-based fails, use Hugging Face similarity
+    """
+    text = extract_text(file_path)
     rule_label = rule_based_check(text)
     if rule_label:
         return rule_label
 
-    # Embed text and compute similarity
-    text_embedding = model.encode(text[:1500], convert_to_tensor=True)
-    similarity_scores = util.cos_sim(text_embedding, category_embeddings)
-    best_idx = similarity_scores.argmax()
-    return category_names[best_idx]
-
-def classify_document(file_path):
-    """Extract text from a document and classify it."""
-    text = extract_text(file_path)
-    category = classify_text_with_embeddings(text)
-    return category
+    return classify_text_with_hf(text)

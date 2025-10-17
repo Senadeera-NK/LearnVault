@@ -11,6 +11,4 @@ pdf2image
 pytesseract
 docx2txt
 PyMuPDF
-sentence-transformers==2.2.2
-torch>=2.0.1
-transformers>=4.34.0
+huggingface-hub==1.30.1
