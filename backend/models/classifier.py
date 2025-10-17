@@ -1,14 +1,17 @@
+# models/classifier.py
 from utils import extract_text, rule_based_check
+from sentence_transformers import SentenceTransformer, util
+import threading
+import subprocess, sys
 
 # Install sentence-transformers at runtime if not present
-import sys, subprocess
 try:
-    from sentence_transformers import SentenceTransformer, util
+    import sentence_transformers
 except ImportError:
     subprocess.check_call([sys.executable, "-m", "pip", "install", "sentence-transformers"])
-    from sentence_transformers import SentenceTransformer, util
+    import sentence_transformers
 
-# categories
+# Categories mapping
 categories = {
     "Math Notes": "Mathematics, formulas, algebra, geometry, calculus, theorems",
     "Physics Paper": "Physics, mechanics, thermodynamics, optics, electricity, waves",
@@ -32,22 +35,41 @@ categories = {
 category_texts = list(categories.values())
 category_names = list(categories.keys())
 
-# Load model
-model = SentenceTransformer('all-MiniLM-L6-v2')
-category_embeddings = model.encode(category_texts, convert_to_tensor=True)
+# Thread-safe lazy loading
+model = None
+category_embeddings = None
+load_lock = threading.Lock()
+
+def load_model():
+    """Load the SentenceTransformer model and encode categories if not loaded yet."""
+    global model, category_embeddings
+    with load_lock:
+        if model is None:
+            print("⚡ Loading SentenceTransformer model...")
+            model = SentenceTransformer('all-MiniLM-L6-v2')
+            category_embeddings = model.encode(category_texts, convert_to_tensor=True)
+            print("✅ Model loaded successfully!")
 
 def classify_text_with_embeddings(text):
-    # rule-based first
+    """Classify text using embeddings, with rule-based fallback."""
+    global model, category_embeddings
+    # Load model lazily
+    if model is None:
+        load_model()
+
+    # First check rule-based
     rule_label = rule_based_check(text)
     if rule_label:
         return rule_label
 
+    # Embed text and compute similarity
     text_embedding = model.encode(text[:1500], convert_to_tensor=True)
     similarity_scores = util.cos_sim(text_embedding, category_embeddings)
     best_idx = similarity_scores.argmax()
     return category_names[best_idx]
 
-def classify_document(fle_path):
-    text = extract_text(fle_path)
+def classify_document(file_path):
+    """Extract text from a document and classify it."""
+    text = extract_text(file_path)
     category = classify_text_with_embeddings(text)
     return category
