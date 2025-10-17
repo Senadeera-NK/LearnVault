@@ -1,39 +1,9 @@
 from services.supabase_config import SUPABASE_KEY, SUPABASE_URL
 from supabase import create_client
-import requests
-import os
-import tempfile
-from requests import post
-from requests.models import RequestEncodingMixin
+from models.classifier import classify_document, download_file_from_url
 
 
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
-
-def classify_file_with_colab(file_url):
-    """
-    Send the raw Supabase file URL to Colab.
-    """
-    colab_api_url = "https://kristeen-wholehearted-quotably.ngrok-free.dev/classify_url"
-    
-    # Remove trailing ? if exists
-    if file_url.endswith('?'):
-        file_url = file_url[:-1]
-    
-    print("DEBUG: Sending URL to Colab:", file_url)
-    print("DEBUG: Type of file_url:", type(file_url))
-    
-    try:
-        resp = requests.post(colab_api_url, json={"url": file_url}, timeout=30)
-        if resp.ok:
-            return resp.json().get("category")
-        else:
-            print("DEBUG: Colab response:", resp.status_code, resp.text)
-            return "ERROR"
-    except Exception as e:
-        print("DEBUG: Colab request error:", str(e))
-        return "ERROR"
-
-
 
 
 # Classify all uncategorized files for a user
@@ -50,8 +20,11 @@ async def classify_user_files(user_id: int):
 
         for file in files_to_classify:
             file_url = file["file_url"]
-            category = classify_file_with_colab(file_url)
-            print(f"File {file['id']} classified as", category)
+            local_file = download_file_from_url(file_url)
+            if local_file:
+                category = classify_document(local_file)
+            else:
+                category = "Download/Error"
 
             # Update Supabase table
             supabase.table("users_pdfs").update({"category": category})\
@@ -62,7 +35,7 @@ async def classify_user_files(user_id: int):
     except Exception as e:
         print("classification error", str(e))
         return {"success": False, "error": str(e)}
-    
+
 
 def get_user_files(user_id: int):
     try:
@@ -77,4 +50,31 @@ def get_user_files(user_id: int):
             return {"success": False, "message": "No files found", "data": []}
     except Exception as e:
         return {"success": False, "error": str(e)}
+
+
+# def classify_file_with_colab(file_url):
+#     """
+#     Send the raw Supabase file URL to Colab.
+#     """
+#     colab_api_url = "https://kristeen-wholehearted-quotably.ngrok-free.dev/classify_url"
+
+#     # Remove trailing ? if exists
+#     if file_url.endswith('?'):
+#         file_url = file_url[:-1]
+
+#     print("DEBUG: Sending URL to Colab:", file_url)
+#     print("DEBUG: Type of file_url:", type(file_url))
+
+#     try:
+#         resp = requests.post(colab_api_url, json={"url": file_url}, timeout=30)
+#         if resp.ok:
+#             return resp.json().get("category")
+#         else:
+#             print("DEBUG: Colab response:", resp.status_code, resp.text)
+#             return "ERROR"
+#     except Exception as e:
+#         print("DEBUG: Colab request error:", str(e))
+#         return "ERROR"
+
+
 
