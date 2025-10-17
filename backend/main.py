@@ -32,9 +32,13 @@ def startup_event():
     supabase_service_users.test_connection_and_users()
 
 if __name__ == "__main__":
-    import os, uvicorn
-    port = int(os.environ.get("PORT", 8000))  # use Railway assigned port
+    import os
+    import uvicorn
+
+    # Railway automatically sets a dynamic PORT in the environment
+    port = int(os.environ.get("PORT", 8000))  # fallback to 8000 if not set
     uvicorn.run("main:app", host="0.0.0.0", port=port)
+
 
 
 
