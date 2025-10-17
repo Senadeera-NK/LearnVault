@@ -39,6 +39,9 @@ if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8000))  # fallback to 8000 if not set
     uvicorn.run("main:app", host="0.0.0.0", port=port)
 
+@app.get("/")
+def read_root():
+    return {"message": "LearnVault backend is running 🚀"}
 
 
 
