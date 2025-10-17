@@ -1,5 +1,7 @@
-SUPABASE_URL = "https://uomksagzyiittforjxsb.supabase.co"
-SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVvbWtzYWd6eWlpdHRmb3JqeHNiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1ODA4OTgyMiwiZXhwIjoyMDczNjY1ODIyfQ.xJqTnjtOBinSBMrRZbdKEvi_obGbPspx6hJmw33mrp4"  # better to load via .env
+import os
+
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 
 HEADERS = {
     "apikey":SUPABASE_KEY,

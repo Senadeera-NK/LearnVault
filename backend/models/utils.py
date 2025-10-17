@@ -12,7 +12,7 @@ def download_file_from_url(file_url, save_dir="/tmp"):
     file_url = urlsplit(file_url)._replace(query="").geturl()
     file_url_encoded = quote(file_url, safe=':/')
     ext = os.path.splitext(file_url_encoded)[1]
-    local_filename = os.path.join(save_dir, f"downloaded_file: {ext}")
+    local_filename = os.path.join(save_dir, f"downloaded_file_{ext}")
 
     print("DEBUG: Downloading file from URL:", file_url_encoded)
     print("DEBUG: Saving to local path:", local_filename)
