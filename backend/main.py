@@ -31,6 +31,10 @@ app.include_router(users_files_classification.router)
 def startup_event():
     supabase_service_users.test_connection_and_users()
 
+if __name__ == "__main__":
+    import os, uvicorn
+    uvicorn.run("main:app", host="0.0.0.0", port=int(os.environ.get("PORT", 8000)))
+
 
 # # in main.py or routes file
 # from services.supabase_service_classification import classify_file_with_colab
