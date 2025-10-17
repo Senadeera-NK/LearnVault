@@ -1,1 +1,0 @@
-from .file_classifier import classify_document

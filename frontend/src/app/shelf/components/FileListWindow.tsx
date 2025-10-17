@@ -12,8 +12,9 @@ import {
   VStack,
   HStack,
   Text,
+  Box,
 } from "@chakra-ui/react";
-
+import { IconButton } from "@chakra-ui/react";
 import { DownloadIcon } from "@chakra-ui/icons";
 interface FileListWindowProps {
   isOpen: boolean;
@@ -56,9 +57,13 @@ const downloadFile = async (url: string, filename: string) => {
   }
 };
 
+const downloadAll = () => {
+  files.forEach((file) => downloadFile(file.url, file.name));
+  console.log("Downloading all files in category:", category);
+}
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size="lg" scrollBehavior="inside">
+    <Modal isOpen={isOpen} onClose={onClose} size="xl" scrollBehavior="inside">
       <ModalOverlay />
       <ModalContent>
         <ModalHeader>{category || "Uncategorized"} Files</ModalHeader>
@@ -77,21 +82,26 @@ const downloadFile = async (url: string, filename: string) => {
                   p={2}
                 >
                   <Text>{file.name}</Text>
-                  <Box
-                    size="sm"
-                    colorScheme="teal"
-                    onClick={() => downloadFile(file.url, file.name)}
-                  >
-                    <DownloadIcon/>
-                  </Box>
+                    <IconButton
+                      aria-label={`Download ${file.name}`}
+                      icon={<DownloadIcon />}
+                      size="sm"
+                      colorScheme="teal"
+                      variant="ghost"
+                      onClick={() => downloadFile(file.url, file.name)}
+                    />
+
                 </HStack>
               ))
             )}
           </VStack>
         </ModalBody>
-        <ModalFooter>
+        <ModalFooter justifyContent="space-between">
           <Button onClick={onClose} colorScheme="gray">
             Close
+          </Button>
+          <Button onClick={downloadAll} colorScheme="gray">
+            Download All
           </Button>
         </ModalFooter>
       </ModalContent>
