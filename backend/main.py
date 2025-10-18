@@ -3,11 +3,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from services import supabase_service_users
 from services import supabase_service_users_usage
 from routers import users_files_classification, users_attachFiles, users, users_usage
-import os  # ✅ add this
+import os
+import uvicorn
 
 app = FastAPI()
 
-# ✅ Debug print to check which port Railway assigns
+# ✅ Debug print to confirm assigned port
 print("⚙️ Running on PORT:", os.getenv("PORT"))
 
 app.add_middleware(
@@ -18,18 +19,24 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Include routers
+# ✅ Include routers
 app.include_router(users.router)
 app.include_router(users_usage.router)
 app.include_router(users_attachFiles.router)
 app.include_router(users_files_classification.router)
 
-# Startup event
+# ✅ Startup event
 @app.on_event("startup")
 def startup_event():
     supabase_service_users.test_connection_and_users()
 
-# Root route
+# ✅ Root route
 @app.get("/")
 def read_root():
-    return {"message": "✅ LearnVault backend is running on Railway!"}
+    return {"message": "✅ LearnVault backend is running on Render!"}
+
+
+# ✅ Run the app (Render requires this)
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 10000))
+    uvicorn.run(app, host="0.0.0.0", port=port)
