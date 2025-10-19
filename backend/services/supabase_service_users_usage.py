@@ -3,7 +3,7 @@ import logging
 from datetime import date
 from supabase import create_client
 
-supabase = create_client(SUPABASE_URL, SUPABASE_KEY)    
+supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 def insert_user_usage(user_id: str, pageName: str, durationseconds: int):
     try:
