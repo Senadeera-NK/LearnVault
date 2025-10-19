@@ -1,7 +1,7 @@
 // services/api.ts
 
 // Use your Codespaces-provided forwarded URL here
-const API_URL = "https://nhkxvn9q-8000.asse.devtunnels.ms";
+const API_URL = "https://learnvault-jdbg.onrender.com";
 // "proxy": "http://localhost:8000"
 
 export async function signup(name: string, email: string, password: string) {
