@@ -1,4 +1,5 @@
 # routers/users_signed_upload.py
+import urllib
 from fastapi import APIRouter, UploadFile, Form, HTTPException
 from services.supabase_config import SUPABASE_URL, SUPABASE_KEY
 from supabase import create_client
@@ -32,6 +33,7 @@ async def upload_file(user_id: int = Form(...), file: UploadFile = Form(...)):
         if not signed_url:
             raise HTTPException(status_code=500, detail="Failed to generate signed URL")
 
+        signed_url = urllib.parse.quote(signed_url, safe=':/?&=%')
         # ✅ Upload file using signed URL
         with open(temp_file_path, "rb") as f:
             upload_resp = requests.put(signed_url, data=f)
