@@ -19,7 +19,7 @@ def generate_signed_url(user_id: int = Query(...), filename: str = Query(...)):
             raise HTTPException(status_code=500, detail="Failed to generate signed URL")
 
         return {
-            "upload_url": res["signedURL"],
+            "upload_url": res["file_url"],
             "file_path": file_path
         }
     except Exception as e:
