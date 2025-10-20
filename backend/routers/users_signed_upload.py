@@ -1,5 +1,3 @@
-# routers/users_signed_upload.py
-import urllib
 from fastapi import APIRouter, UploadFile, Form, HTTPException
 from services.supabase_config import SUPABASE_URL, SUPABASE_KEY
 from supabase import create_client
@@ -10,41 +8,37 @@ supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 @router.post("/upload_file")
 async def upload_file(user_id: int = Form(...), file: UploadFile = Form(...)):
-    """
-    Upload a file to Supabase Storage and insert a record in users_pdfs.
-    """
     try:
-        # ✅ Generate unique file path
-        file_path = f"user_{user_id}/{uuid.uuid4()}_{file.filename}"
+        # Generate unique file path
+        safe_filename = "".join(c if c.isalnum() or c in "-_." else "_" for c in file.filename)
+        file_path = f"user_{user_id}/{uuid.uuid4()}_{safe_filename}"
 
-        # ✅ Save file temporarily in chunks to avoid memory overload
-        temp_dir = tempfile.gettempdir()
-        temp_file_path = os.path.join(temp_dir, file.filename)
+        # Save file temporarily
+        temp_file_path = os.path.join(tempfile.gettempdir(), file.filename)
+        with open(temp_file_path, "wb") as f:
+            while chunk := await file.read(1024 * 1024):
+                f.write(chunk)
 
-        with open(temp_file_path, "wb") as buffer:
-            while chunk := await file.read(1024 * 1024):  # 1 MB chunks
-                buffer.write(chunk)
-
-        # ✅ Get signed upload URL (latest SDK returns 'signed_url')
+        # Get signed upload URL (path only)
         signed_url_res = supabase.storage.from_("user_pdfs").create_signed_upload_url(file_path)
-        print("DEBUG: signed_url_res =", signed_url_res)
-
-        signed_url = signed_url_res.get("signed_url")
-        if not signed_url:
+        signed_path = signed_url_res.get("signed_url")
+        if not signed_path:
             raise HTTPException(status_code=500, detail="Failed to generate signed URL")
 
-        signed_url = urllib.parse.quote(signed_url, safe=':/?&=%')
-        # ✅ Upload file using signed URL
+        # ✅ Prepend full storage URL
+        full_signed_url = f"{SUPABASE_URL}/storage/v1/{signed_path.lstrip('/')}"
+        
+        # Upload file
         with open(temp_file_path, "rb") as f:
-            upload_resp = requests.put(signed_url, data=f)
+            upload_resp = requests.put(full_signed_url, data=f)
         if upload_resp.status_code not in [200, 201, 204]:
             raise HTTPException(status_code=500, detail=f"Supabase upload failed: {upload_resp.text}")
 
-        # ✅ Insert record into Supabase table
+        # Insert record
         file_url = supabase.storage.from_("user_pdfs").get_public_url(file_path)
         supabase.table("users_pdfs").insert({"user_id": user_id, "file_url": file_url}).execute()
 
-        # ✅ Clean up temp file
+        # Clean up
         os.remove(temp_file_path)
 
         return {"success": True, "file_url": file_url, "file_path": file_path}
