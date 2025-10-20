@@ -10,10 +10,10 @@ supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 @router.post("/upload_file")
 async def upload_file(user_id: int = Form(...), file: UploadFile = Form(...)):
     """
-    Upload a file to Supabase Storage and insert record in users_pdfs.
+    Upload a file to Supabase Storage and insert a record in users_pdfs.
     """
     try:
-        # ✅ Generate a unique file path
+        # ✅ Generate unique file path
         file_path = f"user_{user_id}/{uuid.uuid4()}_{file.filename}"
 
         # ✅ Save file temporarily in chunks to avoid memory overload
@@ -24,11 +24,13 @@ async def upload_file(user_id: int = Form(...), file: UploadFile = Form(...)):
             while chunk := await file.read(1024 * 1024):  # 1 MB chunks
                 buffer.write(chunk)
 
-        # ✅ Get signed URL for upload
+        # ✅ Get signed upload URL (latest SDK returns 'signed_url')
         signed_url_res = supabase.storage.from_("user_pdfs").create_signed_upload_url(file_path)
-        if "signedURL" not in signed_url_res:
+        print("DEBUG: signed_url_res =", signed_url_res)
+
+        signed_url = signed_url_res.get("signed_url")
+        if not signed_url:
             raise HTTPException(status_code=500, detail="Failed to generate signed URL")
-        signed_url = signed_url_res["signedURL"]
 
         # ✅ Upload file using signed URL
         with open(temp_file_path, "rb") as f:
@@ -36,7 +38,7 @@ async def upload_file(user_id: int = Form(...), file: UploadFile = Form(...)):
         if upload_resp.status_code not in [200, 201, 204]:
             raise HTTPException(status_code=500, detail=f"Supabase upload failed: {upload_resp.text}")
 
-        # ✅ Insert record into database
+        # ✅ Insert record into Supabase table
         file_url = supabase.storage.from_("user_pdfs").get_public_url(file_path)
         supabase.table("users_pdfs").insert({"user_id": user_id, "file_url": file_url}).execute()
 
