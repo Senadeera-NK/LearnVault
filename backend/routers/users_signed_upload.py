@@ -13,7 +13,7 @@ def generate_signed_url(user_id: int = Query(...), filename: str = Query(...)):
     """
     try:
         file_path = f"user_{user_id}/{uuid.uuid4()}_{filename}"
-        res = supabase.storage.from_("user_pdfs").create_signed_upload_url(file_path, expires_in=600)
+        res = supabase.storage.from_("user_pdfs").create_signed_upload_url(file_path)
 
         if not res:
             raise HTTPException(status_code=500, detail="Failed to generate signed URL")
