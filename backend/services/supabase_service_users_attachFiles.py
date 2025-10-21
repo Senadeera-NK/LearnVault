@@ -11,7 +11,7 @@ def background_classification(file_path, pdf_id):
     try:
         category = classify_document(file_path)
         supabase.table("users_pdfs").update({
-            "predicted_category": category,
+            "category": category,
             "classification_status": "done"
         }).eq("id", pdf_id).execute()
     except Exception as e:
