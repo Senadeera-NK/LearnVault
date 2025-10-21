@@ -61,3 +61,16 @@ async def insert_user_files(user_id: str, files: list):
 
     except Exception as e:
         return {"success": False, "error": str(e)}
+
+def get_user_file_status(user_id: int):
+    """
+    Fetch all files for a user with their classification status and predicted category.
+    """
+    try:
+        res = supabase.table("users_pdfs").select("*").eq("user_id", user_id).execute()
+        if res.data:
+            return {"success": True, "files": res.data}
+        else:
+            return {"success": True, "files": []}  # no files yet
+    except Exception as e:
+        return {"success": False, "error": str(e)}
