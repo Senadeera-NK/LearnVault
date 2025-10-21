@@ -24,9 +24,9 @@ export default function AttachmentButton() {
     try {
       await insertPdfFiles(user.id, Array.from(files));
       console.log("✅ Files uploaded successfully");
-      const classificationResult = await classifyUserFiles(user.id);
+      //const classificationResult = await classifyUserFiles(user.id);
       console.log("Triggerig classification for user: ", user.id);
-      console.log("files classified successfully", classificationResult);
+     // console.log("files classified successfully", classificationResult);
     } catch (error) {
       console.error("❌ Error uploading files or classifying files", error);
     } finally {

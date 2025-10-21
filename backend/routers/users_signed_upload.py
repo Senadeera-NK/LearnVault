@@ -27,7 +27,7 @@ async def upload_file(user_id: int = Form(...), file: UploadFile = Form(...)):
 
         # ✅ Prepend full storage URL
         full_signed_url = f"{SUPABASE_URL}/storage/v1/{signed_path.lstrip('/')}"
-        
+
         # Upload file
         with open(temp_file_path, "rb") as f:
             upload_resp = requests.put(full_signed_url, data=f)
