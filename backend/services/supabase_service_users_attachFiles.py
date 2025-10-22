@@ -3,6 +3,8 @@ from services.supabase_config import SUPABASE_URL, SUPABASE_KEY
 from supabase import create_client
 import tempfile, os, threading
 from models.classifier import classify_document
+import logging
+logging.basicConfig(level=logging.INFO)
 
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
@@ -37,6 +39,7 @@ async def insert_user_files(user_id: str, files: list):
         for file in files:
             if(checking_duplicate_files(user_id, file.filename)):
                 print(f"Error:file already exists - {file.filename}")
+                logging.info(f"[Duplicate Skipped] File already exists for user {user_id}: {file.filename}")
                 continue
             temp_dir = tempfile.gettempdir()
             temp_path = os.path.join(temp_dir, file.filename)
