@@ -22,12 +22,22 @@ def background_classification(file_path, pdf_id):
         if os.path.exists(file_path):
             os.remove(file_path)
 
+def checking_duplicate_files(user_id:str, filename:str):
+    storage_path = f"user_{user_id}/{filename}"
+    file_url = supabase.storage.from_("users_pdfs").get_public_url(storage_path)
+    res = supabase.table("users_pdfs").select("*").eq("user_id", user_id).eq("file_url", file_url).execute()
+    return bool(res.data)
+
+
 async def insert_user_files(user_id: str, files: list):
     """Upload files to Supabase and start background classification"""
     try:
         file_urls = []
 
         for file in files:
+            if(checking_duplicate_files(user_id, file.filename)):
+                print(f"Error:file already exists - {file.filename}")
+                continue
             temp_dir = tempfile.gettempdir()
             temp_path = os.path.join(temp_dir, file.filename)
 

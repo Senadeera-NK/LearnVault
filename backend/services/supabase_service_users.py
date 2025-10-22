@@ -37,7 +37,7 @@ def signin_user(email: str, password: str):
 
     if user.data:
         return {"success": True, "user": user.data[0]}
-    else:   
+    else:
         return {"error": "Invalid email or password"}
 
 # ✅ Test and print users
