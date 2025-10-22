@@ -41,15 +41,19 @@ def checking_duplicate_files(user_id:str, filename:str)->bool:
 
 
 async def insert_user_files(user_id: str, files: list):
+    uploaded_urls = []
+    skipped_files = []
     """Upload files to Supabase and start background classification"""
     try:
         file_urls = []
 
         for file in files:
             if(checking_duplicate_files(user_id, file.filename)):
+                skipped_files.append(file.filename)
                 print(f"Error:file already exists - {file.filename}")
                 logging.info(f"[Duplicate Skipped] File already exists for user {user_id}: {file.filename}")
                 continue
+            uploaded_urls.append(file.filename)
             temp_dir = tempfile.gettempdir()
             temp_path = os.path.join(temp_dir, file.filename)
 
@@ -79,7 +83,7 @@ async def insert_user_files(user_id: str, files: list):
             # Start classification in background thread
             threading.Thread(target=background_classification, args=(temp_path, pdf_id)).start()
 
-        return {"success": True, "file_urls": file_urls}
+        return {"success": True, "file_urls": file_urls, "uploaded files":uploaded_urls, "skipped files":skipped_files}
 
     except Exception as e:
         return {"success": False, "error": str(e)}
