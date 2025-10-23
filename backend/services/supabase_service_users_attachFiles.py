@@ -83,7 +83,7 @@ async def insert_user_files(user_id: str, files: list):
             # Start classification in background thread
             threading.Thread(target=background_classification, args=(temp_path, pdf_id)).start()
 
-        return {"success": True, "file_urls": file_urls, "uploaded files":uploaded_urls, "skipped files":skipped_files}
+        return {"success": True, "file_urls": file_urls, "uploaded_files":uploaded_urls, "skipped_files":skipped_files}
 
     except Exception as e:
         return {"success": False, "error": str(e)}
