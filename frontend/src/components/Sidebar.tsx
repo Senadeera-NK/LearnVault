@@ -20,9 +20,13 @@ export default function Sidebar() {
 
     useEffect(() => {
       function handleOutside(event: MouseEvent) {
+        const target = event.target as HTMLElement
+        if(target.closest('[role="dialog"]')){
+          return
+        }
         if (
           actionsRef.current &&
-          !actionsRef.current.contains(event.target as Node)
+          !actionsRef.current.contains(target)
         ) {
           setShowActions(false);
         }

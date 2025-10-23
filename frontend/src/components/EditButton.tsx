@@ -28,12 +28,13 @@ export default function EditNotepad() {
         right="1.5rem"
         borderRadius="full"
         size="md"
+        zIndex={1}
         onClick={openModal}
       />
 
       <Modal isOpen={isOpen} onClose={closeModal} size="xl">
-        <ModalOverlay />
-        <ModalContent>
+        <ModalOverlay zIndex={1400}/>
+        <ModalContent zIndex={1500}>
           <ModalHeader>Edit Note</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
