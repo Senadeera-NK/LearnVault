@@ -26,3 +26,13 @@ async def user_attach_files(user_id: int = Form(...), files: List[UploadFile] = 
         }
     else:
         raise HTTPException(status_code=400, detail=result.get("error", "Failed to upload files"))
+
+@router.post("/txt_file_convert/{user_id}")
+async def txt_file_convert(user_id:int, title:str, text:str):
+    result = await txt_file_convert(user_id, title, text)
+    if result.get("success"):
+        return{
+            "message":"Files converted to PDF successfully"
+        }
+    else:
+        raise HTTPException(status_code=400, detail=result.get("error", "Failed to convert text to PDF"))

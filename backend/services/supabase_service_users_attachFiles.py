@@ -100,3 +100,11 @@ def get_user_file_status(user_id: int):
             return {"success": True, "files": []}  # no files yet
     except Exception as e:
         return {"success": False, "error": str(e)}
+
+
+# function to convert the added text to a PDF, with the title, and classify it as a usual, with a classification
+def txt_file_convert(text:str, title:str):
+    try:
+        return
+    except Exception as e:
+        return {"success":False, "error":str(e)}

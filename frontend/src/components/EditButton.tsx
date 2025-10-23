@@ -3,17 +3,32 @@
 import { useState } from "react"
 import {IconButton,Modal,ModalOverlay,ModalContent,ModalHeader,ModalFooter,ModalBody,ModalCloseButton,Button,Textarea,} from "@chakra-ui/react"
 import { EditIcon } from "@chakra-ui/icons"
+import {txt_file_convert} from "../../api/api"
+import { useAuth } from "./AuthContext";
 
 export default function EditNotepad() {
   const [isOpen, setIsOpen] = useState(false)
   const [text, setText] = useState("")
+  const [title, setTitle] = useState("")
 
   const openModal = () => setIsOpen(true)
   const closeModal = () => setIsOpen(false)
 
-  const handleSave = () => {
+  const { user } = useAuth();
+
+  const handleSave = async () => {
+    console.log("Title: ", title)
     console.log("Saved text:", text)
-    // You can save to localStorage, backend, or state here
+
+    //calling the API, for txt to pdf conversion
+    if (!user) return;
+    try{
+      await txt_file_convert(user.id,title, text);
+      console.log("successfully passed the text, and title");
+    }
+    catch(error){
+      console.log("Error occured:",error);
+    }
     closeModal()
   }
 
@@ -37,6 +52,16 @@ export default function EditNotepad() {
         <ModalContent zIndex={1500}>
           <ModalHeader>Edit Note</ModalHeader>
           <ModalCloseButton />
+           <ModalBody>
+            <Textarea
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Write the document title..."
+              size="md"
+              minH="50px"
+            />
+          </ModalBody>
+
           <ModalBody>
             <Textarea
               value={text}

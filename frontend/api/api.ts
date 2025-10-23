@@ -134,6 +134,23 @@ export async function classifyUserFiles(userId: number) {
   return res.json();
 }
 
+// creating a function for text to pdf, classification, upload
+export async function txt_file_convert(userId:number, text:string, title:string){
+  const res = await fetch(`${API_URL}/txt_file_convert/${userId}`,{
+    method:'POST',
+    headers:{
+      'Content-type':'application/json',
+    },
+    body:JSON.stringify({text, title}),
+  });
+
+  if(!res.ok){
+    const errData = await res.json().catch(()=>({}));
+    throw new Error(errData?.error || "Failed to convert and add the file to DB");
+  }
+  return res.json();
+}
+
 // Example usage:
 // (async () => {
 //   try {
