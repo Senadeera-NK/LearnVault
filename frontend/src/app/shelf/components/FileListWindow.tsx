@@ -58,7 +58,7 @@ const downloadFile = async (url: string, filename: string) => {
 };
 
 const downloadAll = () => {
-  files.forEach((file) => downloadFile(file.url, file.name));
+  files.forEach((file) => downloadFile(file.url, decodeURIComponent(file.name)));
   console.log("Downloading all files in category:", category);
 }
 
@@ -81,7 +81,7 @@ const downloadAll = () => {
                   borderRadius="md"
                   p={2}
                 >
-                  <Text>{file.name}</Text>
+                  <Text>{decodeURIComponent(file.name)}</Text>
                     <IconButton
                       aria-label={`Download ${file.name}`}
                       icon={<DownloadIcon />}
