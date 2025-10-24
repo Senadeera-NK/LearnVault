@@ -50,7 +50,7 @@ export default function QA() {
           <Button colorScheme="gray" w="100%">Add from shelf</Button>
           <Button colorScheme="gray" w="100%">Upload from the device</Button>
           </VStack>
-  
+
         </Box>
         <Box
         w="60%"
