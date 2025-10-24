@@ -12,3 +12,4 @@ pytesseract
 docx2txt
 PyMuPDF
 huggingface-hub
+fpdf
