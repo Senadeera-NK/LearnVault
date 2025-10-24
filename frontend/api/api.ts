@@ -135,13 +135,13 @@ export async function classifyUserFiles(userId: number) {
 }
 
 // creating a function for text to pdf, classification, upload
-export async function txt_file_convert(userId:number, text:string, title:string){
+export async function txt_file_convert(userId:number, title:string, text:string){
   const res = await fetch(`${API_URL}/txt_file_convert/${userId}`,{
     method:'POST',
     headers:{
       'Content-type':'application/json',
     },
-    body:JSON.stringify({text, title}),
+    body:JSON.stringify({title,text }),
   });
 
   if(!res.ok){

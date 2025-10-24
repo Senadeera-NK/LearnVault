@@ -1,6 +1,6 @@
 # routers/users_attachFiles.py
 from fastapi import APIRouter, HTTPException, File, Form, UploadFile
-from services.supabase_service_users_attachFiles import insert_user_files
+from services.supabase_service_users_attachFiles import insert_user_files, txt_file_convert_service
 from typing import List
 
 router = APIRouter()
@@ -28,11 +28,15 @@ async def user_attach_files(user_id: int = Form(...), files: List[UploadFile] = 
         raise HTTPException(status_code=400, detail=result.get("error", "Failed to upload files"))
 
 @router.post("/txt_file_convert/{user_id}")
-async def txt_file_convert(user_id:int, title:str, text:str):
-    result = await txt_file_convert(user_id, title, text)
+async def txt_file_convert(user_id:int, payload:dict):
+    title = payload.get("title")
+    text = payload.get("text")
+    if not title or not text:
+        raise HTTPException(status_code=400, detail="Title or text missing")
+    result = await txt_file_convert_service(user_id, title, text)
     if result.get("success"):
         return{
-            "message":"Files converted to PDF successfully"
+            "message":"Files converted to PDF successfully", "detail":result.get("result")
         }
     else:
         raise HTTPException(status_code=400, detail=result.get("error", "Failed to convert text to PDF"))

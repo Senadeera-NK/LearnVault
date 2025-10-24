@@ -4,6 +4,10 @@ from supabase import create_client
 import tempfile, os, threading
 from models.classifier import classify_document
 import logging
+from fpdf import FPDF
+from fastapi import UploadFile
+from io import BytesIO
+import asyncio
 logging.basicConfig(level=logging.INFO)
 
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
@@ -103,8 +107,18 @@ def get_user_file_status(user_id: int):
 
 
 # function to convert the added text to a PDF, with the title, and classify it as a usual, with a classification
-def txt_file_convert(text:str, title:str):
+async def txt_file_convert_service(user_id:int, title:str, text:str):
     try:
-        return
+        pdf = FPDF()
+        pdf.add_page()
+        pdf.set_font("Arial", size=12)
+        for line in text.split("\n"):
+            pdf.cell(200,10,txt=line, ln=True)
+        pdf_bytes = BytesIO()
+        pdf.output(pdf_bytes)
+        pdf_bytes.seek(0)
+        converted_pdf = UploadFile(filename=f"{title}.pdf", file=pdf_bytes)
+        res = await insert_user_files(user_id, converted_pdf)
+        return {'success':True, "message":"file added successfully", "result":res}
     except Exception as e:
         return {"success":False, "error":str(e)}
