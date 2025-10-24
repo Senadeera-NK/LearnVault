@@ -113,12 +113,14 @@ async def txt_file_convert_service(user_id:int, title:str, text:str):
         pdf.add_page()
         pdf.set_font("Arial", size=12)
         for line in text.split("\n"):
-            pdf.cell(200,10,txt=line, ln=True)
-        pdf_bytes = BytesIO()
-        pdf.output(pdf_bytes)
+            pdf.cell(0,10, txt=line, ln=True)
+
+        pdf_data = pdf.output(dest='S').encode('latin1')
+        pdf_bytes = BytesIO(pdf_data)
         pdf_bytes.seek(0)
+
         converted_pdf = UploadFile(filename=f"{title}.pdf", file=pdf_bytes)
-        res = await insert_user_files(user_id, converted_pdf)
+        res = await insert_user_files(user_id, [converted_pdf])
         return {'success':True, "message":"file added successfully", "result":res}
     except Exception as e:
         return {"success":False, "error":str(e)}
