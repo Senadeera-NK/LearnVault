@@ -61,7 +61,6 @@ export default function QA() {
         p={3}
         >
 
-          
         </Box>
         </Box>
       </>
