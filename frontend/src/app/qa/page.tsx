@@ -59,7 +59,10 @@ export default function QA() {
         borderColor="gray.300"
         borderRadius="lg"
         p={3}
-        ></Box>
+        >
+
+          
+        </Box>
         </Box>
       </>
   );}
