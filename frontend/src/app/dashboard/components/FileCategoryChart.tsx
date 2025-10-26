@@ -1,6 +1,5 @@
 "use client";
 
-import * as React from "react";
 import { Box, Card, Text } from "@chakra-ui/react";
 import { PieChart } from "@mui/x-charts";
 
@@ -12,8 +11,6 @@ export default function FileCategoryChart() {
     { label: "Chrome OS", value: 2.42 },
     { label: "Other", value: 4.65 },
   ];
-
-  const valueFormatter = (item: { value: number }) => `${item.value}%`;
 
   return (
     <Card p={4} height="250px" width="250px" position="relative">
@@ -32,7 +29,7 @@ export default function FileCategoryChart() {
               data: desktopOS,
               highlightScope: { fade: "global", highlight: "item" },
               faded: { innerRadius: 40, additionalRadius: -40, color: "gray" },
-              valueFormatter,
+              valueFormatter: (item: any) => `${item.value}%`,
             },
           ]}
           height={250}
