@@ -16,12 +16,14 @@ export default function UserAvatar() {
         top="1.5rem"
         right="1.5rem"
         borderRadius="full"
+        zIndex={1000}
       >
             <Avatar
              name={userName}
              src="" // no image? will fallback to intials
              size="sm"
              cursor="pointer"
+             zIndex={1000}
              >
               {userInitials}
               </Avatar>

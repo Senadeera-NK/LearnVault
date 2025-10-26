@@ -1,6 +1,6 @@
 "use client";
 
-import { Box, Card, Text } from "@chakra-ui/react";
+import { Box, Text, HStack, VStack } from "@chakra-ui/react";
 import { PieChart } from "@mui/x-charts";
 
 export default function FileCategoryChart() {
@@ -12,14 +12,20 @@ export default function FileCategoryChart() {
     { label: "Other", value: 4.65 },
   ];
 
+  const colors = ["#1976d2", "#9c27b0", "#43a047", "#ff9800", "#9e9e9e"];
+
   return (
-    <Card p={4} height="250px" width="250px" position="relative">
+    <Box p={4} display="flex" flexDirection="column" alignItems="center">
       <Box
         sx={{
-          transform: "rotate(-90deg)",
-          overflow: "hidden",
-          height: "125px",
+          overflow: "visible",
           width: "100%",
+          display: "flex",
+          justifyContent: "center",
+          // hide built-in legend
+          "& .MuiChartsLegend-root": {
+            display: "none",
+          },
         }}
       >
         <PieChart
@@ -27,24 +33,42 @@ export default function FileCategoryChart() {
             {
               type: "pie" as const,
               data: desktopOS,
+              startAngle: -90,
+              endAngle: 90,
+              innerRadius: 100,
+              outerRadius: 220,
+              cx: 400,
+              cy: 220,
               highlightScope: { fade: "global", highlight: "item" },
-              faded: { innerRadius: 40, additionalRadius: -40, color: "gray" },
               valueFormatter: (item: any) => `${item.value}%`,
             },
           ]}
-          height={250}
-          width={250}
+          height={240}
+          width={800}
         />
       </Box>
-      <Text
-        fontWeight="bold"
-        position="absolute"
-        top="75%"
-        left="50%"
-        transform="translate(-50%, -50%)"
-      >
+
+      {/* Chart title */}
+      <Text fontWeight="bold" mt={1}>
         OS Share
       </Text>
-    </Card>
+
+      {/* Bottom custom legend — only labels */}
+      <VStack spacing={1} mt={1} width="100%">
+        <HStack wrap="wrap" spacing={3} justify="center">
+          {desktopOS.map((d, i) => (
+            <HStack key={d.label} spacing={1}>
+              <Box
+                w="12px"
+                h="12px"
+                borderRadius="2px"
+                bg={colors[i % colors.length]}
+              />
+              <Text fontSize="sm">{d.label}</Text>
+            </HStack>
+          ))}
+        </HStack>
+      </VStack>
+    </Box>
   );
 }

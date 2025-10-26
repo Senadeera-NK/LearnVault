@@ -62,7 +62,9 @@ export default function Dashboard() {
   return (
     <Box p={6} bg="gray.50" minH="100vh">
       {/* Welcome */}
-      <Heading ml={20} mb={6}>Welcome back, {userName}!</Heading>
+      <Box position="sticky" top="0" zIndex="999" px={8} py={4} mb={6} borderBottom="1px solid" borderColor="gray.200"  bg="gray.50">
+        <Heading fontSize="2xl" fontWeight="bold">Welcome back, {userName}!</Heading>
+      </Box>
 
       {/* Top Stats */}
       <Grid templateColumns={{ base: "1fr", md: "repeat(3, 1fr)" }} gap={4} mb={6}>
