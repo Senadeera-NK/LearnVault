@@ -1,62 +1,58 @@
 "use client";
-import { ResponsiveContainer, BarChart, CartesianGrid, XAxis, YAxis, Tooltip, Bar, Cell } from 'recharts';
+
+import { Box, Spinner } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
-import { fetchUserUsage } from "../../../../api/api";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  CartesianGrid,
+} from "recharts";
 
-const barCOLORS = ['#8884d8', '#82ca9d', '#ffc658', '#ff8042', '#8dd1e1'];
+interface PageUsageChartProps {
+  userId: string;
+}
 
-interface Usage {
+interface PageUsageData {
   page: string;
-  value: number;
+  views: number;
 }
 
-interface Props {
-  userId: number;
-}
-
-export default function PageUsageChart({ userId }: Props) {
-  const [barData, setBarData] = useState<Usage[]>([]);
+export default function PageUsageChart({ userId }: PageUsageChartProps) {
+  const [data, setData] = useState<PageUsageData[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function loadUsage() {
-      try {
-        const data = await fetchUserUsage(userId);
-        
-        // Aggregate total hours by page
-        const usageByPage: { [key: string]: number } = {};
-        data.usage.forEach((u: any) => {
-          if (!usageByPage[u.page_name]) usageByPage[u.page_name] = 0;
-          usageByPage[u.page_name] += u.hours;
-        });
-
-        // Transform to array for Recharts
-        const chartData: Usage[] = Object.entries(usageByPage).map(([page, value]) => ({ page, value }));
-        setBarData(chartData);
-      } catch (err) {
-        console.error("Failed to load user usage:", err);
-      }
-    }
-
-    loadUsage();
+    // Simulate fetching data
+    const fetchData = async () => {
+      setLoading(true);
+      // Replace this with your real API call
+      const dummyData = Array.from({ length: 10 }, (_, i) => ({
+        page: `Page ${i + 1}`,
+        views: Math.floor(Math.random() * 50),
+      }));
+      setData(dummyData);
+      setLoading(false);
+    };
+    fetchData();
   }, [userId]);
 
+  if (loading) return <Spinner />;
+
   return (
-    <ResponsiveContainer width="100%" height="100%">
-      <BarChart
-        data={barData}
-        layout="vertical"
-        margin={{ top: 20, right: 30, left: 30, bottom: 20 }}
-      >
-        <CartesianGrid strokeDasharray="3 3" />
-        <XAxis type="number" />
-        <YAxis type="category" dataKey="page" /> {/* <-- Correct key */}
-        <Tooltip formatter={(value: number) => value.toFixed(2) + " hrs"} />
-        <Bar dataKey="value">
-          {barData.map((entry, index) => (
-            <Cell key={`cell-${index}`} fill={barCOLORS[index % barCOLORS.length]} />
-          ))}
-        </Bar>
-      </BarChart>
-    </ResponsiveContainer>
+    <Box width="100%" height="100%">
+      <ResponsiveContainer width="100%" height="100%">
+        <BarChart data={data} margin={{ top: 20, right: 20, left: 0, bottom: 5 }}>
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis dataKey="page" />
+          <YAxis />
+          <Tooltip />
+          <Bar dataKey="views" fill="#3182CE" />
+        </BarChart>
+      </ResponsiveContainer>
+    </Box>
   );
 }

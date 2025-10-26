@@ -1,40 +1,42 @@
 "use client";
 
-import { useEffect, useState, Suspense, lazy } from "react";
+import React, { useEffect, useState, Suspense, lazy } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../../components/AuthContext";
-import { Heading, Box } from "@chakra-ui/react";
-import { usePageTimer } from "../../components/UsePageTimer";
-import { recordUsage, fetchUserUsage } from "../../../api/api";
-import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from "recharts";
-import styles from "../page.module.css";
+import { recordUsage } from "../../../api/api";
 
-// Lazy loaded charts (must be client components themselves)
-const DailyUsageChart = lazy(() => import("./components/DailyUsageChart"));
+// Chakra UI imports
+import {
+  Box,
+  Grid,
+  Card,
+  Text,
+  Spinner,
+  Heading,
+} from "@chakra-ui/react";
+
+// Lazy load charts
 const PageUsageChart = lazy(() => import("./components/PageUsageChart"));
+const DailyUsageChart = lazy(() => import("./components/DailyUsageChart"));
+const FileCategoryChart = lazy(()=> import("./components/FileCategoryChart"));
+
+// Sample Pie Chart Data (Chakra + Recharts Pie)
+import {
+  PieChart as RePieChart,
+  Pie,
+  Cell,
+  ResponsiveContainer,
+  Tooltip,
+} from "recharts";
 
 const pieData = [
-  { name: "Group A", value: 400 },
-  { name: "Group B", value: 300 },
-  { name: "Group C", value: 300 },
-  { name: "Group D", value: 200 },
+  { name: "Reports", value: 40 },
+  { name: "Invoices", value: 30 },
+  { name: "Letters", value: 20 },
+  { name: "Other", value: 10 },
 ];
 
-const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"];
-const RADIAN = Math.PI / 180;
-
-// Pie chart labels
-const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent }: any) => {
-  const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
-  const x = cx + radius * Math.cos(-(midAngle ?? 0) * RADIAN);
-  const y = cy + radius * Math.sin(-(midAngle ?? 0) * RADIAN);
-
-  return (
-    <text x={x} y={y} fill="white" textAnchor={x > cx ? "start" : "end"} dominantBaseline="central">
-      {`${((percent ?? 1) * 100).toFixed(0)}%`}
-    </text>
-  );
-};
+const COLORS = ["#3182CE", "#38A169", "#E53E3E", "#D69E2E"];
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -42,96 +44,106 @@ export default function Dashboard() {
   const [dailyUsageData, setDailyUsageData] = useState<{ day: string; hours: number }[]>([]);
 
   const userName = user?.name || "Guest";
+  const totalFiles = pieData.reduce((sum, item) => sum + item.value, 0);
 
   // Redirect if not logged in
   useEffect(() => {
-    if (!user) {
-      router.push("/");
-    }
+    if (!user) router.push("/");
   }, [user, router]);
 
-  // Generate dummy 30-day usage data client-side
+  // Generate dummy daily usage
   useEffect(() => {
     const today = new Date();
-    const day = today.getDate();
     const generated = Array.from({ length: 30 }, (_, i) => ({
-      day: `Day ${day - i}`,
+      day: `Day ${today.getDate() - i}`,
       hours: Math.floor(Math.random() * 5),
-    }));
+    })).reverse();
     setDailyUsageData(generated);
   }, []);
 
-  // Fetch user usage data client-side
+  // Track page usage
   useEffect(() => {
     if (!user) return;
-    const fetchData = async () => {
-      try {
-        const data = await fetchUserUsage(user.id);
-        console.log("Fetched user usage data:", data);
-      } catch (err) {
-        console.error(err);
-      }
+    const trackUsage = async () => {
+      await recordUsage(user.id, "Dashboard", Math.floor(Math.random() * 5));
     };
-    fetchData();
+    trackUsage();
   }, [user]);
 
-  // Track page usage
-  usePageTimer("Dashboard", async (duration) => {
-    if (!user) return;
-    try {
-      await recordUsage(user.id, "Dashboard", duration);
-    } catch (err) {
-      console.error(err);
-    }
-  });
-
-  if (!user) return null; // hide content while redirecting
+  if (!user) return null;
 
   return (
-    <div className={styles.page}>
-      <Heading position="absolute" top={5}>
-        Welcome, Back! {userName}
-      </Heading>
+    <Box p={6} bg="gray.50" minH="100vh">
+      {/* Welcome */}
+      <Heading mb={6}>Welcome back, {userName}!</Heading>
 
-      <Box width="100%" display="flex" justifyContent="center" alignItems="flex-start" gap="60px" flexWrap="wrap" marginTop="400px">
-        {/* PIE CHART */}
-        <Box flex="1 1 400px" height="400px">
+      {/* Top Stats */}
+      <Grid templateColumns={{ base: "1fr", md: "repeat(3, 1fr)" }} gap={4} mb={6}>
+        <Card p={4}>
+          <Text fontSize="sm" color="gray.500">Total Files</Text>
+          <Text fontSize="2xl" fontWeight="bold">{totalFiles}</Text>
+        </Card>
+        <Card p={4}>
+          <Text fontSize="sm" color="gray.500">Total QA Generated</Text>
+          <Text fontSize="2xl" fontWeight="bold">75</Text>
+        </Card>
+        <Card p={4}>
+          <Text fontSize="sm" color="gray.500">Active Days</Text>
+          <Text fontSize="2xl" fontWeight="bold">
+            {dailyUsageData.filter(d => d.hours > 0).length}
+          </Text>
+        </Card>
+      </Grid>
+
+      {/* Charts */}
+      <Grid templateColumns={{ base: "1fr", md: "repeat(2, 1fr)" }} gap={4}>
+        {/* Pie Chart */}
+        <Card p={4} height="350px" position="relative">
           <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
+            <RePieChart>
               <Pie
                 data={pieData}
-                cx="50%"
-                cy="45%"
-                outerRadius={150}
-                fill="#8884d8"
                 dataKey="value"
-                label={renderCustomizedLabel}
-                labelLine={false}
+                nameKey="name"
+                innerRadius={70}
+                outerRadius={120}
+                startAngle={180}
+                endAngle={0}
+                paddingAngle={2}
               >
                 {pieData.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                 ))}
               </Pie>
               <Tooltip />
-              <Legend layout="horizontal" verticalAlign="bottom" align="center" iconSize={14} wrapperStyle={{ marginTop: -20 }} />
-            </PieChart>
+            </RePieChart>
           </ResponsiveContainer>
-        </Box>
+          <Text
+            position="absolute"
+            top="50%"
+            left="50%"
+            transform="translate(-50%, -50%)"
+            fontSize="lg"
+            fontWeight="bold"
+          >
+            {totalFiles} Files
+          </Text>
+        </Card>
 
-        {/* BAR CHART */}
-        <Suspense fallback={<p>Loading...</p>}>
-          <Box flex="1 1 400px" height="400px">
-            {user && <PageUsageChart userId={user.id} />}
-          </Box>
+        {/* Page Usage Bar Chart */}
+        <Card p={4} height="350px">
+          <Suspense fallback={<Spinner />}>
+            <PageUsageChart userId={user.id.toString()} />
+          </Suspense>
+        </Card>
+      </Grid>
+
+      {/* Daily Usage Line Chart */}
+      <Card mt={4} p={4} height="300px">
+        <Suspense fallback={<Spinner />}>
+          <DailyUsageChart userId={user.id.toString()} />
         </Suspense>
-      </Box>
-
-      {/* Daily usage chart */}
-      <Suspense fallback={<p>Loading...</p>}>
-        <Box width="100%" height="250px" marginTop="480px" padding="0 10px" zIndex={0}>
-          {user && dailyUsageData.length > 0 && <DailyUsageChart userId={user.id} />}
-        </Box>
-      </Suspense>
-    </div>
+      </Card>
+    </Box>
   );
 }
