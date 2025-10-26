@@ -3,8 +3,8 @@
 import { Box, Spinner } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import {
-  LineChart,
-  Line,
+  AreaChart,
+  Area,
   XAxis,
   YAxis,
   Tooltip,
@@ -32,7 +32,7 @@ export default function DailyUsageChart({ userId }: DailyUsageChartProps) {
       const dummyData = Array.from({ length: 30 }, (_, i) => ({
         day: `Day ${today.getDate() - i}`,
         hours: Math.floor(Math.random() * 5),
-      })).reverse(); // Optional: oldest to newest
+      })).reverse();
       setData(dummyData);
       setLoading(false);
     };
@@ -44,13 +44,33 @@ export default function DailyUsageChart({ userId }: DailyUsageChartProps) {
   return (
     <Box width="100%" height="100%">
       <ResponsiveContainer width="100%" height="100%">
-        <LineChart data={data} margin={{ top: 20, right: 20, left: 0, bottom: 5 }}>
-          <CartesianGrid strokeDasharray="3 3" />
+        <AreaChart
+          data={data}
+          margin={{ top: 20, right: 20, left: 0, bottom: 5 }}
+        >
+          <defs>
+            <linearGradient id="gradientHours" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#38A169" stopOpacity={0.6} />
+              <stop offset="100%" stopColor="#38A169" stopOpacity={0} />
+            </linearGradient>
+          </defs>
+
+          {/* Only horizontal line */}
+          <CartesianGrid horizontal={false} vertical={false} strokeDasharray="3 3" />
+
           <XAxis dataKey="day" />
           <YAxis />
           <Tooltip />
-          <Line type="monotone" dataKey="hours" stroke="#38A169" />
-        </LineChart>
+
+          <Area
+            type="linear"          // straight lines instead of monotone curve
+            dataKey="hours"
+            stroke="#38A169"
+            fill="url(#gradientHours)"
+            strokeWidth={2}
+            dot={{ r: 4, stroke: '#38A169', fill: '#38A169' }} // pointy dots
+          />
+        </AreaChart>
       </ResponsiveContainer>
     </Box>
   );

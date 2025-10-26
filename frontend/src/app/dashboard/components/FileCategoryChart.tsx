@@ -2,6 +2,7 @@
 
 import { Box, Text, HStack, VStack } from "@chakra-ui/react";
 import { PieChart } from "@mui/x-charts";
+import { useState, useEffect, useRef } from "react";
 
 export default function FileCategoryChart() {
   const desktopOS = [
@@ -13,19 +14,47 @@ export default function FileCategoryChart() {
   ];
 
   const colors = ["#1976d2", "#9c27b0", "#43a047", "#ff9800", "#9e9e9e"];
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [chartWidth, setChartWidth] = useState(400);
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (containerRef.current) {
+        // Container width minus some padding
+        let width = containerRef.current.offsetWidth - 32;
+        // Cap max width
+        width = Math.min(width, 500);
+        setChartWidth(width);
+      }
+    };
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  // Donut sizing
+  const outerRadius = chartWidth / 2.5; // smaller proportion so it doesn't get huge
+  const innerRadius = outerRadius / 2;
+  const cx = chartWidth / 2;
+  const cy = outerRadius + 20; // enough space for half-donut
+  const chartHeight = cy + 60; // leave extra room for bottom legend
 
   return (
-    <Box p={4} display="flex" flexDirection="column" alignItems="center">
+    <Box
+      p={4}
+      display="flex"
+      flexDirection="column"
+      alignItems="center"
+      ref={containerRef}
+      width="100%"
+    >
       <Box
         sx={{
           overflow: "visible",
           width: "100%",
           display: "flex",
           justifyContent: "center",
-          // hide built-in legend
-          "& .MuiChartsLegend-root": {
-            display: "none",
-          },
+          "& .MuiChartsLegend-root": { display: "none" }, // hide built-in legend
         }}
       >
         <PieChart
@@ -35,26 +64,25 @@ export default function FileCategoryChart() {
               data: desktopOS,
               startAngle: -90,
               endAngle: 90,
-              innerRadius: 100,
-              outerRadius: 220,
-              cx: 400,
-              cy: 220,
+              innerRadius,
+              outerRadius,
+              cx,
+              cy,
               highlightScope: { fade: "global", highlight: "item" },
               valueFormatter: (item: any) => `${item.value}%`,
             },
           ]}
-          height={240}
-          width={800}
+          width={chartWidth}
+          height={chartHeight}
         />
       </Box>
 
-      {/* Chart title */}
-      <Text fontWeight="bold" mt={1}>
+      {/* <Text fontWeight="bold" mt={1}>
         OS Share
-      </Text>
+      </Text> */}
 
-      {/* Bottom custom legend — only labels */}
-      <VStack spacing={1} mt={1} width="100%">
+      {/* Bottom legend */}
+      <VStack spacing={1} mt={-2} width="100%">
         <HStack wrap="wrap" spacing={3} justify="center">
           {desktopOS.map((d, i) => (
             <HStack key={d.label} spacing={1}>

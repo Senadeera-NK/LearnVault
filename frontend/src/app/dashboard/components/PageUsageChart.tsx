@@ -1,58 +1,99 @@
 "use client";
 
-import { Box, Spinner } from "@chakra-ui/react";
+import { Box, VStack, Text } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-  CartesianGrid,
-} from "recharts";
-
-interface PageUsageChartProps {
-  userId: string;
-}
 
 interface PageUsageData {
   page: string;
   views: number;
 }
 
+interface PageUsageChartProps {
+  userId: string;
+}
+
 export default function PageUsageChart({ userId }: PageUsageChartProps) {
   const [data, setData] = useState<PageUsageData[]>([]);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     // Simulate fetching data
     const fetchData = async () => {
-      setLoading(true);
-      // Replace this with your real API call
-      const dummyData = Array.from({ length: 10 }, (_, i) => ({
-        page: `Page ${i + 1}`,
-        views: Math.floor(Math.random() * 50),
-      }));
-      setData(dummyData);
-      setLoading(false);
+      const dummyData: PageUsageData[] = [
+        { page: "Dashboard", views: 120 },
+        { page: "Shelf", views: 75 },
+        { page: "Q & A", views: 45 },
+        { page: "Settings", views: 30 },
+      ];
+
+      // Sort descending by views
+      setData(dummyData.sort((a, b) => b.views - a.views));
     };
+
     fetchData();
   }, [userId]);
 
-  if (loading) return <Spinner />;
+  const maxViews = Math.max(...data.map((d) => d.views), 1);
 
   return (
-    <Box width="100%" height="100%">
-      <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={data} margin={{ top: 20, right: 20, left: 0, bottom: 5 }}>
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="page" />
-          <YAxis />
-          <Tooltip />
-          <Bar dataKey="views" fill="#3182CE" />
-        </BarChart>
-      </ResponsiveContainer>
-    </Box>
+    <VStack spacing={4} align="stretch" p={4} width="100%" mt={6}>
+      {data.map((d) => {
+        const barWidthPercent = (d.views / maxViews) * 100;
+
+        return (
+          <Box
+            key={d.page}
+            position="relative"
+            height="48px"
+            borderRadius="md"
+            overflow="hidden"
+            role="group" // allows hover styles inside
+          >
+            {/* Background bar only visible on hover */}
+            <Box
+              position="absolute"
+              top={0}
+              left={0}
+              width="100%"
+              height="100%"
+              bg="gray.200"
+              borderRadius="md"
+              opacity={0} // hidden by default
+              _groupHover={{ opacity: 1 }} // show on hover
+              transition="opacity 0.3s"
+            />
+
+            {/* Filled Bar */}
+            <Box
+              bg="teal.400"
+              width={`${barWidthPercent}%`}
+              height="100%"
+              borderRadius="md"
+              transition="width 0.3s"
+              display="flex"
+              alignItems="center"
+              px={2}
+              position="relative" // keep above background
+            >
+              <Text fontSize="sm" color="white" fontWeight="bold" noOfLines={1}>
+                {d.page}
+              </Text>
+            </Box>
+
+            {/* Value at end */}
+            <Text
+              position="absolute"
+              right="8px"
+              top="50%"
+              transform="translateY(-50%)"
+              fontSize="sm"
+              fontWeight="bold"
+              color="blackAlpha.800"
+            >
+              {d.views}
+            </Text>
+          </Box>
+        );
+      })}
+    </VStack>
   );
 }
