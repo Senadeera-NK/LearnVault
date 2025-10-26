@@ -19,9 +19,10 @@ export default function FileCategoryChart() {
     <Card p={4} height="250px" width="250px" position="relative">
       <Box
         sx={{
-          transform: "rotate(-90deg)", // Rotate to make it appear as half donut
+          transform: "rotate(-90deg)",
           overflow: "hidden",
-          height: "125px", // half height
+          height: "125px",
+          width: "100%",
         }}
       >
         <PieChart
