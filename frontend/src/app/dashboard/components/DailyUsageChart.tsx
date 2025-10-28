@@ -11,6 +11,7 @@ import {
   ResponsiveContainer,
   CartesianGrid,
 } from "recharts";
+import {fetchUserUsage} from "../../../../api/api"
 
 interface DailyUsageChartProps {
   userId: string;
@@ -28,13 +29,36 @@ export default function DailyUsageChart({ userId }: DailyUsageChartProps) {
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
-      const today = new Date();
-      const dummyData = Array.from({ length: 30 }, (_, i) => ({
-        day: `Day ${today.getDate() - i}`,
-        hours: Math.floor(Math.random() * 5),
-      })).reverse();
-      setData(dummyData);
-      setLoading(false);
+      try{
+        const response = await fetchUserUsage(parseInt(userId));
+        const usage = response.usage;
+
+        // create a map of date => total hours
+        const usageMap:Record<string,number> = {};
+        usage.forEach((u:any)=>{
+          if(!usageMap[u.date]) usageMap[u.date]=0;
+          usageMap[u.date] += u.hours;
+        });
+
+        // last 30 days
+        const today = new Date();
+        const last30days: DailyUsageData[] = Array.from({length:30},(_,i)=>{
+          const d = new Date();
+          d.setDate(today.getDate()-(29-i));
+          const dayStr = `${d.getDate()} ${d.toLocaleString('default', {month: 'short'})}`;
+          const isoDate = d.toISOString().split('T')[0];
+          return{
+            day:dayStr,
+            hours:(usageMap[isoDate]||0) *60,
+          };
+        });
+        setData(last30days);
+      }
+      catch(err){
+        console.error(err);
+      }finally{
+        setLoading(false);
+      }
     };
     fetchData();
   }, [userId]);
@@ -59,8 +83,15 @@ export default function DailyUsageChart({ userId }: DailyUsageChartProps) {
           <CartesianGrid horizontal={false} vertical={false} strokeDasharray="3 3" />
 
           <XAxis dataKey="day" />
-          <YAxis />
-          <Tooltip />
+          <YAxis
+          label={{
+            value:"Mins used",
+            angle:-90,
+            position:"insideLeft",
+            style:{textAnchor:"middle", fill:"#888"}
+          }}
+           />
+          <Tooltip formatter={(value:number) =>`${value.toFixed(1)} min`} />
 
           <Area
             type="linear"          // straight lines instead of monotone curve
@@ -68,7 +99,7 @@ export default function DailyUsageChart({ userId }: DailyUsageChartProps) {
             stroke="#38A169"
             fill="url(#gradientHours)"
             strokeWidth={2}
-            dot={{ r: 4, stroke: '#38A169', fill: '#38A169' }} // pointy dots
+            dot={false} // pointy dots
           />
         </AreaChart>
       </ResponsiveContainer>
