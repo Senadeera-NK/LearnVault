@@ -2,10 +2,21 @@
 
 import { Box, VStack, Text } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
+import {fetchUserUsage} from "../../../../api/api";
+import { selectorChartDrawingArea } from "@mui/x-charts/internals";
+
+interface UsageRecord{
+  id:number;
+  user_id:number;
+  date: string;
+  hours: number;
+  page_name:string;
+  created_at:string;
+}
 
 interface PageUsageData {
   page: string;
-  views: number;
+  hours: number;
 }
 
 interface PageUsageChartProps {
@@ -18,26 +29,39 @@ export default function PageUsageChart({ userId }: PageUsageChartProps) {
   useEffect(() => {
     // Simulate fetching data
     const fetchData = async () => {
-      const dummyData: PageUsageData[] = [
-        { page: "Dashboard", views: 120 },
-        { page: "Shelf", views: 75 },
-        { page: "Q & A", views: 45 },
-        { page: "Settings", views: 30 },
-      ];
+      try{
+        const result= await fetchUserUsage(parseInt(userId));
+        const response: UsageRecord[] = result.usage ||[];
 
-      // Sort descending by views
-      setData(dummyData.sort((a, b) => b.views - a.views));
+        //group and sub hours by page_name
+        const grouped: Record<string, number> = {};
+        response.forEach((record)=>{
+          if(record.page_name){
+            grouped[record.page_name]=(grouped[record.page_name]||0) + record.hours;
+          }
+        });
+
+        // convert to array
+        const formattedData = Object.entries(grouped).map(([page,hours])=>({
+          page,hours,
+        }));
+        //sort by total hours descending
+        formattedData.sort((a,b)=>b.hours - a.hours);
+
+        setData(formattedData);
+      }catch(err){
+        console.error(err);
+      }
     };
+      fetchData();
+    }, [userId]);
 
-    fetchData();
-  }, [userId]);
-
-  const maxViews = Math.max(...data.map((d) => d.views), 1);
-
+//total hours
+const totalHours = data.reduce((sum,d)=>sum + d.hours, 0);
   return (
     <VStack spacing={4} align="stretch" p={4} width="100%" mt={6}>
       {data.map((d) => {
-        const barWidthPercent = (d.views / maxViews) * 100;
+        const percent = totalHours ? (d.hours/totalHours) * 100:0;
 
         return (
           <Box
@@ -65,7 +89,7 @@ export default function PageUsageChart({ userId }: PageUsageChartProps) {
             {/* Filled Bar */}
             <Box
               bg="teal.400"
-              width={`${barWidthPercent}%`}
+              width={`${percent}%`}
               height="100%"
               borderRadius="md"
               transition="width 0.3s"
@@ -74,7 +98,19 @@ export default function PageUsageChart({ userId }: PageUsageChartProps) {
               px={2}
               position="relative" // keep above background
             >
-              <Text fontSize="sm" color="white" fontWeight="bold" noOfLines={1}>
+              <Text
+              position="absolute"
+              left="8px"
+              top="40%"
+              transform="translateY(-50%)"
+              fontSize="sm"
+              fontWeight="bold"
+              color="blackAlpha.800"
+              zIndex={2}
+              whiteSpace="nowrap" //to prevent line breaks
+              overflow="hidden" //optional, cut off if too long
+              textOverflow="ellipsis"
+              >
                 {d.page}
               </Text>
             </Box>
@@ -89,11 +125,16 @@ export default function PageUsageChart({ userId }: PageUsageChartProps) {
               fontWeight="bold"
               color="blackAlpha.800"
             >
-              {d.views}
+              {d.hours.toFixed(2)} hrs ({percent.toFixed(1)}%)
             </Text>
           </Box>
         );
       })}
+      {totalHours > 0 && (
+        <Text fontSize="sm" color="gray.500" textAlign="right" mt={2}>
+          Total: {totalHours.toFixed(2)} hrs
+        </Text>
+      )}
     </VStack>
   );
 }
