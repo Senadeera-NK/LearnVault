@@ -30,7 +30,7 @@ export default function Dashboard() {
   const { user } = useAuth();
   const router = useRouter();
   const [dailyUsageData, setDailyUsageData] = useState<{ day: string; hours: number }[]>([]);
-
+  const[fileStats, setFileStats] = useState<{totalFiles:number}|null>(null);
   const userName = user?.name || "Guest";
 
   // Redirect if not logged in
@@ -70,7 +70,7 @@ export default function Dashboard() {
       <Grid templateColumns={{ base: "1fr", md: "repeat(3, 1fr)" }} gap={4} mb={6}>
         <Card p={4}>
           <Text fontSize="sm" color="gray.500">Total Files</Text>
-          <Text fontSize="2xl" fontWeight="bold">150</Text>
+          <Text fontSize="2xl" fontWeight="bold">{fileStats?.totalFiles??"0"}</Text>
         </Card>
         <Card p={4}>
           <Text fontSize="sm" color="gray.500">Total QA Generated</Text>
@@ -88,7 +88,7 @@ export default function Dashboard() {
       <Grid templateColumns={{ base: "1fr", md: "repeat(2, 1fr)" }} gap={4}>
         {/* File Category Pie Chart (Half Donut) */}
         <Card p={4} height="350px">
-          <FileCategoryChart userId={user.id.toString()} />
+          <FileCategoryChart userId={user.id.toString()} onStats={(stats)=> setFileStats(stats)} />
         </Card>
 
         {/* Page Usage Bar Chart */}

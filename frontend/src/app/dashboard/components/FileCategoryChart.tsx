@@ -20,8 +20,9 @@ interface fileCategory{
 
 interface FileCategoryChartProps{
   userId:string;
+  onStats?:(stats:{totalFiles:number})=>void;
 }
-export default function FileCategoryChart({userId}: FileCategoryChartProps) {
+export default function FileCategoryChart({userId, onStats}: FileCategoryChartProps) {
   const [data, setData] = useState<{label:string; value:number}[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
   const [chartWidth, setChartWidth] = useState(400);
@@ -40,7 +41,7 @@ export default function FileCategoryChart({userId}: FileCategoryChartProps) {
           if(f.category) counts[f.category] = (counts[f.category] ||0) +1;
         });
         const total = files.length;
-
+        if (onStats) onStats({totalFiles:total});
         //convert to array of, label, and value(percentage)
         const formatted = Object.entries(counts).map(([category, count])=>({
           label:category,
@@ -106,7 +107,7 @@ export default function FileCategoryChart({userId}: FileCategoryChartProps) {
               cx,
               cy,
               highlightScope: { fade: "global", highlight: "item" },
-              valueFormatter: (item: any) => `${item.value}%`,
+              valueFormatter: (item: any) => `${item.value.toFixed(1)}%`,
             },
           ]}
           width={chartWidth}
