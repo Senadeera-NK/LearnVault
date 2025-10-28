@@ -88,7 +88,7 @@ export default function Dashboard() {
       <Grid templateColumns={{ base: "1fr", md: "repeat(2, 1fr)" }} gap={4}>
         {/* File Category Pie Chart (Half Donut) */}
         <Card p={4} height="350px">
-          <FileCategoryChart />
+          <FileCategoryChart userId={user.id.toString()} />
         </Card>
 
         {/* Page Usage Bar Chart */}

@@ -3,21 +3,58 @@
 import { Box, Text, HStack, VStack } from "@chakra-ui/react";
 import { PieChart } from "@mui/x-charts";
 import { useState, useEffect, useRef } from "react";
+import {fetch_user_pdfs} from "../../../../api/api";
 
-export default function FileCategoryChart() {
-  const desktopOS = [
-    { label: "Windows", value: 72.72 },
-    { label: "OS X", value: 16.38 },
-    { label: "Linux", value: 3.83 },
-    { label: "Chrome OS", value: 2.42 },
-    { label: "Other", value: 4.65 },
-  ];
+interface fileRecord{
+  id: number;
+  user_id:number;
+  file_url:string;
+  category:string;
+  uploaded_at:string;
+  classification_status:string;
+}
+interface fileCategory{
+  file_url:string;
+  category:string;
+}
 
-  const colors = ["#1976d2", "#9c27b0", "#43a047", "#ff9800", "#9e9e9e"];
+interface FileCategoryChartProps{
+  userId:string;
+}
+export default function FileCategoryChart({userId}: FileCategoryChartProps) {
+  const [data, setData] = useState<{label:string; value:number}[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
   const [chartWidth, setChartWidth] = useState(400);
 
+  const colors = ["#1976d2", "#9c27b0", "#43a047", "#ff9800", "#9e9e9e"];
+
   useEffect(() => {
+    const fetchData = async ()=>{
+      try{
+        const result = await fetch_user_pdfs(parseInt(userId));
+        const files: fileRecord[]=result.details ||[];
+
+        //count files per category
+        const counts: Record<string, number> = {};
+        files.forEach((f)=>{
+          if(f.category) counts[f.category] = (counts[f.category] ||0) +1;
+        });
+        const total = files.length;
+
+        //convert to array of, label, and value(percentage)
+        const formatted = Object.entries(counts).map(([category, count])=>({
+          label:category,
+          value:total? (count/total)*100:0,
+        }));
+        setData(formatted);
+      }
+      catch(err){
+        console.error(err);
+      }
+    };
+
+    fetchData();
+    //resizing function
     const handleResize = () => {
       if (containerRef.current) {
         // Container width minus some padding
@@ -30,7 +67,7 @@ export default function FileCategoryChart() {
     handleResize();
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
-  }, []);
+  }, [userId]);
 
   // Donut sizing
   const outerRadius = chartWidth / 2.5; // smaller proportion so it doesn't get huge
@@ -61,7 +98,7 @@ export default function FileCategoryChart() {
           series={[
             {
               type: "pie" as const,
-              data: desktopOS,
+              data: data,
               startAngle: -90,
               endAngle: 90,
               innerRadius,
@@ -84,7 +121,7 @@ export default function FileCategoryChart() {
       {/* Bottom legend */}
       <VStack spacing={1} mt={-2} width="100%">
         <HStack wrap="wrap" spacing={3} justify="center">
-          {desktopOS.map((d, i) => (
+          {data.map((d, i) => (
             <HStack key={d.label} spacing={1}>
               <Box
                 w="12px"
