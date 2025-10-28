@@ -15,6 +15,7 @@ import {fetchUserUsage} from "../../../../api/api"
 
 interface DailyUsageChartProps {
   userId: string;
+  onStats?:(stats:{totalDays:number})=>void;
 }
 
 interface DailyUsageData {
@@ -22,7 +23,7 @@ interface DailyUsageData {
   hours: number;
 }
 
-export default function DailyUsageChart({ userId }: DailyUsageChartProps) {
+export default function DailyUsageChart({ userId, onStats }: DailyUsageChartProps) {
   const [data, setData] = useState<DailyUsageData[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -53,6 +54,10 @@ export default function DailyUsageChart({ userId }: DailyUsageChartProps) {
           };
         });
         setData(last30days);
+
+        //calculating total active days
+        const totalDays = last30days.filter(d=>d.hours>0).length;
+        if(onStats) onStats({totalDays});
       }
       catch(err){
         console.error(err);

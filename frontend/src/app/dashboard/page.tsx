@@ -31,6 +31,7 @@ export default function Dashboard() {
   const router = useRouter();
   const [dailyUsageData, setDailyUsageData] = useState<{ day: string; hours: number }[]>([]);
   const[fileStats, setFileStats] = useState<{totalFiles:number}|null>(null);
+  const[dayStats, setDayStats] = useState<{totalDays:number}|null>(null);
   const userName = user?.name || "Guest";
 
   // Redirect if not logged in
@@ -74,12 +75,12 @@ export default function Dashboard() {
         </Card>
         <Card p={4}>
           <Text fontSize="sm" color="gray.500">Total QA Generated</Text>
-          <Text fontSize="2xl" fontWeight="bold">75</Text>
+          <Text fontSize="2xl" fontWeight="bold">0</Text>
         </Card>
         <Card p={4}>
           <Text fontSize="sm" color="gray.500">Active Days</Text>
           <Text fontSize="2xl" fontWeight="bold">
-            {dailyUsageData.filter(d => d.hours > 0).length}
+            {dayStats?.totalDays??"0"}
           </Text>
         </Card>
       </Grid>
@@ -93,13 +94,13 @@ export default function Dashboard() {
 
         {/* Page Usage Bar Chart */}
         <Card p={4} height="350px">
-          <PageUsageChart userId={user.id.toString()} />
+          <PageUsageChart userId={user.id.toString()}/>
         </Card>
       </Grid>
 
       {/* Daily Usage Line Chart */}
       <Card mt={4} p={4} height="300px">
-        <DailyUsageChart userId={user.id.toString()} />
+        <DailyUsageChart userId={user.id.toString()} onStats={(stats)=>setDayStats(stats)} />
       </Card>
     </Box>
   );
