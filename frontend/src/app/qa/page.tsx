@@ -1,13 +1,22 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef} from "react";
 import { Box, Heading, Button, VStack } from "@chakra-ui/react";
 import {usePageTimer} from "../../components/UsePageTimer";
 import {recordUsage} from "../../../api/api";
 import { useAuth } from "@/components/AuthContext";
 
-export default function QA() { 
+export default function QA() {
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { user } = useAuth();
+
+  const handleLocalClick=()=>{
+    fileInputRef.current?.click()
+  }
+  const handleFileChange =async(event:React.ChangeEvent<HTMLInputElement>)=>{
+    const files = event.target.files;
+    if(!files||!user) return;
+  }
     // Track page usage
   usePageTimer("Q & A", async (duration) => {
     if (!user) return; // skip if not logged in
@@ -40,15 +49,27 @@ export default function QA() {
       mb={0}>
       <Box
         w="30%"
+        h="80vh"
         mx="auto"
         border="1px solid"
         borderColor="gray.300"
         borderRadius="lg"
         p={3}
         >
+          <Box h="65vh" p={3}>
+
+          </Box>
           <VStack spacing={3} align="stretch">
           <Button colorScheme="gray" w="100%">Add from shelf</Button>
-          <Button colorScheme="gray" w="100%">Upload from the device</Button>
+          <Button colorScheme="gray" w="100%" onClick={handleLocalClick}>Upload from the device</Button>
+          <input
+          type="file"
+          ref={fileInputRef}
+          style={{display:"none"}}
+          accept=".pdf"
+          multiple
+          onChange={handleFileChange}
+          />
           </VStack>
 
         </Box>
