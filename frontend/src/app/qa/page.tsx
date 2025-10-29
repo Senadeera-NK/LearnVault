@@ -1,18 +1,34 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { Box, Heading, Button, VStack, Text, IconButton } from "@chakra-ui/react";
+import {
+  Box,
+  Heading,
+  Button,
+  VStack,
+  Text,
+  IconButton,
+} from "@chakra-ui/react";
 import { Trash2 } from "lucide-react";
 import { usePageTimer } from "../../components/UsePageTimer";
-import { recordUsage } from "../../../api/api";
+import { recordUsage, fetch_user_pdfs } from "../../../api/api";
 import { useAuth } from "@/components/AuthContext";
+import ShelfWindow from "./components/ShelfWindow";
 
 export default function QA() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { user } = useAuth();
-  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
-  const [selectedFileIndex, setSelectedFileIndex] = useState<number | null>(null);
 
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const [shelfFiles, setShelfFiles] = useState<
+    { id: string; name: string; url: string }[]
+  >([]);
+  const [selectedFileIndex, setSelectedFileIndex] = useState<number | null>(
+    null
+  );
+  const [isShelfOpen, setIsShelfOpen] = useState(false);
+
+  // Upload from device
   const handleLocalClick = () => {
     fileInputRef.current?.click();
   };
@@ -37,7 +53,36 @@ export default function QA() {
     }
   });
 
-  // Close modal when clicking outside
+  // Helper function to extract file name from URL
+  const extractFileName = (url: string) => {
+    if (!url) return "unknown.pdf";
+    const cleanUrl = url.trim().replace(/\r?\n/g, "");
+    const parts = cleanUrl.split("/");
+    return parts[parts.length - 1].replace(/\?.*$/, "");
+  };
+
+  // Fetch shelf files on load
+  useEffect(() => {
+    const fetchShelfFiles = async () => {
+      if (!user) return;
+      try {
+        const res = await fetch_user_pdfs(user.id);
+        const formattedPdfs =
+          (res.details || []).map((file: any) => ({
+            id: file.id,
+            name: extractFileName(file.file_url),
+            url: file.file_url,
+          })) || [];
+        setShelfFiles(formattedPdfs);
+      } catch (err) {
+        console.error("Error fetching shelf files:", err);
+      }
+    };
+
+    fetchShelfFiles();
+  }, [user]);
+
+  // Close options modal when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as HTMLElement;
@@ -49,14 +94,30 @@ export default function QA() {
     return () => document.removeEventListener("click", handleClickOutside);
   }, []);
 
+  // Merge local and shelf files for ShelfWindow
+  const allFiles = [
+    ...uploadedFiles.map((file, index) => ({
+      id: `local-${index}`,
+      name: file.name,
+      url: URL.createObjectURL(file),
+    })),
+    ...shelfFiles.map((file) => ({
+      id: `server-${file.id}`,
+      name: file.name,
+      url: file.url,
+    })),
+  ];
+
   return (
     <>
-      <Box className="styles.page" display="flex" flexDirection="column" justifyContent="flex-start" pt="10px">
-        <Heading mb="20px" textAlign="center" w="100%">Q & A</Heading>
+      <Box display="flex" flexDirection="column" justifyContent="flex-start" pt="10px">
+        <Heading mb="20px" textAlign="center" w="100%">
+          Q & A
+        </Heading>
       </Box>
 
-      <Box display="flex" justifyContent="space-between" w="90%" mx="auto" mt={0} mb={0}>
-        {/* Left panel */}
+      <Box display="flex" justifyContent="space-between" w="90%" mx="auto">
+        {/* Left panel: uploaded files */}
         <Box w="30%" h="80vh" mx="auto" border="1px solid" borderColor="gray.300" borderRadius="lg" p={3}>
           <Box h="65vh" p={3} overflowY="auto">
             {uploadedFiles.map((file, index) => (
@@ -104,7 +165,7 @@ export default function QA() {
                 {selectedFileIndex === index && (
                   <Box
                     position="absolute"
-                    left="280px" // left of the file box
+                    left="280px"
                     top="0"
                     w="140px"
                     p={2}
@@ -146,8 +207,12 @@ export default function QA() {
           </Box>
 
           <VStack spacing={3} align="stretch">
-            <Button colorScheme="gray" w="100%">Add from shelf</Button>
-            <Button colorScheme="gray" w="100%" onClick={handleLocalClick}>Upload from the device</Button>
+            <Button colorScheme="gray" w="100%" onClick={() => setIsShelfOpen(true)}>
+              Add from shelf
+            </Button>
+            <Button colorScheme="gray" w="100%" onClick={handleLocalClick}>
+              Upload from the device
+            </Button>
             <input
               type="file"
               ref={fileInputRef}
@@ -160,8 +225,14 @@ export default function QA() {
         </Box>
 
         {/* Right panel */}
-        <Box w="60%" mx="auto" border="1px solid" borderColor="gray.300" borderRadius="lg" p={3}>
-        </Box>
+        <Box w="60%" mx="auto" border="1px solid" borderColor="gray.300" borderRadius="lg" p={3}></Box>
+
+        {/* Shelf window modal */}
+        <ShelfWindow
+          isOpen={isShelfOpen}
+          onClose={() => setIsShelfOpen(false)}
+          files={allFiles}
+        />
       </Box>
     </>
   );
