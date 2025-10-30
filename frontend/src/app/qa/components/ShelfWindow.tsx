@@ -16,7 +16,7 @@ import {
   RadioGroup,
 } from "@chakra-ui/react";
 import { IconButton , Input, InputGroup, InputLeftElement} from "@chakra-ui/react";
-import { DownloadIcon } from "@chakra-ui/icons";
+import { DownloadIcon, SearchIcon } from "@chakra-ui/icons";
 import { useEffect, useState, useRef } from "react";
 interface ShelfWindowProps {
   isOpen: boolean;
@@ -31,6 +31,7 @@ export default function ShelfWindow({
 }: ShelfWindowProps) {
 
 const [selectedFileId, setSelectedFileId] = useState<string>("");
+const [searchQuery, setSearchQuery] = useState("");
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} size="xl" scrollBehavior="inside">
@@ -39,6 +40,13 @@ const [selectedFileId, setSelectedFileId] = useState<string>("");
         <ModalHeader>Files</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
+          {/* search bar */}
+          <InputGroup mb={3}>
+          <InputLeftElement pointerEvents="none">
+          <SearchIcon color="gray.400"/>
+          </InputLeftElement>
+          <Input placeContent="Search files..." value={searchQuery} onChange={(e)=>{setSearchQuery(e.target.value)}}/>
+          </InputGroup>
           <VStack align="stretch" spacing={3}>
             {files.length === 0 ? (
               <Text>No files.</Text>
