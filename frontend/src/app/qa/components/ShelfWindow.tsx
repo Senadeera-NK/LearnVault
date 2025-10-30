@@ -12,10 +12,12 @@ import {
   VStack,
   HStack,
   Text,
-  Box,
+  Radio,
+  RadioGroup,
 } from "@chakra-ui/react";
-import { IconButton } from "@chakra-ui/react";
+import { IconButton , Input, InputGroup, InputLeftElement} from "@chakra-ui/react";
 import { DownloadIcon } from "@chakra-ui/icons";
+import { useEffect, useState, useRef } from "react";
 interface ShelfWindowProps {
   isOpen: boolean;
   onClose: () => void;
@@ -28,37 +30,7 @@ export default function ShelfWindow({
   files,
 }: ShelfWindowProps) {
 
-  // Helper to download file
-const downloadFile = async (url: string, filename: string) => {
-  if (!url) return;
-
-  let cleanUrl = url.trim().replace(/\r?\n/g, "");
-  if (cleanUrl.endsWith("?")) cleanUrl = cleanUrl.slice(0, -1);
-
-  try {
-    const response = await fetch(cleanUrl);
-    if (!response.ok) throw new Error("Network response was not ok");
-
-    const blob = await response.blob(); // fetch binary data
-    const blobUrl = URL.createObjectURL(blob);
-
-    const link = document.createElement("a");
-    link.href = blobUrl;
-    link.setAttribute("download", filename || "file.pdf");
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-
-    URL.revokeObjectURL(blobUrl); // clean up
-  } catch (err) {
-    console.error("❌ Failed to download file:", err);
-  }
-};
-
-const downloadAll = () => {
-  files.forEach((file) => downloadFile(file.url, decodeURIComponent(file.name)));
-  console.log("Downloading all files");
-}
+const [selectedFileId, setSelectedFileId] = useState<string>("");
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} size="xl" scrollBehavior="inside">
@@ -71,7 +43,9 @@ const downloadAll = () => {
             {files.length === 0 ? (
               <Text>No files.</Text>
             ) : (
-              files.map((file) => (
+              <RadioGroup value={selectedFileId} onChange={setSelectedFileId}>
+                <VStack align="stretch" spacing={2}>
+              {files.map((file) => (
                 <HStack
                   key={file.id}
                   justifyContent="space-between"
@@ -80,17 +54,11 @@ const downloadAll = () => {
                   p={2}
                 >
                   <Text>{decodeURIComponent(file.name)}</Text>
-                    <IconButton
-                      aria-label={`Download ${file.name}`}
-                      icon={<DownloadIcon />}
-                      size="sm"
-                      colorScheme="teal"
-                      variant="ghost"
-                      onClick={() => downloadFile(file.url, file.name)}
-                    />
-
+                    <Radio value={file.id} colorScheme="teal"/>
                 </HStack>
-              ))
+              ))}
+              </VStack>
+              </RadioGroup>
             )}
           </VStack>
         </ModalBody>
@@ -98,8 +66,12 @@ const downloadAll = () => {
           <Button onClick={onClose} colorScheme="gray">
             Close
           </Button>
-          <Button onClick={downloadAll} colorScheme="gray">
-            Download All
+          <Button isDisabled={!selectedFileId} onClick={()=>{
+            const selected = files.find((f)=>f.id === selectedFileId);
+            console.log("selected file: ", selected);
+            onClose();
+          }} colorScheme="gray">
+            Done
           </Button>
         </ModalFooter>
       </ModalContent>
