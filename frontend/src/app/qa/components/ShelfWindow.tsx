@@ -22,16 +22,21 @@ interface ShelfWindowProps {
   isOpen: boolean;
   onClose: () => void;
   files: { id: string; name: string; url: string }[];
+  onFileSelect :(file:{id:string;name:string;url:string})=>void;
 }
 
 export default function ShelfWindow({
   isOpen,
   onClose,
   files,
+  onFileSelect
 }: ShelfWindowProps) {
 
 const [selectedFileId, setSelectedFileId] = useState<string>("");
 const [searchQuery, setSearchQuery] = useState("");
+
+const filteredFiles = files.filter((file)=>
+  decodeURIComponent(file.name).toLowerCase().includes(searchQuery.toLowerCase()));
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} size="xl" scrollBehavior="inside">
@@ -48,12 +53,12 @@ const [searchQuery, setSearchQuery] = useState("");
           <Input placeContent="Search files..." value={searchQuery} onChange={(e)=>{setSearchQuery(e.target.value)}}/>
           </InputGroup>
           <VStack align="stretch" spacing={3}>
-            {files.length === 0 ? (
-              <Text>No files.</Text>
+            {filteredFiles.length === 0 ? (
+              <Text>No matching files.</Text>
             ) : (
               <RadioGroup value={selectedFileId} onChange={setSelectedFileId}>
                 <VStack align="stretch" spacing={2}>
-              {files.map((file) => (
+              {filteredFiles.map((file) => (
                 <HStack
                   key={file.id}
                   justifyContent="space-between"
@@ -77,6 +82,9 @@ const [searchQuery, setSearchQuery] = useState("");
           <Button isDisabled={!selectedFileId} onClick={()=>{
             const selected = files.find((f)=>f.id === selectedFileId);
             console.log("selected file: ", selected);
+            if(selected){
+              onFileSelect(selected);
+            }
             onClose();
           }} colorScheme="gray">
             Done

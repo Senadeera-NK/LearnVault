@@ -8,12 +8,14 @@ import {
   VStack,
   Text,
   IconButton,
+  Portal
 } from "@chakra-ui/react";
 import { Trash2 } from "lucide-react";
 import { usePageTimer } from "../../components/UsePageTimer";
 import { recordUsage, fetch_user_pdfs } from "../../../api/api";
 import { useAuth } from "@/components/AuthContext";
 import ShelfWindow from "./components/ShelfWindow";
+import { projectHmrEvents } from "next/dist/build/swc/generated-native";
 
 export default function QA() {
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -163,18 +165,20 @@ export default function QA() {
 
                 {/* Options modal */}
                 {selectedFileIndex === index && (
+                  <Portal>
                   <Box
                     position="absolute"
-                    left="280px"
-                    top="0"
-                    w="140px"
-                    p={2}
+                    left="35%"
+                    top={`${100+index*60}px`}
+                    transform="translate(-50%)"
+                    w={["90%","200px"]} //responsive for mobile-desktop
+                    p={3}
                     bg="white"
                     border="1px solid"
                     borderColor="gray.300"
                     borderRadius="md"
                     shadow="md"
-                    zIndex={10}
+                    zIndex={2000}
                   >
                     <Button
                       w="100%"
@@ -201,6 +205,7 @@ export default function QA() {
                       Fact Q&A
                     </Button>
                   </Box>
+                  </Portal>
                 )}
               </Box>
             ))}
@@ -232,6 +237,13 @@ export default function QA() {
           isOpen={isShelfOpen}
           onClose={() => setIsShelfOpen(false)}
           files={allFiles}
+          onFileSelect={(file)=>{
+            //add selected shelf file to uploaded files
+            setUploadedFiles((prev)=>[
+              ...prev,
+              new File([], file.name, {type:"applicatoin/pdf"}),
+            ]);
+          }}
         />
       </Box>
     </>
