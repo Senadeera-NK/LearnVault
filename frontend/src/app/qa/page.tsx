@@ -12,7 +12,7 @@ import {
 } from "@chakra-ui/react";
 import { Trash2 } from "lucide-react";
 import { usePageTimer } from "../../components/UsePageTimer";
-import { recordUsage, fetch_user_pdfs } from "../../../api/api";
+import { recordUsage, fetch_user_pdfs,send_qa_selection } from "../../../api/api";
 import { useAuth } from "@/components/AuthContext";
 import ShelfWindow from "./components/ShelfWindow";
 import { projectHmrEvents } from "next/dist/build/swc/generated-native";
@@ -62,6 +62,18 @@ export default function QA() {
     const parts = cleanUrl.split("/");
     return parts[parts.length - 1].replace(/\?.*$/, "");
   };
+
+// funciton to handle selected category
+  const handleCategorySelect = async(category:string, file:File|{name:string,url:string}) =>{
+      if(!user) return;
+      try{
+        const fileURL = (file as any).url || URL.createObjectURL(file as File);
+        await send_qa_selection(user.id, fileURL, category);
+        console.log("Sent", {userId:user.id, fileURL, category})
+      }catch(err){
+        console.error("Failed to send category selection: ", err);
+      }
+  }
 
   // Fetch shelf files on load
   useEffect(() => {
@@ -184,7 +196,7 @@ export default function QA() {
                       w="100%"
                       size="sm"
                       variant="ghost"
-                      onClick={() => console.log("MCQ selected:", file.name)}
+                      onClick={() => handleCategorySelect("MCQ", file)}
                     >
                       MCQ
                     </Button>
@@ -192,7 +204,7 @@ export default function QA() {
                       w="100%"
                       size="sm"
                       variant="ghost"
-                      onClick={() => console.log("True/False selected:", file.name)}
+                      onClick={() => handleCategorySelect("True/False", file)}
                     >
                       True/False
                     </Button>
@@ -200,7 +212,7 @@ export default function QA() {
                       w="100%"
                       size="sm"
                       variant="ghost"
-                      onClick={() => console.log("Fact Q&A selected:", file.name)}
+                      onClick={() => handleCategorySelect("Fact Q&A", file)}
                     >
                       Fact Q&A
                     </Button>
