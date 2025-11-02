@@ -151,6 +151,8 @@ export async function txt_file_convert(userId:number, title:string, text:string)
   return res.json();
 }
 
+
+// for sending QAselection of the user
 export async function send_qa_selection(userId:number, fileURL:string, category:string){
   try{
   const res = await fetch(`${API_URL}/user_qa_selection`,{
@@ -160,7 +162,6 @@ export async function send_qa_selection(userId:number, fileURL:string, category:
     },
     body:JSON.stringify({userId, fileURL, category}),
   });
-  
   if(!res.ok) throw new Error("failed to send data");
   return await res.json();
 
@@ -169,6 +170,7 @@ export async function send_qa_selection(userId:number, fileURL:string, category:
   console.error("Error sending QA selection", err)
   }
 }
+
 
 // Example usage:
 // (async () => {
@@ -202,5 +204,3 @@ export async function send_qa_selection(userId:number, fileURL:string, category:
 // export function neon_oauth(provider: string) {
 //   window.location.href = `${API_URL}/neon/oauth/${provider}`;
 // }
-
-// for sending QAselection of the user
