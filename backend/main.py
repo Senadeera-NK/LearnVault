@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from services import supabase_service_users
 from services import supabase_service_users_usage
-from routers import users_files_classification, users_attachFiles, users, users_usage, users_signed_upload
+from routers import users_files_classification, users_attachFiles, users, users_usage, users_signed_upload, qa_selection
 import os
 import uvicorn
 
@@ -25,6 +25,7 @@ app.include_router(users_usage.router)
 app.include_router(users_attachFiles.router)
 app.include_router(users_files_classification.router)
 app.include_router(users_signed_upload.router)
+app.include_router(qa_selection.router)
 
 # ✅ Startup event
 @app.on_event("startup")

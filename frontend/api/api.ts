@@ -155,7 +155,7 @@ export async function txt_file_convert(userId:number, title:string, text:string)
 // for sending QAselection of the user
 export async function send_qa_selection(userId:number, fileURL:string, category:string){
   try{
-  const res = await fetch(`${API_URL}/user_qa_selection`,{
+  const res = await fetch(`${API_URL}/qa/selection`,{
     method:'POST',
     headers:{
       'Content-Type':'application/json'
@@ -164,7 +164,6 @@ export async function send_qa_selection(userId:number, fileURL:string, category:
   });
   if(!res.ok) throw new Error("failed to send data");
   return await res.json();
-
 }
  catch(err){
   console.error("Error sending QA selection", err)
