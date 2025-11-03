@@ -2,29 +2,33 @@ import re
 import json
 
 def parse_fact_qa(qa_text: str):
-    pattern = r"Q:\s*(.*?)\s*A:\s*(.*?)(?=Q:|$)"
-    matches = re.findall(pattern, qa_text, re.DOTALL)
+    pattern = r"(?:Q:|^\d+\.)\s*(.*?)\s*Answer:\s*(.*?)(?=\n\d+\.|\Z)"
+    matches = re.findall(pattern, qa_text, re.DOTALL | re.IGNORECASE | re.MULTILINE)
+    print("DEBUG: Matched QA count: ", len(matches))
     return [{"question": q.strip(), "answer": a.strip()} for q, a in matches]
 
 
 def parse_true_false_qa(qa_text: str):
-    pattern = r"Q:\s*(.*?)\s*Answer:\s*(True|False)"
-    matches = re.findall(pattern, qa_text, re.DOTALL | re.IGNORECASE)
+    # Match either Q: or 1., 2., etc. followed by text and "Answer: True/False"
+    pattern = r"(?:Q:|^\d+\.)\s*(.*?)\s*Answer:\s*(True|False)"
+    matches = re.findall(pattern, qa_text, re.DOTALL | re.IGNORECASE | re.MULTILINE)
+    print("DEBUG: Matched QA count: ", len(matches))
     return [{"question": q.strip(), "answer": a.strip().capitalize()} for q, a in matches]
 
 
 def parse_mcq_qa(qa_text: str):
     """
     Expected pattern:
-    Q: What is AI?
+    1. What is AI?
     A) Automated Interface
     B) Artificial Intelligence
     C) Algorithmic Input
     D) Applied Innovation
     Answer: B
     """
-    pattern = r"Q:\s*(.*?)\s*A\)\s*(.*?)\s*B\)\s*(.*?)\s*C\)\s*(.*?)\s*D\)\s*(.*?)\s*Answer:\s*([A-D])"
-    matches = re.findall(pattern, qa_text, re.DOTALL)
+    pattern = r"(?:Q:|^\d+\.)\s*(.*?)\s*A\)\s*(.*?)\s*B\)\s*(.*?)\s*C\)\s*(.*?)\s*D\)\s*(.*?)\s*Answer:\s*([A-D])"
+    matches = re.findall(pattern, qa_text, re.DOTALL | re.MULTILINE | re.IGNORECASE)
+    print("DEBUG: Matched QA count: ", len(matches))
 
     qa_list = []
     for q, a, b, c, d, ans in matches:
