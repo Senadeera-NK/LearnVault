@@ -1,4 +1,4 @@
-from google import genai
+import google.generativeai as genai
 import pdfplumber
 from utils import download_file_from_url, extract_text
 import os
@@ -8,7 +8,7 @@ GENAI_API_KEY = os.environ.get("GENAI_API_KEY")
 if not GENAI_API_KEY:
     raise RuntimeError("GEMINI_API_KEY env variable is not set")
 
-client = genai.Client(api_key = GENAI_API_KEY)
+genai.configure(api_key=GENAI_API_KEY)
 
 # mcq generation function
 def generate_mcq_qa(text:str, num_questions:int=20)->str:
@@ -22,7 +22,8 @@ def generate_mcq_qa(text:str, num_questions:int=20)->str:
     - Indicate the correct answer clearly (e.g., "Answer:B")
     - Keep questions meaningful and diverse
     """
-    response = client.models.generate_content(model="gemini-2.0-flash", contents=prompt)
+    model = genai.GenerativeModel("gemini-2.0-flash")
+    response = model.generate_content(prompt)
     return response.text
 
 def generate_true_false_qa(text:str,num_questions=20)->str:
@@ -39,10 +40,8 @@ def generate_true_false_qa(text:str,num_questions=20)->str:
     - Provide the answer after each question (e.g., "Answer: True" or "Answer: False")
     - Keep questions meaningful and cover different parts of the text
     """
-    response = client.models.generate_content(
-        model="gemini-2.0-flash",
-        contents=prompt
-    )
+    model = genai.GenerativeModel("gemini-2.0-flash")
+    response = model.generate_content(prompt)
     return response.text
 
 def generate_fact_qa(text:str, num_questions=20)->str:
@@ -60,10 +59,8 @@ def generate_fact_qa(text:str, num_questions=20)->str:
     - Ensure questions are factual and checkable
     - Cover different parts of the text
     """
-    response = client.models.generate_content(
-        model="gemini-2.5-flash",
-        contents=prompt
-    )
+    model = genai.GenerativeModel("gemini-2.0-flash")
+    response = model.generate_content(prompt)
     return response.text
 
 
