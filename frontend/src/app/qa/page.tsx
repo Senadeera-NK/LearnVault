@@ -197,7 +197,7 @@ export default function QA() {
                       w="100%"
                       size="sm"
                       variant="ghost"
-                      onClick={() => handleCategorySelect("MCQ", file)}
+                      onClick={() => handleCategorySelect("mcq", file)}
                     >
                       MCQ
                     </Button>
@@ -205,7 +205,7 @@ export default function QA() {
                       w="100%"
                       size="sm"
                       variant="ghost"
-                      onClick={() => handleCategorySelect("True/False", file)}
+                      onClick={() => handleCategorySelect("true_false", file)}
                     >
                       True/False
                     </Button>
@@ -213,7 +213,7 @@ export default function QA() {
                       w="100%"
                       size="sm"
                       variant="ghost"
-                      onClick={() => handleCategorySelect("Fact Q&A", file)}
+                      onClick={() => handleCategorySelect("fact", file)}
                     >
                       Fact Q&A
                     </Button>
