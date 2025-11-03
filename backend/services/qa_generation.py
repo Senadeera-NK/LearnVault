@@ -66,7 +66,9 @@ def generate_fact_qa(text:str, num_questions=20)->str:
     )
     return response.text
 
-def generate_qa_from_file(file_url:str, qa_type:str):
+
+# main function to generate qa
+async def generate_qa_from_file(file_url:str, qa_type:str):
     # downloads a PDF, extract text and generates QA using the model
     local_path = download_file_from_url(file_url)
     if not local_path:
