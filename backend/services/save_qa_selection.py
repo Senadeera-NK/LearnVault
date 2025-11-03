@@ -6,7 +6,11 @@ supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 async def save_qa_selection(user_id:str, file_url:str, category:str, qa_content:str):
     # logic
+    print("DEBUG: saving qa selection...")
+    print("DEBUG: QA content length: ", len(qa_content)if qa_content else 0)
+    
     qa_json = parse_qa_to_json(qa_content, category)
+    print("DEBUG: Parsed QA JSON sample:", str(qa_json)[:500])
     response = supabase.table("qa_files").insert({
         "user_id":user_id,
         "file_url":file_url,

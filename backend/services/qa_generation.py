@@ -87,11 +87,15 @@ async def generate_qa_from_file(file_url:str, qa_type:str):
     # downloads a PDF, extract text and generates QA using the model
     local_path = download_file_from_url_qa(file_url)
     if not local_path:
+        print("DEBUG ERROR: File not downloaded")
         return {"error":"failed to download the file"}
     
     text = extract_text(local_path)
+    print("DEBUG : Extracted text length: ", len(text) if text else 0)
     if text in ["EMPTY", "READ_ERROR", "PHOTO_ONLY"]:
+        print("DEBUG ERROR: Text extraction failed with", text)
         return {"error", f"Could not extract meaningful text: {text}"}
+    
     
     try:
         if qa_type == "fact":
@@ -101,8 +105,11 @@ async def generate_qa_from_file(file_url:str, qa_type:str):
         elif qa_type =="mcq":
             qa_output = generate_mcq_qa(text)
         else:
+            print("DEBUG ERROR: Invalid QA type", qa_type)
             return {"error":"Invalid QA type"}
         
+        print("DEBUG: LLM output preview:", qa_output[:500])
         return {"qa_output":qa_output}
     except Exception as e:
+        print("DEBUG ERROR: Exception while generating QA: ", str(e))
         return {"error": f"QA generation failed: {e}"}
