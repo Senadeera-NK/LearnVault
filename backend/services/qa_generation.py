@@ -1,12 +1,13 @@
 import google.generativeai as genai
 import pdfplumber
+from qa_utils import download_file_from_url_qa
 from utils import download_file_from_url, extract_text
 import os
 
 # gemini client securely
 GENAI_API_KEY = os.environ.get("GENAI_API_KEY")
 if not GENAI_API_KEY:
-    raise RuntimeError("GEMINI_API_KEY env variable is not set")
+    raise RuntimeError("GENAI_API_KEY env variable is not set")
 
 genai.configure(api_key=GENAI_API_KEY)
 
@@ -67,7 +68,7 @@ def generate_fact_qa(text:str, num_questions=20)->str:
 # main function to generate qa
 async def generate_qa_from_file(file_url:str, qa_type:str):
     # downloads a PDF, extract text and generates QA using the model
-    local_path = download_file_from_url(file_url)
+    local_path = download_file_from_url_qa(file_url)
     if not local_path:
         return {"error":"failed to download the file"}
     
