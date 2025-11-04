@@ -37,6 +37,7 @@ export default function QA() {
     null
   );
   const [isShelfOpen, setIsShelfOpen] = useState(false);
+  const [categorySelectedIndex, setCategorySelectedIndex] = useState<number|null>(null);
 
   // Upload from local
   const handleLocalClick = () => {
@@ -76,10 +77,12 @@ export default function QA() {
   };
 
   // Send category selection (handles both local and shelf)
-  const handleCategorySelect = async (category: string, file: UploadedFile) => {
+  const handleCategorySelect = async (category: string, file: UploadedFile, index:number) => {
     if (!user) return;
 
     try {
+      // highlighting the category selected file box
+      setCategorySelectedIndex(index);
       // Close popup after selecting category
       setSelectedFileIndex(null);
 
@@ -135,7 +138,11 @@ export default function QA() {
           p={3}
         >
           <Box h="65vh" p={3} overflowY="auto">
-            {uploadedFiles.map((file, index) => (
+            {uploadedFiles.map((file, index) => {
+              const isSelected = selectedFileIndex ===index;
+              const isCategoryChosen = categorySelectedIndex === index;
+
+              return(
               <Box
                 key={index}
                 className="file-item"
@@ -168,7 +175,7 @@ export default function QA() {
                   }}
                 />
 
-                {selectedFileIndex === index && (
+                {isSelected && (
                   <Portal>
                     <Box
                       position="absolute"
@@ -189,7 +196,7 @@ export default function QA() {
                         w="100%"
                         size="sm"
                         variant="ghost"
-                        onClick={() => handleCategorySelect("mcq", file)}
+                        onClick={() => handleCategorySelect("mcq", file, index)}
                       >
                         MCQ
                       </Button>
@@ -197,7 +204,7 @@ export default function QA() {
                         w="100%"
                         size="sm"
                         variant="ghost"
-                        onClick={() => handleCategorySelect("true_false", file)}
+                        onClick={() => handleCategorySelect("true_false", file, index)}
                       >
                         True / False
                       </Button>
@@ -205,7 +212,7 @@ export default function QA() {
                         w="100%"
                         size="sm"
                         variant="ghost"
-                        onClick={() => handleCategorySelect("fact", file)}
+                        onClick={() => handleCategorySelect("fact", file, index)}
                       >
                         Fact Q&A
                       </Button>
@@ -213,7 +220,8 @@ export default function QA() {
                   </Portal>
                 )}
               </Box>
-            ))}
+            );
+            })}
           </Box>
 
           <VStack spacing={3} align="stretch">
