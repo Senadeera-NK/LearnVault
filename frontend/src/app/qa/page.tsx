@@ -68,8 +68,9 @@ export default function QA() {
       if(!user) return;
       try{
         const fileURL = (file as any).url || URL.createObjectURL(file as File);
-        await send_qa_selection(user.id, fileURL, category);
         console.log("Sent", {userId:user.id, fileURL, category})
+        const result = await send_qa_selection(user.id, fileURL, category);
+        console.log("QA generation output: ", result?.result?.qa_content);
       }catch(err){
         console.error("Failed to send category selection: ", err);
       }

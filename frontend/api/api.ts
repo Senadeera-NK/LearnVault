@@ -163,7 +163,9 @@ export async function send_qa_selection(userId:number, fileURL:string, category:
     body:JSON.stringify({userId, fileURL, category}),
   });
   if(!res.ok) throw new Error("failed to send data");
-  return await res.json();
+  const data = res.json();
+  console.log("DEBUG: QA API response: ", data);
+  return data;
 }
  catch(err){
   console.error("Error sending QA selection", err)
