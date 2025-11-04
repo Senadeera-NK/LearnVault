@@ -8,20 +8,28 @@ import {
   VStack,
   Text,
   IconButton,
-  Portal
+  Portal,
 } from "@chakra-ui/react";
 import { Trash2 } from "lucide-react";
 import { usePageTimer } from "../../components/UsePageTimer";
-import { recordUsage, fetch_user_pdfs,send_qa_selection } from "../../../api/api";
+import {
+  recordUsage,
+  fetch_user_pdfs,
+  send_qa_selection,
+} from "../../../api/api";
 import { useAuth } from "@/components/AuthContext";
 import ShelfWindow from "./components/ShelfWindow";
-import { projectHmrEvents } from "next/dist/build/swc/generated-native";
 
 export default function QA() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { user } = useAuth();
 
-  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  // Types
+  type LocalFile = File & { source: "local" };
+  type ShelfFile = { name: string; url: string; source: "shelf" };
+  type UploadedFile = LocalFile | ShelfFile;
+
+  const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
   const [shelfFiles, setShelfFiles] = useState<
     { id: string; name: string; url: string }[]
   >([]);
@@ -30,17 +38,21 @@ export default function QA() {
   );
   const [isShelfOpen, setIsShelfOpen] = useState(false);
 
-  // Upload from device
+  // Upload from local
   const handleLocalClick = () => {
     fileInputRef.current?.click();
   };
 
-  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
-    if (!files || !user) return;
-    setUploadedFiles(Array.from(files));
+    if (!files) return;
+    const localFiles: UploadedFile[] = Array.from(files).map((file) =>
+      Object.assign(file, { source: "local" as const })
+    );
+    setUploadedFiles((prev) => [...prev, ...localFiles]);
   };
 
+  // Delete a file
   const handleDeleteFile = (index: number) => {
     setUploadedFiles((prev) => prev.filter((_, i) => i !== index));
   };
@@ -55,7 +67,7 @@ export default function QA() {
     }
   });
 
-  // Helper function to extract file name from URL
+  // Helper: extract filename from URL
   const extractFileName = (url: string) => {
     if (!url) return "unknown.pdf";
     const cleanUrl = url.trim().replace(/\r?\n/g, "");
@@ -63,79 +75,65 @@ export default function QA() {
     return parts[parts.length - 1].replace(/\?.*$/, "");
   };
 
-// funciton to handle selected category
-  const handleCategorySelect = async(category:string, file:File|{name:string,url:string}) =>{
-    console.log("Clicked category: ", category, file);
-    if(!user) {return <Box textAlign="center" mt="50px">Loading the user...</Box>}
-      try{
-        const fileURL = (file as any).url || URL.createObjectURL(file as File);
-        console.log("Sent", {userId:user.id, fileURL, category})
-        const result = await send_qa_selection(user.id, fileURL, category);
-        console.log("QA generation output: ", result?.result?.qa_content);
-      }catch(err){
-        console.error("Failed to send category selection: ", err);
-      }
-  }
+  // Send category selection (handles both local and shelf)
+  const handleCategorySelect = async (category: string, file: UploadedFile) => {
+    if (!user) return;
 
+    try {
+      // Close popup after selecting category
+      setSelectedFileIndex(null);
 
-  // Fetch shelf files on load
+      let fileURL = "";
+      if (file.source === "shelf") fileURL = file.url;
+      else if (file.source === "local") fileURL = URL.createObjectURL(file);
+
+      console.log("Sending QA request:", { userId: user.id, fileURL, category });
+      const result = await send_qa_selection(user.id, fileURL, category);
+      console.log("QA generation result:", result?.result?.qa_content);
+    } catch (err) {
+      console.error("Error sending QA selection:", err);
+    }
+  };
+
+  // Fetch shelf files
   useEffect(() => {
     const fetchShelfFiles = async () => {
       if (!user) return;
       try {
         const res = await fetch_user_pdfs(user.id);
-        const formattedPdfs =
+        const formatted =
           (res.details || []).map((file: any) => ({
             id: file.id,
             name: extractFileName(file.file_url),
             url: file.file_url,
           })) || [];
-        setShelfFiles(formattedPdfs);
+        setShelfFiles(formatted);
       } catch (err) {
         console.error("Error fetching shelf files:", err);
       }
     };
-
     fetchShelfFiles();
   }, [user]);
 
-  // Close options modal when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      const target = event.target as HTMLElement;
-      if (!target.closest(".file-item")) {
-        setSelectedFileIndex(null);
-      }
-    };
-    document.addEventListener("click", handleClickOutside);
-    return () => document.removeEventListener("click", handleClickOutside);
-  }, []);
-
-  // Merge local and shelf files for ShelfWindow
-  const allFiles = [
-    ...uploadedFiles.map((file, index) => ({
-      id: `local-${index}`,
-      name: file.name,
-      url: URL.createObjectURL(file),
-    })),
-    ...shelfFiles.map((file) => ({
-      id: `server-${file.id}`,
-      name: file.name,
-      url: file.url,
-    })),
-  ];
-
   return (
     <>
-      <Box display="flex" flexDirection="column" justifyContent="flex-start" pt="10px">
-        <Heading mb="20px" textAlign="center" w="100%">
+      <Box display="flex" flexDirection="column" pt="10px">
+        <Heading mb="20px" textAlign="center">
           Q & A
         </Heading>
       </Box>
 
       <Box display="flex" justifyContent="space-between" w="90%" mx="auto">
-        {/* Left panel: uploaded files */}
-        <Box w="30%" h="80vh" mx="auto" border="1px solid" borderColor="gray.300" borderRadius="lg" p={3}>
+        {/* Left panel */}
+        <Box
+          w="30%"
+          h="80vh"
+          mx="auto"
+          border="1px solid"
+          borderColor="gray.300"
+          borderRadius="lg"
+          p={3}
+        >
           <Box h="65vh" p={3} overflowY="auto">
             {uploadedFiles.map((file, index) => (
               <Box
@@ -154,15 +152,7 @@ export default function QA() {
                 _hover={{ bg: "gray.100", cursor: "pointer" }}
                 onClick={() => setSelectedFileIndex(index)}
               >
-                <Text
-                  fontSize="sm"
-                  color="gray.700"
-                  flex="1"
-                  isTruncated
-                  whiteSpace="nowrap"
-                  overflow="hidden"
-                  textOverflow="ellipsis"
-                >
+                <Text fontSize="sm" color="gray.700" flex="1" isTruncated>
                   {file.name}
                 </Text>
 
@@ -178,49 +168,48 @@ export default function QA() {
                   }}
                 />
 
-                {/* Options modal */}
                 {selectedFileIndex === index && (
                   <Portal>
-                  <Box
-                    position="absolute"
-                    left="35%"
-                    top={`${100+index*60}px`}
-                    transform="translate(-50%)"
-                    w={["90%","200px"]} //responsive for mobile-desktop
-                    p={3}
-                    bg="white"
-                    border="1px solid"
-                    borderColor="gray.300"
-                    borderRadius="md"
-                    shadow="md"
-                    zIndex={2000}
-                    onClick={(e)=>e.stopPropagation()}
-                  >
-                    <Button
-                      w="100%"
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => handleCategorySelect("mcq", file)}
+                    <Box
+                      position="absolute"
+                      left="35%"
+                      top={`${100 + index * 60}px`}
+                      transform="translate(-50%)"
+                      w={["90%", "200px"]}
+                      p={3}
+                      bg="white"
+                      border="1px solid"
+                      borderColor="gray.300"
+                      borderRadius="md"
+                      shadow="md"
+                      zIndex={2000}
+                      onClick={(e) => e.stopPropagation()}
                     >
-                      MCQ
-                    </Button>
-                    <Button
-                      w="100%"
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => handleCategorySelect("true_false", file)}
-                    >
-                      True/False
-                    </Button>
-                    <Button
-                      w="100%"
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => handleCategorySelect("fact", file)}
-                    >
-                      Fact Q&A
-                    </Button>
-                  </Box>
+                      <Button
+                        w="100%"
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => handleCategorySelect("mcq", file)}
+                      >
+                        MCQ
+                      </Button>
+                      <Button
+                        w="100%"
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => handleCategorySelect("true_false", file)}
+                      >
+                        True / False
+                      </Button>
+                      <Button
+                        w="100%"
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => handleCategorySelect("fact", file)}
+                      >
+                        Fact Q&A
+                      </Button>
+                    </Box>
                   </Portal>
                 )}
               </Box>
@@ -228,11 +217,19 @@ export default function QA() {
           </Box>
 
           <VStack spacing={3} align="stretch">
-            <Button colorScheme="gray" w="100%" onClick={() => setIsShelfOpen(true)}>
+            <Button
+              colorScheme="gray"
+              w="100%"
+              onClick={() => {
+                // ensure any inline popup is closed before modal
+                setSelectedFileIndex(null);
+                setIsShelfOpen(true);
+              }}
+            >
               Add from shelf
             </Button>
             <Button colorScheme="gray" w="100%" onClick={handleLocalClick}>
-              Upload from the device
+              Upload from device
             </Button>
             <input
               type="file"
@@ -246,18 +243,27 @@ export default function QA() {
         </Box>
 
         {/* Right panel */}
-        <Box w="60%" mx="auto" border="1px solid" borderColor="gray.300" borderRadius="lg" p={3}></Box>
+        <Box
+          w="60%"
+          mx="auto"
+          border="1px solid"
+          borderColor="gray.300"
+          borderRadius="lg"
+          p={3}
+        ></Box>
 
-        {/* Shelf window modal */}
+        {/* Shelf modal */}
         <ShelfWindow
           isOpen={isShelfOpen}
           onClose={() => setIsShelfOpen(false)}
-          files={allFiles}
-          onFileSelect={(file)=>{
-            //add selected shelf file to uploaded files
-            setUploadedFiles((prev)=>[...prev,
-              new File([], file.name, {type:"application/pdf"}),
+          files={shelfFiles}
+          onFileSelect={(file) => {
+            // when user clicks Done, this will run
+            setUploadedFiles((prev) => [
+              ...prev,
+              { name: file.name, url: file.url, source: "shelf" },
             ]);
+            setIsShelfOpen(false);
           }}
         />
       </Box>

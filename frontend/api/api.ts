@@ -156,6 +156,7 @@ console.log("current API URL:", API_URL);
 // for sending QAselection of the user
 export async function send_qa_selection(userId:number, fileURL:string, category:string){
   try{
+  console.log("DEBUG: Sending QA request to:", `${API_URL}/qa/selection`);
   const res = await fetch(`${API_URL}/qa/selection`,{
     method:'POST',
     headers:{
@@ -169,7 +170,8 @@ export async function send_qa_selection(userId:number, fileURL:string, category:
   return data;
 }
  catch(err){
-  console.error("Error sending QA selection", err)
+  console.error("Error sending QA selection", err);
+  return null;
   }
 }
 
