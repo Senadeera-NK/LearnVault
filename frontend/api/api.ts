@@ -1,7 +1,7 @@
 // services/api.ts
 
 // Use your Codespaces-provided forwarded URL here
-const API_URL = "https://learnvault-jdbg.onrender.com";
+const API_URL = process.env.NEXT_PUBLIC_API_URL ||"https://learnvault-jdbg.onrender.com";
 // "proxy": "http://localhost:8000"
 
 export async function signup(name: string, email: string, password: string) {
@@ -151,6 +151,7 @@ export async function txt_file_convert(userId:number, title:string, text:string)
   return res.json();
 }
 
+console.log("current API URL:", API_URL);
 
 // for sending QAselection of the user
 export async function send_qa_selection(userId:number, fileURL:string, category:string){
@@ -163,7 +164,7 @@ export async function send_qa_selection(userId:number, fileURL:string, category:
     body:JSON.stringify({userId, fileURL, category}),
   });
   if(!res.ok) throw new Error("failed to send data");
-  const data = res.json();
+  const data = await res.json();
   console.log("DEBUG: QA API response: ", data);
   return data;
 }

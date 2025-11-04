@@ -65,7 +65,8 @@ export default function QA() {
 
 // funciton to handle selected category
   const handleCategorySelect = async(category:string, file:File|{name:string,url:string}) =>{
-      if(!user) return;
+    console.log("Clicked category: ", category, file);
+    if(!user) {return <Box textAlign="center" mt="50px">Loading the user...</Box>}
       try{
         const fileURL = (file as any).url || URL.createObjectURL(file as File);
         console.log("Sent", {userId:user.id, fileURL, category})
@@ -193,6 +194,7 @@ export default function QA() {
                     borderRadius="md"
                     shadow="md"
                     zIndex={2000}
+                    onClick={(e)=>e.stopPropagation()}
                   >
                     <Button
                       w="100%"
@@ -253,9 +255,8 @@ export default function QA() {
           files={allFiles}
           onFileSelect={(file)=>{
             //add selected shelf file to uploaded files
-            setUploadedFiles((prev)=>[
-              ...prev,
-              new File([], file.name, {type:"applicatoin/pdf"}),
+            setUploadedFiles((prev)=>[...prev,
+              new File([], file.name, {type:"application/pdf"}),
             ]);
           }}
         />
