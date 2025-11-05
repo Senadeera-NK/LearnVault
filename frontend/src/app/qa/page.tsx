@@ -19,6 +19,9 @@ import {
 } from "../../../api/api";
 import { useAuth } from "@/components/AuthContext";
 import ShelfWindow from "./components/ShelfWindow";
+import MCQskeleton from "./components/MCQskeleton";
+import FactQAskeleton from "./components/FactQAskeleton";
+import TrueFalseSkeleton from "./components/TrueFalseSkeleton";
 
 export default function QA() {
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -38,6 +41,8 @@ export default function QA() {
   );
   const [isShelfOpen, setIsShelfOpen] = useState(false);
   const [categorySelectedIndex, setCategorySelectedIndex] = useState<number|null>(null);
+  const [qaCategory, setQaCategory] = useState<string | null>(null);
+  const [qaContent, setQaContent] = useState<any[]>([]);
 
   // Upload from local
   const handleLocalClick = () => {
@@ -92,7 +97,12 @@ export default function QA() {
 
       console.log("Sending QA request:", { userId: user.id, fileURL, category });
       const result = await send_qa_selection(user.id, fileURL, category);
+
+      const qa_json = result?.result?.qa_content;
       console.log("QA generation result:", result?.result?.qa_content);
+
+      setQaCategory(category);
+      setQaContent(qa_json);
     } catch (err) {
       console.error("Error sending QA selection:", err);
     }
@@ -258,7 +268,17 @@ export default function QA() {
           borderColor="gray.300"
           borderRadius="lg"
           p={3}
-        ></Box>
+        >
+          {qaCategory === "mcq" && <MCQskeleton data={qaContent}/>}
+          {qaCategory === "true_false" && <TrueFalseSkeleton data={qaContent}/>}
+          {qaCategory === "fact" && <FactQAskeleton data={qaContent}/>}
+
+          {!qaCategory && (
+            <Text color="gray.500" textAlign="center" mt={10}>
+              Select a category to generate Q&A
+            </Text>
+          )}
+        </Box>
 
         {/* Shelf modal */}
         <ShelfWindow
