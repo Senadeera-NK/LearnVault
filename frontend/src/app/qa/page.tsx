@@ -6,9 +6,11 @@ import {
   Heading,
   Button,
   VStack,
+  HStack,
   Text,
   IconButton,
   Portal,
+  Flex
 } from "@chakra-ui/react";
 import { Trash2 } from "lucide-react";
 import { usePageTimer } from "../../components/UsePageTimer";
@@ -260,9 +262,10 @@ export default function QA() {
           </VStack>
         </Box>
 
+        <Flex direction="column" align="center" w="60%">
         {/* Right panel */}
         <Box
-          w="60%"
+          w="100%"
           mx="auto"
           border="1px solid"
           borderColor="gray.300"
@@ -282,6 +285,12 @@ export default function QA() {
             </Text>
           )}
         </Box>
+
+        <HStack spacing={4} mt={4}>
+          <Button>Check Answers</Button>
+          <Button>Refresh</Button>
+        </HStack>
+        </Flex>
 
         {/* Shelf modal */}
         <ShelfWindow
