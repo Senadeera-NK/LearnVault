@@ -23,8 +23,8 @@ export default function TrueFalseSkeleton({ data }:TrueFalseSkeletonProps){
                 <Box key={index} p={3} border="1px solid" borderColor="gray.200">
                     <Text fontWeight="semibold" pb={2}>{index+1}. {qa.question}</Text>
                     <HStack align="stretch" spacing={2}>
-                        <Button value="true" colorScheme={selectedAnswer[index]==="true"?"green":"gray"} onClick={()=>handleSelect(index, "true")}>True</Button>
-                        <Button value="true" colorScheme={selectedAnswer[index]==="false"?"red":"gray"} onClick={()=>{handleSelect(index, "false")}}>False</Button>
+                        <Button value="true" colorScheme={selectedAnswer[index]==="true"?"blue":"gray"} onClick={()=>handleSelect(index, "true")}>True</Button>
+                        <Button value="true" colorScheme={selectedAnswer[index]==="false"?"brown":"gray"} onClick={()=>{handleSelect(index, "false")}}>False</Button>
                     </HStack>
                 </Box>
             ))}
