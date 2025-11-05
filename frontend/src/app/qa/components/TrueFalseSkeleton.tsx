@@ -12,11 +12,12 @@ interface TrueFalseSkeletonProps{
 }
 export default function MCQskeleton({ data }:TrueFalseSkeletonProps){
     return(
-        <VStack>
+        <VStack align="stretch" spacing={3}>
             {data.map((qa,index)=>(
                 <Box key={index} p={3} border="1px solid" borderColor="gray.200">
-                    <Text fontWeight="semibold">{qa.question}</Text>
-                    <Text color="green.600" mt={2}>{qa.answer}</Text>
+                    <Text fontWeight="semibold" pb={2}>{index+1}. {qa.question}</Text>
+                    <Button value="true">True</Button>
+                    <Button value="false">False</Button>
                 </Box>
             ))}
         </VStack>

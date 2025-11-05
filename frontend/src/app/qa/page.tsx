@@ -268,6 +268,9 @@ export default function QA() {
           borderColor="gray.300"
           borderRadius="lg"
           p={3}
+          h="80vh"
+          overflowY="auto"
+          overflowX="hidden"
         >
           {qaCategory === "mcq" && <MCQskeleton data={qaContent}/>}
           {qaCategory === "true_false" && <TrueFalseSkeleton data={qaContent}/>}
