@@ -12,7 +12,6 @@ interface FactQAskeletonProps{
 }
 export default function FactQAskeleton({ data }:FactQAskeletonProps){
     return(
-        <Box w="100%">
             <VStack align="stretch" spacing={3}>
                 {data.map((qa,index)=>(
                     <Box key={index} p={3} border="1px solid" borderColor="gray.200" w="100%">
@@ -25,6 +24,5 @@ export default function FactQAskeleton({ data }:FactQAskeletonProps){
                     </Box>
                 ))}
             </VStack>
-        </Box>
     );
 }
