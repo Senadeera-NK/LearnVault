@@ -1,7 +1,7 @@
 from services.supabase_config import SUPABASE_URL, SUPABASE_KEY
 from supabase import create_client
 import tempfile, os
-import datetime
+from datetime import datetime, timezone
 from urllib.parse import urlparse
 import re
 
@@ -11,12 +11,13 @@ async def upload_temp_file(user_id:int, file):
     try:
         temp_dir = tempfile.gettempdir()
         temp_path = os.path.join(temp_dir,file.filename)
+        timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H-%M")
         
         contents = await file.read()
         with open(temp_path, "wb") as buffer:
                 buffer.write(contents)
         
-        storage_path = f"temp_user_{user_id}/{file.filename}"
+        storage_path = f"temp_{timestamp}_user_{user_id}/{file.filename}"
         with open(temp_path, "rb") as f:
             supabase.storage.from_("user_pdfs").upload(storage_path,f,{"upsert":"true"})
         
