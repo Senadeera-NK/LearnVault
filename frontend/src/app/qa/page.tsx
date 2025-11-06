@@ -18,6 +18,7 @@ import {
   recordUsage,
   fetch_user_pdfs,
   send_qa_selection,
+  uploadFile
 } from "../../../api/api";
 import { useAuth } from "@/components/AuthContext";
 import ShelfWindow from "./components/ShelfWindow";
@@ -95,7 +96,17 @@ export default function QA() {
 
       let fileURL = "";
       if (file.source === "shelf") fileURL = file.url;
-      else if (file.source === "local") fileURL = URL.createObjectURL(file);
+      else if (file.source === "local"){
+        console.log("uploading temporary filei to backend..");
+        const uploadResponse = await uploadFile(user.id, file);
+        console.log("temp upload response: ", uploadResponse);
+
+        if(!uploadResponse?.file_url){
+          console.error("failed to upload temp file");
+          return;
+        }
+        fileURL = uploadResponse.file_url;
+      }
 
       console.log("Sending QA request:", { userId: user.id, fileURL, category });
       const result = await send_qa_selection(user.id, fileURL, category);
