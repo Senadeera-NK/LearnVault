@@ -175,6 +175,19 @@ export async function send_qa_selection(userId:number, fileURL:string, category:
   }
 }
 
+export async function uploadFile(userId:number, file:File){
+  const formData = new FormData();
+  formData.append("user_id", String(userId));
+  formData.append("file",file);
+
+  const res = await fetch(`${API_URL}/temp_upload`,{
+    method:"POST",
+    body:formData,
+  });
+  if(!res.ok)throw new Error("Failed to upload temperory file");
+  return res.json();
+}
+
 
 // Example usage:
 // (async () => {
@@ -184,7 +197,7 @@ export async function send_qa_selection(userId:number, fileURL:string, category:
 //   } catch (error) {
 //     console.error("❌ Signup failed:", error);
 //   }
-// })();  
+// })(); 
 
 // ------ neon auth -----------
 // export async function neon_signup(name:string, email:string, password:string){
