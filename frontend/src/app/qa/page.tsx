@@ -46,6 +46,7 @@ export default function QA() {
   const [categorySelectedIndex, setCategorySelectedIndex] = useState<number|null>(null);
   const [qaCategory, setQaCategory] = useState<string | null>(null);
   const [qaContent, setQaContent] = useState<any[]>([]);
+  const [checkAnswersTrigger, setCheckAnswersTrigger] = useState(0);
 
   // Upload from local
   const handleLocalClick = () => {
@@ -121,6 +122,9 @@ export default function QA() {
     }
   };
 
+  const checkUserAnswer = () =>{
+    setCheckAnswersTrigger(prev=>prev+1)
+  }
   // Fetch shelf files
   useEffect(() => {
     const fetchShelfFiles = async () => {
@@ -286,8 +290,8 @@ export default function QA() {
           overflowY="auto"
           overflowX="hidden"
         >
-          {qaCategory === "mcq" && <MCQskeleton data={qaContent}/>}
-          {qaCategory === "true_false" && <TrueFalseSkeleton data={qaContent}/>}
+          {qaCategory === "mcq" && (<MCQskeleton data={qaContent} checkAnswerTrigger={checkAnswersTrigger} />)}
+          {qaCategory === "true_false" && (<TrueFalseSkeleton data={qaContent} checkAnswerTrigger={checkAnswersTrigger}/>)}
           {qaCategory === "fact" && <FactQAskeleton data={qaContent}/>}
 
           {!qaCategory && (
@@ -298,7 +302,7 @@ export default function QA() {
         </Box>
 
         <HStack spacing={4} mt={4}>
-          <Button>Check Answers</Button>
+          <Button onClick={checkUserAnswer}>Check Answers</Button>
           <Button>Refresh</Button>
         </HStack>
         </Flex>

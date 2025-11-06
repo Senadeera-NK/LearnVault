@@ -17,7 +17,7 @@ def cleanup_temp_folders():
         response = supabase.storage.from_(BUCKET_NAME).list(path="", options={"limit":1000})
         now = datetime.now(timezone.utc)
         deleted = 0
-        
+
         for item in response:
             name = item["name"]
             if not name.startswith(TEMP_PREFIX):
