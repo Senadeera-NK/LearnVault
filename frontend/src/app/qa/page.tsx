@@ -97,7 +97,7 @@ export default function QA() {
       let fileURL = "";
       if (file.source === "shelf") fileURL = file.url;
       else if (file.source === "local"){
-        console.log("uploading temporary filei to backend..");
+        console.log("uploading temporary file to backend..");
         const uploadResponse = await uploadFile(user.id, file);
         console.log("temp upload response: ", uploadResponse);
 
