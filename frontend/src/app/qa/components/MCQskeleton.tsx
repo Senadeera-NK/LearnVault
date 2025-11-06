@@ -31,9 +31,14 @@ export default function MCQskeleton({ data, checkAnswerTrigger }: MCQskeletonPro
 
   const checkAnswers = () => {
     const newResults: Record<number, boolean> = {};
+    const letters = ["A", "B","C","D"]
+
     data.forEach((qa, index) => {
       const userAnswer = selectedAnswer[index];
-      newResults[index] = userAnswer?.trim().toLowerCase() === qa.answer.trim().toLowerCase();
+    //   find the correct letter for the answer
+    const selectedLetter = letters[qa.options.findIndex(opt=>opt===userAnswer)];
+
+    newResults[index]=selectedLetter===qa.answer;
     });
     setResult(newResults);
   };
@@ -43,6 +48,7 @@ export default function MCQskeleton({ data, checkAnswerTrigger }: MCQskeletonPro
       {data.map((qa, index) => {
         const userAnswer = selectedAnswer[index];
         const isCorrect = result[index];
+        const letters = ["A", "B","C","D"]
 
         return (
           <Box
@@ -64,8 +70,10 @@ export default function MCQskeleton({ data, checkAnswerTrigger }: MCQskeletonPro
 
             <VStack align="stretch" spacing={2}>
               {qa.options?.map((opt, i) => {
+                const letter = letters[i];
                 const isSelected = userAnswer === opt;
-                const isCorrectAnswer = result[index] !== undefined && qa.answer === opt;
+                const isCorrectAnswer =
+                 result[index] !== undefined && qa.answer === letter;
 
                 return (
                   <Button
