@@ -2,6 +2,8 @@ from services.supabase_config import SUPABASE_URL, SUPABASE_KEY
 from supabase import create_client
 import tempfile, os
 import datetime
+from urllib.parse import urlparse
+import re
 
 supabase = create_client(SUPABASE_URL,SUPABASE_KEY)
 
@@ -25,13 +27,18 @@ async def upload_temp_file(user_id:int, file):
     except Exception as e:
         return {"success":False, "error":str(e)}
 
-def cleanup_temp_files():
+
+def delete_supabase_file(public_url: str):
+    """Delete file from Supabase storage given its public URL"""
     try:
-        all_files = supabase.storage.from_("user_pdfs").list("temp_user_")
-        cutoff_time = datetime.utcnow() - datetime.timedelta(hours=24)
-        for f in all_files:
-            if f["created_at"] < cutoff_time.isoformat():
-                supabase.storage.from_("users_pdfs").remove(f["name"])
-        print("old temp files cleaned")
+        parts = urlparse(public_url)
+        # Extract path after bucket name
+        match = re.search(r'/storage/v1/object/public/([^/]+)/(.+)', parts.path)
+        if not match:
+            print("DEBUG: Could not parse URL for deletion:", public_url)
+            return
+        bucket, file_path = match.groups()
+        supabase.storage.from_(bucket).remove([file_path])
+        print(f"DEBUG: Deleted temp file from {bucket}/{file_path}")
     except Exception as e:
-        print("cleanup error: ", e)
+        print(f"DEBUG: Error deleting file: {e}")
