@@ -9,7 +9,9 @@ async def temp_upload(user_id:int = Form(...), file:UploadFile=File(...)):
     try:
         result = await upload_temp_file(user_id, file)
         if result.get("success"):
+            print("successfully uploaded the temp file")
             return {"message":"temporary file uploaded", "file_url":result["file_url"]}
         raise HTTPException(status_code=400, detail=result.get("error", "Upload failed"))
     except Exception as e:
+        print("error uploading the temp file: ", str(e))
         raise HTTPException(status_code=500, detail=str(e))
