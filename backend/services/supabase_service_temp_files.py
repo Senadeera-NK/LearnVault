@@ -20,7 +20,7 @@ async def upload_temp_file(user_id:int, file):
         with open(temp_path, "rb") as f:
             supabase.storage.from_("users_pdfs").upload(storage_path,f,{"upsert":"true"})
         
-        file_url = supabase.storage.from_("users_pdpfs").get_public_url(storage_path)
+        file_url = supabase.storage.from_("users_pdfs").get_public_url(storage_path)
         os.remove(temp_path)
         
         return {"success":True, "file_url":file_url}
