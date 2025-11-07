@@ -307,7 +307,8 @@ export default function QA() {
 
         <HStack spacing={4} mt={4}>
           <Button onClick={checkUserAnswer}>Check Answers</Button>
-          <Button onClick={refrehshUserAnswers}>Refresh</Button>
+          <Button onClick={checkUserAnswer}>Show Answers</Button>
+          <Button onClick={refrehshUserAnswers}>Reset</Button>
         </HStack>
         </Flex>
 
