@@ -1,7 +1,8 @@
 "use client";
 
 import {   Box,VStack,Text,Textarea } from "@chakra-ui/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import stringSimilarity from "string-similarity";
 
 interface FactQAItem {
     question:string;
@@ -12,13 +13,52 @@ interface FactQAskeletonProps{
     checkAnswerTrigger:number;
 }
 export default function FactQAskeleton({ data, checkAnswerTrigger }:FactQAskeletonProps){
-    const [userAnswer, setUserAnswer] = useState<Record<number, string>>({});
+    const [userAnswers, setUserAnswers] = useState<Record<number, string>>({});
+    const [results, setResults] = useState<Record<number, string>>({});
+
+    const handleChange = (index:number, value:string)=>{
+        setUserAnswers((prev)=>({...prev,[index]:value}));
+    };
+
+    useEffect(()=>{
+        if(checkAnswerTrigger>0){
+            checkAnswer();
+        }
+    },[checkAnswerTrigger]);
+
+    const checkAnswer = ()=>{
+        const newResults: Record<number, string>={};
+        data.forEach((qa,index)=>{
+            const userAnswer = userAnswers[index]||"";
+            const similarity = stringSimilarity.compareTwoStrings(
+                userAnswer.toLowerCase(),
+                qa.answer.toLowerCase()
+            );
+
+            if (similarity>0.9) newResults[index]="correct";
+            else if (similarity>0.6) newResults[index]="nearly correct";
+            else newResults[index] ="incorrect";
+        });
+        setResults(newResults);
+    }
+
     return(
             <VStack align="stretch" spacing={3}>
                 {data.map((qa,index)=>(
-                    <Box key={index} p={3} border="1px solid" borderColor="gray.200" w="100%">
+                    <Box key={index} p={3} border="1px solid"
+                    borderColor={
+                        results[index]==="correct"
+                        ?"green.400"
+                        :results[index]==="nearly correct"
+                        ?"yellow.400"
+                        :results[index]==="incorrect"
+                        ?"red.400"
+                        :"gray.200"
+                    } w="100%">
                         <Text fontWeight="semibold" pb={3}>{index+1}. {qa.question}</Text>
                             <Textarea
+                                value = {userAnswers[index]||""}
+                                onChange={(e)=>handleChange(index,e.target.value)}
                                 placeholder="Write the answer here..."
                                 size="md"
                                 minH="40px"
