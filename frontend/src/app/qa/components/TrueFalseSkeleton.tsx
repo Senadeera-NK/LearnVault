@@ -11,9 +11,10 @@ interface TrueFalseItem {
 interface TrueFalseSkeletonProps{
     data:TrueFalseItem[];
     checkAnswerTrigger:number;
+    refreshTrigger:number;
 }
 
-export default function TrueFalseSkeleton({ data, checkAnswerTrigger }:TrueFalseSkeletonProps){
+export default function TrueFalseSkeleton({ data, checkAnswerTrigger, refreshTrigger }:TrueFalseSkeletonProps){
     const [selectedAnswer, setSelectedAnswer] = useState<Record<number, string>>({});
     const[result,setResult] = useState<Record<number, "correct"|"wrong"|"skipped">>({});
 
@@ -37,7 +38,14 @@ useEffect(()=>{
         }
     });
     setResult(newResults);
+
 },[checkAnswerTrigger]);
+
+// useEffect for refreshing
+useEffect(()=>{
+    setSelectedAnswer({});
+    setResult({});
+},[refreshTrigger]);
 
     return(
         <VStack align="stretch" spacing={3}>
@@ -54,9 +62,9 @@ useEffect(()=>{
                 }
                 bg={
                     status==="correct"
-                    ?"green.50"
+                    ?"green.100"
                     :status==="wrong"
-                    ?"red.50"
+                    ?"red.100"
                     :"white"
                 }
                 >

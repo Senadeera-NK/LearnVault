@@ -12,9 +12,10 @@ interface MCQItem {
 interface MCQskeletonProps {
   data: MCQItem[];
   checkAnswerTrigger: number; // used to trigger answer checking externally
+  refreshTrigger:number;
 }
 
-export default function MCQskeleton({ data, checkAnswerTrigger }: MCQskeletonProps) {
+export default function MCQskeleton({ data, checkAnswerTrigger,refreshTrigger }: MCQskeletonProps) {
   const [selectedAnswer, setSelectedAnswer] = useState<Record<number, string>>({});
   const [result, setResult] = useState<Record<number, boolean>>({});
 
@@ -43,6 +44,12 @@ export default function MCQskeleton({ data, checkAnswerTrigger }: MCQskeletonPro
     setResult(newResults);
   };
 
+// useEffect for refreshing
+useEffect(()=>{
+    setSelectedAnswer({});
+    setResult({});
+},[refreshTrigger]);
+
   return (
     <VStack align="stretch" spacing={3}>
       {data.map((qa, index) => {
@@ -60,6 +67,13 @@ export default function MCQskeleton({ data, checkAnswerTrigger }: MCQskeletonPro
                 ? isCorrect
                   ? "green.400"
                   : "red.400"
+                : "gray.200"
+            }
+            bg={
+              result[index] !== undefined
+                ? isCorrect
+                  ? "green.100"
+                  : "red.100"
                 : "gray.200"
             }
             borderRadius="md"

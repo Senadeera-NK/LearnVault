@@ -11,8 +11,9 @@ interface FactQAItem {
 interface FactQAskeletonProps{
     data:FactQAItem[];
     checkAnswerTrigger:number;
+    refreshTrigger:number;
 }
-export default function FactQAskeleton({ data, checkAnswerTrigger }:FactQAskeletonProps){
+export default function FactQAskeleton({ data, checkAnswerTrigger,refreshTrigger }:FactQAskeletonProps){
     const [userAnswers, setUserAnswers] = useState<Record<number, string>>({});
     const [results, setResults] = useState<Record<number, string>>({});
 
@@ -25,6 +26,12 @@ export default function FactQAskeleton({ data, checkAnswerTrigger }:FactQAskelet
             checkAnswer();
         }
     },[checkAnswerTrigger]);
+
+    // useEffect for refreshing
+    useEffect(()=>{
+        setUserAnswers({});
+        setResults({});
+    },[refreshTrigger]);
 
     const checkAnswer = ()=>{
         const newResults: Record<number, string>={};
@@ -54,7 +61,17 @@ export default function FactQAskeleton({ data, checkAnswerTrigger }:FactQAskelet
                         :results[index]==="incorrect"
                         ?"red.400"
                         :"gray.200"
-                    } w="100%">
+                    }
+                    bg={
+                        results[index]==="correct"
+                        ?"green.100"
+                        :results[index]==="nearly correct"
+                        ?"yellow.100"
+                        :results[index]==="incorrect"
+                        ?"red.10"
+                        :"gray.200"
+                    }
+                    w="100%">
                         <Text fontWeight="semibold" pb={3}>{index+1}. {qa.question}</Text>
                             <Textarea
                                 value = {userAnswers[index]||""}
