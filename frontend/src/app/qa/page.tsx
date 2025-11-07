@@ -292,7 +292,7 @@ export default function QA() {
         >
           {qaCategory === "mcq" && (<MCQskeleton data={qaContent} checkAnswerTrigger={checkAnswersTrigger} />)}
           {qaCategory === "true_false" && (<TrueFalseSkeleton data={qaContent} checkAnswerTrigger={checkAnswersTrigger}/>)}
-          {qaCategory === "fact" && <FactQAskeleton data={qaContent}/>}
+          {qaCategory === "fact" && (<FactQAskeleton data={qaContent} checkAnswerTrigger={checkAnswersTrigger}/>)}
 
           {!qaCategory && (
             <Text color="gray.500" textAlign="center" mt={10}>
