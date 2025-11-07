@@ -1,16 +1,18 @@
 "use client";
 
 import {   Box,VStack,Text,Textarea } from "@chakra-ui/react";
+import { useState } from "react";
 
 interface FactQAItem {
     question:string;
     answer:string;
 }
-
 interface FactQAskeletonProps{
     data:FactQAItem[];
+    checkAnswerTrigger:number;
 }
-export default function FactQAskeleton({ data }:FactQAskeletonProps){
+export default function FactQAskeleton({ data, checkAnswerTrigger }:FactQAskeletonProps){
+    const [userAnswer, setUserAnswer] = useState<Record<number, string>>({});
     return(
             <VStack align="stretch" spacing={3}>
                 {data.map((qa,index)=>(
