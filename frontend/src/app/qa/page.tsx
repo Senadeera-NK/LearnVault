@@ -10,7 +10,8 @@ import {
   Text,
   IconButton,
   Portal,
-  Flex
+  Flex,
+  Spinner
 } from "@chakra-ui/react";
 import { Trash2 } from "lucide-react";
 import { usePageTimer } from "../../components/UsePageTimer";
@@ -42,6 +43,7 @@ export default function QA() {
   const [selectedFileIndex, setSelectedFileIndex] = useState<number | null>(
     null
   );
+  const [loading, setLoading] = useState(false);
   const [isShelfOpen, setIsShelfOpen] = useState(false);
   const [categorySelectedIndex, setCategorySelectedIndex] = useState<number|null>(null);
   const [qaCategory, setQaCategory] = useState<string | null>(null);
@@ -89,13 +91,12 @@ export default function QA() {
   // Send category selection (handles both local and shelf)
   const handleCategorySelect = async (category: string, file: UploadedFile, index:number) => {
     if (!user) return;
-
+    setLoading(true);
     try {
       // highlighting the category selected file box
       setCategorySelectedIndex(index);
       // Close popup after selecting category
       setSelectedFileIndex(null);
-
       let fileURL = "";
       if (file.source === "shelf") fileURL = file.url;
       else if (file.source === "local"){
@@ -120,6 +121,8 @@ export default function QA() {
       setQaContent(qa_json);
     } catch (err) {
       console.error("Error sending QA selection:", err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -327,6 +330,29 @@ export default function QA() {
           }}
         />
       </Box>
+            {/* Fullscreen Spinner Overlay */}
+            {loading && (
+              <Box
+                position="fixed"
+                top="0"
+                left="0"
+                width="100vw"
+                height="100vh"
+                display="flex"
+                justifyContent="center"
+                alignItems="center"
+                backdropFilter="blur(6px)"
+                backgroundColor="rgba(0, 0, 0, 0.05)" // very light overlay
+                zIndex={10000}
+              >
+                <Spinner
+                  size="xl"
+                  thickness="5px"
+                  speed="0.65s"
+                  color="blue.500"
+                />
+              </Box>
+            )}
     </>
   );
 }
