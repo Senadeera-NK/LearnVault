@@ -26,6 +26,7 @@ export default function Settings() {
             {label:"Enable Notifications", key:"notifications"},
             {label:"Dark Mode", key:"DarkMode"},
             {label:"Auto-Save", key:"autoSave"},
+            {label:"Enable/Disable show answers function",key:"Enable/Disable show answers function"}
        ];
   return(
       <>
