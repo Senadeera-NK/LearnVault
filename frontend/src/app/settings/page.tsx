@@ -25,9 +25,6 @@ export default function Settings() {
       }
       });
        console.log("Rendering Settings for user:", user);
-      const darkLightModeFunc = ()=>{
-            console.log("dark mode");
-      }
        const settingsOptions = [
             {label:"Enable Notifications", key:"notifications"},
             {label:"Dark Mode", key:"DarkMode", func:()=>{
