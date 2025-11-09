@@ -1,13 +1,17 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Box, Heading, VStack, HStack, Text, Switch } from "@chakra-ui/react";
+import { Box, Heading, VStack, HStack, Text, Switch,useColorMode } from "@chakra-ui/react";
 import {usePageTimer} from "../../components/UsePageTimer";
 import {recordUsage} from "../../../api/api";
 import { useAuth } from "@/components/AuthContext";
+import { optionsReducer } from "recharts/types/state/optionsSlice";
 
 export default function Settings() {
       const { user } = useAuth();
+      const{colorMode, toggleColorMode} = useColorMode();
+      const [darkMode, setDarkMode] = useState(colorMode==="dark");
+
       // Track page usage
       usePageTimer("Settings", async (duration) => {
       if (!user) return; // skip if not logged in
@@ -21,10 +25,15 @@ export default function Settings() {
       }
       });
        console.log("Rendering Settings for user:", user);
-
+      const darkLightModeFunc = ()=>{
+            console.log("dark mode");
+      }
        const settingsOptions = [
             {label:"Enable Notifications", key:"notifications"},
-            {label:"Dark Mode", key:"DarkMode"},
+            {label:"Dark Mode", key:"DarkMode", func:()=>{
+                  toggleColorMode();
+                  setDarkMode(!darkMode)}
+            },
             {label:"Auto-Save", key:"autoSave"},
             {label:"Enable/Disable show answers function",key:"Enable/Disable show answers function"}
        ];
@@ -59,7 +68,12 @@ export default function Settings() {
                   borderRadius="md"
                   >
                   <Text>{option.label}</Text>
-                  <Switch />
+                  {option.func?(
+                        <Switch isChecked={darkMode} onChange={option.func}/>
+                  ):(
+                        <Switch/>
+                  )
+            }
                   </HStack>
             ))}
             </VStack>
