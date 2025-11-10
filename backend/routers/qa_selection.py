@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from services.qa_generation import generate_qa_from_file
-from services.save_qa_selection import save_qa_selection
+from services.save_qa_selection import save_qa_selection,user_qa_count_service
 router = APIRouter(prefix="/qa",tags=["QA Selection"])
 
 class QASelectionRequest(BaseModel):
