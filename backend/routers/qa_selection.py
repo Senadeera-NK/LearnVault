@@ -29,3 +29,11 @@ async def create_qa_selection(data:QASelectionRequest):
         return{"message":"data saved successfully", "result":saved_record}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/user_qa_count/{user_id}")
+async def user_qa_count(user_id:int):
+    result = await user_qa_count_service(user_id)
+    if result.get("success"):
+        return {"message":"user qa count received successfully","details":result.get("count")}
+    else:
+        raise HTTPException(status_code=400, detail=result.get("error", "Failed to convert text to PDF"))

@@ -28,3 +28,13 @@ async def save_qa_selection(user_id:str, file_url:str, category:str, qa_content:
         "category":category,
         "file_url":file_url
     }
+
+async def user_qa_count_service(user_id:int):
+    try:
+        response = supabase.table("qa_files").select("id").eq("user_id",user_id).execute()
+        if response.error:
+            return {"success":False, "error":response.error.message}
+        count = len(response.data)
+        return {"success":True, "count":count}
+    except Exception as e:
+        return {"success":False,"error":str(e)}
