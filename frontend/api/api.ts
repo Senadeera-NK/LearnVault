@@ -187,7 +187,16 @@ export async function uploadFile(userId:number, file:File){
   if(!res.ok)throw new Error("Failed to upload temperory file");
   return res.json();
 }
-
+export async function fetch_user_qa_count(user_id:number){
+  const res = await fetch(`${API_URL}/user_qa_count/${user_id}`,{
+    method:'GET'
+  });
+  if(!res.ok){
+    const errData = await res.json().catch(()=>({}));
+    throw new Error(errData.error||"failed to fetch the user qa count");
+  }
+  return res.json();
+}
 
 // Example usage:
 // (async () => {
