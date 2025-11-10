@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../../components/AuthContext";
-import { recordUsage } from "../../../api/api";
+import { recordUsage,fetch_user_qa_count } from "../../../api/api";
 
 // Chakra UI imports
 import { Box, Grid, Card, Text, Heading, Spinner } from "@chakra-ui/react";
@@ -32,6 +32,7 @@ export default function Dashboard() {
   const [dailyUsageData, setDailyUsageData] = useState<{ day: string; hours: number }[]>([]);
   const[fileStats, setFileStats] = useState<{totalFiles:number}|null>(null);
   const[dayStats, setDayStats] = useState<{totalDays:number}|null>(null);
+  const[qaCount, setQaCount] = useState<number|null>(null);
   const userName = user?.name || "Guest";
 
   // Redirect if not logged in
@@ -58,6 +59,19 @@ export default function Dashboard() {
     trackUsage();
   }, [user]);
 
+  // setting the generated QA count of the user
+  useEffect(()=>{
+    if(!user) return;
+    const fetchQaCount=async()=>{
+      try{
+        const data = await fetch_user_qa_count(user.id);
+        setQaCount(data.details);
+      }catch(err){
+        console.error("Failed to load QA count", err);
+      }
+    };
+    fetchQaCount();
+  },[user]);
   if (!user) return null;
 
   return (
@@ -75,7 +89,7 @@ export default function Dashboard() {
         </Card>
         <Card p={4}>
           <Text fontSize="sm" color="gray.500">Total QA Generated</Text>
-          <Text fontSize="2xl" fontWeight="bold">0</Text>
+          <Text fontSize="2xl" fontWeight="bold">{qaCount!==null?qaCount:"0"}</Text>
         </Card>
         <Card p={4}>
           <Text fontSize="sm" color="gray.500">Active Days</Text>
