@@ -188,7 +188,7 @@ export async function uploadFile(userId:number, file:File){
   return res.json();
 }
 export async function fetch_user_qa_count(user_id:number){
-  const res = await fetch(`${API_URL}/user_qa_count/${user_id}`,{
+  const res = await fetch(`${API_URL}/qa/user_qa_count/${user_id}`,{
     method:'GET'
   });
   if(!res.ok){

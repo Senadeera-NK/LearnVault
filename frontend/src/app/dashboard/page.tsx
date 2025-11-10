@@ -66,6 +66,7 @@ export default function Dashboard() {
       try{
         const data = await fetch_user_qa_count(user.id);
         setQaCount(data.details);
+        console.log(qaCount);
       }catch(err){
         console.error("Failed to load QA count", err);
       }
