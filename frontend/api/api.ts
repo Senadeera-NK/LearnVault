@@ -198,7 +198,9 @@ export async function fetch_user_qa_count(user_id:number){
   return res.json();
 }
 
-// Example usage:
+// 
+
+//Example usage:
 // (async () => {
 //   try {
 //     const signupData = await signup("Alice", "alice@example.com", "password123");
