@@ -5,6 +5,7 @@ from utils import extract_text
 from qa_utils import download_file_from_url_qa
 import google.generativeai as genai
 import math
+from services.save_qa_selection import save_qa_incremental
 
 # Configure Gemini API
 GENAI_API_KEY = os.environ.get("GENAI_API_KEY")
@@ -70,11 +71,19 @@ def generate_fact_qa(text_chunk: str, num_questions: int = 20) -> str:
 # -------------------------
 # Parallel QA generation with per-chunk allocation
 # -------------------------
-async def generate_qa_from_file(file_url: str, qa_type: Literal["fact", "true_false", "mcq"], num_questions_total: int = 20) -> dict:
+
+# (keep the previous generate_*_qa and chunk_text functions unchanged)
+
+async def generate_qa_from_file(
+    file_url: str,
+    qa_type: Literal["fact", "true_false", "mcq"],
+    num_questions_total: int = 20,
+    user_id: int = None
+) -> dict:
     """
-    Downloads a PDF, extracts text, splits into chunks, and generates QA.
-    The total number of questions is distributed evenly across chunks.
-    Returns a single combined QA string.
+    Downloads a PDF, extracts text, splits into chunks, generates QA per chunk,
+    and saves incrementally to Supabase.
+    Returns minimal info (no huge combined string) to prevent memory overload.
     """
     local_path = download_file_from_url_qa(file_url)
     if not local_path:
@@ -95,20 +104,26 @@ async def generate_qa_from_file(file_url: str, qa_type: Literal["fact", "true_fa
     # Limit concurrency to avoid memory spikes
     semaphore = asyncio.Semaphore(5)
 
-    async def process_chunk(chunk: str) -> str:
+    async def process_and_save_chunk(chunk: str):
         async with semaphore:
+            # Generate QA for this chunk
             if qa_type == "fact":
-                return await asyncio.to_thread(generate_fact_qa, chunk, qa_per_chunk)
+                qa_text = await asyncio.to_thread(generate_fact_qa, chunk, qa_per_chunk)
             elif qa_type == "true_false":
-                return await asyncio.to_thread(generate_true_false_qa, chunk, qa_per_chunk)
+                qa_text = await asyncio.to_thread(generate_true_false_qa, chunk, qa_per_chunk)
             elif qa_type == "mcq":
-                return await asyncio.to_thread(generate_mcq_qa, chunk, qa_per_chunk)
+                qa_text = await asyncio.to_thread(generate_mcq_qa, chunk, qa_per_chunk)
             else:
                 raise ValueError(f"Invalid QA type: {qa_type}")
 
+            # Save this chunk incrementally to Supabase
+            result = await save_qa_incremental(user_id=str(user_id), file_url=file_url, category=qa_type, qa_chunks=[qa_text])
+            return result
+
     try:
-        results = await asyncio.gather(*[process_chunk(c) for c in chunks])
-        combined_qa = "\n".join(results)
-        return {"qa_output": combined_qa}
+        # Process all chunks concurrently but with limited concurrency
+        results = await asyncio.gather(*[process_and_save_chunk(c) for c in chunks])
+        return {"message": "QA generated and saved incrementally", "results": results}
+
     except Exception as e:
         return {"error": f"QA generation failed: {e}"}
