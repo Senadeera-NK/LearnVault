@@ -153,8 +153,13 @@ export async function txt_file_convert(userId:number, title:string, text:string)
 
 console.log("current API URL:", API_URL);
 
-// for sending QAselection of the user
-export async function send_qa_selection(userId: number, fileURL: string, category: string, num_questions: number = 20) {
+// for sending QA selection of the user
+export async function send_qa_selection(
+  userId: number,
+  fileURL: string,
+  category: string,
+  num_questions: number = 20
+) {
   try {
     console.log("DEBUG: Sending QA request to:", `${API_URL}/qa/selection`);
 
@@ -164,10 +169,10 @@ export async function send_qa_selection(userId: number, fileURL: string, categor
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        userId,
+        user_id: userId,   // changed key to match backend
         fileURL,
         category,
-        num_questions  // pass the total number of questions
+        num_questions      // pass the total number of questions
       }),
     });
 
@@ -186,19 +191,21 @@ export async function send_qa_selection(userId: number, fileURL: string, categor
   }
 }
 
-//for the qa generation - if the file is uploaded from the local machine, it saves to the store first
-export async function uploadFile(userId:number, file:File){
+// For file upload (stays the same)
+export async function uploadFile(userId: number, file: File) {
   const formData = new FormData();
   formData.append("user_id", String(userId));
-  formData.append("file",file);
+  formData.append("file", file);
 
-  const res = await fetch(`${API_URL}/temp_upload`,{
-    method:"POST",
-    body:formData,
+  const res = await fetch(`${API_URL}/temp_upload`, {
+    method: "POST",
+    body: formData,
   });
-  if(!res.ok)throw new Error("Failed to upload temperory file");
+
+  if (!res.ok) throw new Error("Failed to upload temporary file");
   return res.json();
 }
+
 
 //function to count the generated qa, per user
 export async function fetch_user_qa_count(user_id:number){
@@ -212,7 +219,7 @@ export async function fetch_user_qa_count(user_id:number){
   return res.json();
 }
 
-// 
+//
 
 //Example usage:
 // (async () => {
