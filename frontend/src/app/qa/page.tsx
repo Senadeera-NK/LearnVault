@@ -72,39 +72,53 @@ export default function QA() {
     return parts[parts.length - 1].replace(/\?.*$/, "");
   };
 
-  const handleCategorySelect = async (
-    category: string,
-    file: UploadedFile,
-    index: number
-  ) => {
-    if (!user) return;
-    setLoading(true);
-    try {
-      setCategorySelectedIndex(index);
-      setSelectedFileIndex(null);
-      let fileURL = "";
+const handleCategorySelect = async (
+  category: string,
+  file: UploadedFile,
+  index: number
+) => {
+  if (!user) return;
 
-      if (file.source === "shelf") fileURL = file.url;
-      else if (file.source === "local") {
-        const uploadResponse = await uploadFile(user.id, file);
-        if (!uploadResponse?.file_url) {
-          console.error("failed to upload temp file");
-          return;
-        }
-        fileURL = uploadResponse.file_url;
+  setLoading(true);
+  setCategorySelectedIndex(index);
+  setSelectedFileIndex(null);
+
+  try {
+    let fileURL = "";
+
+    // Determine the file URL (shelf or local upload)
+    if (file.source === "shelf") {
+      fileURL = file.url;
+    } else if (file.source === "local") {
+      const uploadResponse = await uploadFile(user.id, file);
+      if (!uploadResponse?.file_url) {
+        console.error("Failed to upload temporary file");
+        setLoading(false);
+        return;
       }
-
-      const result = await send_qa_selection(user.id, fileURL, category);
-      const qa_json = result?.result?.qa_content;
-
-      setQaCategory(category);
-      setQaContent(qa_json);
-    } catch (err) {
-      console.error("Error sending QA selection:", err);
-    } finally {
-      setLoading(false);
+      fileURL = uploadResponse.file_url;
     }
-  };
+
+    // Send QA selection request
+    const result = await send_qa_selection(user.id, fileURL, category, 20);
+
+    if (!result || result.error) {
+      console.error("QA generation failed:", result?.error || "Unknown error");
+      setLoading(false);
+      return;
+    }
+
+    // Update state with generated QA
+    setQaCategory(category);
+    setQaContent(result.qa_content || []);
+
+  } catch (err) {
+    console.error("Error sending QA selection:", err);
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   const checkUserAnswer = () => setCheckAnswersTrigger((prev) => prev + 1);
   const refrehshUserAnswers = () => setRefreshTrigger((prev) => prev + 1);

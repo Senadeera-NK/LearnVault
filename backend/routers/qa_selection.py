@@ -14,21 +14,24 @@ class QASelectionRequest(BaseModel):
 @router.post("/selection")
 async def create_qa_selection(data: QASelectionRequest):
     try:
-        # Step 1: Generate QA in parallel per chunk
+        # Step 1: Generate QA per chunk
         result = await generate_qa_from_file(
             file_url=data.fileURL,
             qa_type=data.category,
-            num_questions=data.num_questions
+            num_questions_total=data.num_questions  # match the param in qa_generation.py
         )
 
         if "error" in result:
             raise HTTPException(status_code=400, detail=result["error"])
 
-        qa_chunks = result.get("qa_chunks")  # list of QA strings per chunk
-        if not qa_chunks or len(qa_chunks) == 0:
-            raise HTTPException(status_code=400, detail="No QA chunks generated")
+        qa_output = result.get("qa_output")
+        if not qa_output:
+            raise HTTPException(status_code=400, detail="No QA generated")
 
-        # Step 2: Save all chunks incrementally into a single record
+        # Wrap the output as a single chunk for incremental save
+        qa_chunks = [qa_output]
+
+        # Step 2: Save all QA chunks into a single record
         saved_record = await save_qa_incremental(
             user_id=str(data.userId),
             file_url=data.fileURL,

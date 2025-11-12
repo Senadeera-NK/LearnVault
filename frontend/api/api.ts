@@ -154,24 +154,35 @@ export async function txt_file_convert(userId:number, title:string, text:string)
 console.log("current API URL:", API_URL);
 
 // for sending QAselection of the user
-export async function send_qa_selection(userId:number, fileURL:string, category:string){
-  try{
-  console.log("DEBUG: Sending QA request to:", `${API_URL}/qa/selection`);
-  const res = await fetch(`${API_URL}/qa/selection`,{
-    method:'POST',
-    headers:{
-      'Content-Type':'application/json'
-    },
-    body:JSON.stringify({userId, fileURL, category}),
-  });
-  if(!res.ok) throw new Error("failed to send data");
-  const data = await res.json();
-  console.log("DEBUG: QA API response: ", data);
-  return data;
-}
- catch(err){
-  console.error("Error sending QA selection", err);
-  return null;
+export async function send_qa_selection(userId: number, fileURL: string, category: string, num_questions: number = 20) {
+  try {
+    console.log("DEBUG: Sending QA request to:", `${API_URL}/qa/selection`);
+
+    const res = await fetch(`${API_URL}/qa/selection`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        userId,
+        fileURL,
+        category,
+        num_questions  // pass the total number of questions
+      }),
+    });
+
+    if (!res.ok) {
+      const errorText = await res.text();  // get server error message
+      throw new Error(`Failed to send data: ${errorText}`);
+    }
+
+    const data = await res.json();
+    console.log("DEBUG: QA API response:", data);
+    return data;
+
+  } catch (err) {
+    console.error("Error sending QA selection", err);
+    return null;
   }
 }
 
