@@ -20,9 +20,9 @@ async def user_attach_files(user_id: int = Form(...), files: List[UploadFile] = 
     if result.get("success"):
         return {
             "message": "Files uploaded successfully. Classification is running in background.",
-            "files_url": result["file_urls"],
-            "skipped_files":result["skipped_files"],
-            "uploaded_urls":result['uploaded_urls']
+            "files_url": result["file_urls",[]],
+            "skipped_files":result["skipped_files",[]],
+            "uploaded_urls":result['uploaded_files',[]]
         }
     else:
         raise HTTPException(status_code=400, detail=result.get("error", "Failed to upload files"))
