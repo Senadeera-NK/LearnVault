@@ -175,6 +175,7 @@ export async function send_qa_selection(userId:number, fileURL:string, category:
   }
 }
 
+//for the qa generation - if the file is uploaded from the local machine, it saves to the store first
 export async function uploadFile(userId:number, file:File){
   const formData = new FormData();
   formData.append("user_id", String(userId));
@@ -187,6 +188,8 @@ export async function uploadFile(userId:number, file:File){
   if(!res.ok)throw new Error("Failed to upload temperory file");
   return res.json();
 }
+
+//function to count the generated qa, per user
 export async function fetch_user_qa_count(user_id:number){
   const res = await fetch(`${API_URL}/qa/user_qa_count/${user_id}`,{
     method:'GET'
