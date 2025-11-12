@@ -1,16 +1,14 @@
 # services/supabase_service_users_attachFiles.py
+import logging, os, tempfile, threading
+from io import BytesIO
+from fastapi import UploadFile
 from services.supabase_config import SUPABASE_URL, SUPABASE_KEY
 from supabase import create_client
-import tempfile, os, threading
 from models.classifier import classify_document
-import logging
-from fpdf import FPDF
-from fastapi import UploadFile
-from io import BytesIO
-import asyncio
-logging.basicConfig(level=logging.INFO)
 
+logging.basicConfig(level=logging.INFO)
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+
 
 def background_classification(file_path, pdf_id):
     """Classify a single file in background and update Supabase table"""
@@ -21,6 +19,7 @@ def background_classification(file_path, pdf_id):
             "classification_status": "done"
         }).eq("id", pdf_id).execute()
     except Exception as e:
+        logging.error(f"Background classification error for id {pdf_id}: {e}")
         supabase.table("users_pdfs").update({
             "classification_status": "error"
         }).eq("id", pdf_id).execute()
@@ -28,69 +27,95 @@ def background_classification(file_path, pdf_id):
         if os.path.exists(file_path):
             os.remove(file_path)
 
-def checking_duplicate_files(user_id:str, filename:str)->bool:
+
+def checking_duplicate_files(user_id: str, filename: str) -> bool:
+    """Check if a file with the same name already exists for this user"""
     try:
         res = supabase.table("users_pdfs").select("file_url").eq("user_id", user_id).execute()
-        # if there arent any files existing in the user's files section
-        if not res.data:
-            return False
-        # extracting filenames from files URLS
-        existing_filenames = [os.path.basename(item["file_url"]) for item in res.data if "file_url" in item]
-
-        # checking one by one, if the file existing already
+        existing_filenames = [os.path.basename(item.get("file_url", "")) for item in res.data or []]
         return filename in existing_filenames
     except Exception as e:
-        logging.error(f"Error checking duplicates:{e}")
+        logging.error(f"Error checking duplicates for user {user_id}: {e}")
         return False
 
 
-async def insert_user_files(user_id: str, files: list):
-    uploaded_urls = []
-    skipped_files = []
-    """Upload files to Supabase and start background classification"""
-    try:
-        file_urls = []
+async def insert_user_files(user_id, files: list):
+    """Upload multiple files to Supabase and start background classification"""
+    user_id = str(user_id)  # Ensure consistent string type
+    uploaded_urls, skipped_files, file_urls = [], [], []
 
+    try:
         for file in files:
-            if(checking_duplicate_files(user_id, file.filename)):
+            if checking_duplicate_files(user_id, file.filename):
                 skipped_files.append(file.filename)
-                print(f"Error:file already exists - {file.filename}")
                 logging.info(f"[Duplicate Skipped] File already exists for user {user_id}: {file.filename}")
                 continue
-            uploaded_urls.append(file.filename)
+
+            # Read entire file content at once
+            try:
+                content = await file.read()
+            except Exception as e:
+                logging.error(f"Failed to read file {file.filename}: {e}")
+                skipped_files.append(file.filename)
+                continue
+
+            # Save temporarily
             temp_dir = tempfile.gettempdir()
             temp_path = os.path.join(temp_dir, file.filename)
-
-            # Save file in chunks
-            with open(temp_path, "wb") as buffer:
-                while chunk := await file.read(1024 * 1024):  # 1 MB chunks
-                    buffer.write(chunk)
+            with open(temp_path, "wb") as f:
+                f.write(content)
 
             # Upload to Supabase storage
             storage_path = f"user_{user_id}/{file.filename}"
-            with open(temp_path, "rb") as f:
-                supabase.storage.from_("user_pdfs").upload(storage_path, f, {"upsert": "true"})
+            try:
+                supabase.storage.from_("user_pdfs").upload(storage_path, temp_path, {"upsert": "true"})
+            except Exception as e:
+                logging.error(f"Supabase storage upload failed for {file.filename}: {e}")
+                skipped_files.append(file.filename)
+                continue
 
             # Get public URL
-            file_url = supabase.storage.from_("user_pdfs").get_public_url(storage_path)
+            try:
+                file_url = supabase.storage.from_("user_pdfs").get_public_url(storage_path)
+            except Exception as e:
+                logging.error(f"Failed to get public URL for {file.filename}: {e}")
+                skipped_files.append(file.filename)
+                continue
 
-            # Insert row with pending status
-            res = supabase.table("users_pdfs").insert({
-                "user_id": user_id,
-                "file_url": file_url,
-                "classification_status": "pending"
-            }).execute()
+            # Insert metadata into Supabase table
+            try:
+                res = supabase.table("users_pdfs").insert({
+                    "user_id": user_id,
+                    "file_url": file_url,
+                    "classification_status": "pending"
+                }).execute()
+                if not res.data or len(res.data) == 0:
+                    logging.error(f"Insert returned empty data for {file.filename}")
+                    skipped_files.append(file.filename)
+                    continue
+                pdf_id = res.data[0]["id"]
+            except Exception as e:
+                logging.error(f"Failed to insert PDF metadata for {file.filename}: {e}")
+                skipped_files.append(file.filename)
+                continue
 
-            pdf_id = res.data[0]["id"]
+            # Start background classification
+            threading.Thread(target=background_classification, args=(temp_path, pdf_id), daemon=True).start()
+
             file_urls.append(file_url)
+            uploaded_urls.append(file.filename)
 
-            # Start classification in background thread
-            threading.Thread(target=background_classification, args=(temp_path, pdf_id)).start()
-
-        return {"success": True, "file_urls": file_urls, "uploaded_files":uploaded_urls, "skipped_files":skipped_files}
+        return {
+            "success": True,
+            "file_urls": file_urls,
+            "uploaded_files": uploaded_urls,
+            "skipped_files": skipped_files
+        }
 
     except Exception as e:
+        logging.error(f"Unexpected error in insert_user_files: {e}", exc_info=True)
         return {"success": False, "error": str(e)}
+
 
 def get_user_file_status(user_id: int):
     """

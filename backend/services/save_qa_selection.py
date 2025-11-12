@@ -14,7 +14,6 @@ async def save_qa_incremental(user_id: str, file_url: str, category: str, qa_chu
         # Check if a record already exists for this user/file/category
         existing = supabase.table("qa_files").select("*").eq("user_id", user_id)\
             .eq("file_url", file_url).eq("category", category).single().execute()
-        
         qa_content = []
         if existing.data:
             qa_content = existing.data.get("qa_content", [])
