@@ -77,7 +77,7 @@ async def get_existing_qa_for_user(user_id: int, file_url: str, category: str):
 
         qa_content = []
         for row in rows:
-            qas = row.get("qa", [])
+            qas = row.get("qa_content", [])
             if isinstance(qas, str):
                 qas = json.loads(qas)
             qa_content.extend(qas)
