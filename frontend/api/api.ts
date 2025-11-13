@@ -154,6 +154,7 @@ export async function txt_file_convert(userId:number, title:string, text:string)
 console.log("current API URL:", API_URL);
 
 // for sending QA selection of the user
+// Frontend: send QA selection with cache check
 export async function send_qa_selection(
   userId: number,
   fileURL: string,
@@ -161,23 +162,41 @@ export async function send_qa_selection(
   num_questions: number = 20
 ) {
   try {
-    console.log("DEBUG: Sending QA request to:", `${API_URL}/qa/selection`);
+    console.log("DEBUG: Checking existing QA for:", fileURL, category);
 
+    // 1️⃣ Check if QA already exists
+    const checkRes = await fetch(`${API_URL}/qa/check_existing`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ user_id: userId, fileURL, category })
+    });
+
+    if (!checkRes.ok) {
+      const errorText = await checkRes.text();
+      throw new Error(`Failed to check existing QA: ${errorText}`);
+    }
+
+    const checkData = await checkRes.json();
+    if (checkData.exists) {
+      console.log("DEBUG: Returning cached QA");
+      return { message: "QA already exists", cachedQA: checkData.qa };
+    }
+
+    // 2️⃣ If not existing, generate QA
+    console.log("DEBUG: Sending QA generation request to:", `${API_URL}/qa/selection`);
     const res = await fetch(`${API_URL}/qa/selection`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        user_id: userId,   // changed key to match backend
+        user_id: userId,
         fileURL,
         category,
-        num_questions      // pass the total number of questions
+        num_questions
       }),
     });
 
     if (!res.ok) {
-      const errorText = await res.text();  // get server error message
+      const errorText = await res.text();
       throw new Error(`Failed to send data: ${errorText}`);
     }
 
@@ -190,6 +209,7 @@ export async function send_qa_selection(
     return null;
   }
 }
+
 
 // For file upload (stays the same)
 export async function uploadFile(userId: number, file: File) {
