@@ -54,14 +54,22 @@ async def user_qa_count_service(user_id: int):
     Counts all QA records for a user.
     """
     try:
+        print(f"[DEBUG] Counting QA for user_id={user_id}")
+
         response = supabase.table("qa_files").select("id").eq("user_id", user_id).execute()
+        print(f"[DEBUG] Supabase response raw: {response}")
+
         data = getattr(response, "data", None)
+        print(f"[DEBUG] Data extracted: {data}")
 
         if data is None:
             return {"success": False, "error": "No data returned from Supabase"}
 
         count = len(data)
+        print(f"[DEBUG] QA count = {count}")
+
         return {"success": True, "count": count}
     except Exception as e:
         print("Error in user_qa_count_service:", e)
         return {"success": False, "error": str(e)}
+
