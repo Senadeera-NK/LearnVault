@@ -178,8 +178,8 @@ export async function send_qa_selection(
 
     const checkData = await checkRes.json();
     if (checkData.exists) {
-      console.log("DEBUG: Returning cached QA");
-      return { message: "QA already exists", cachedQA: checkData.qa_content };
+      console.log("DEBUG: Returning cached QA", checkData.qa);
+      return { message: "QA already exists", cachedQA: checkData.qa };
     }
 
     // 2️⃣ If not existing, generate QA
