@@ -61,7 +61,7 @@ async def save_qa_incremental(user_id: int, file_url: str, category: str, qa_chu
         print(f"[ERROR] Error saving QA: {e}")
         return {"error": str(e)}
 
-async def get_existing_qa_for_user(user_id: int, file_url: str, category: str):
+async def get_existing_qa_for_user(user_id: int, file_url: str, category: str, num_questions:int=20):
     """Fetch cached QA if it exists."""
     try:
         resp = supabase.table("qa_files") \
@@ -82,7 +82,7 @@ async def get_existing_qa_for_user(user_id: int, file_url: str, category: str):
                 qas = json.loads(qas)
             qa_content.extend(qas)
 
-        return qa_content
+        return qa_content[:num_questions]
 
     except Exception as e:
         print(f"[ERROR] Fetching existing QA failed: {e}")
