@@ -41,7 +41,7 @@ async def save_qa_incremental(user_id: int, file_url: str, category: str, qa_chu
             "user_id": user_id,
             "file_url": file_url,
             "category": category,
-            "qa": json.dumps(qa_content)
+            "qa_content": json.dumps(qa_content)
         }
 
         response = supabase.table("qa_files").upsert(payload).execute()
