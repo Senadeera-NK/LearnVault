@@ -34,6 +34,10 @@ def generate_qa(prompt: str) -> str:
         )
         return response.text or ""
     except Exception as e:
+        error_msg = str(e)
+        if "quota" in error_msg.lower() or "429" in error_msg:
+            print("[ERROR] Gemini API quota exceeded. Try again later.")
+            raise RuntimeError("GEMINI_QUOTA_EXCEEDED")
         print(f"[ERROR] Gemini generation failed: {e}")
         return ""
 
@@ -79,7 +83,7 @@ async def generate_qa_from_file(
     user_id: int = None
 ) -> dict:
     """Generate QA for a file, skip if already processed, save once."""
-    
+
     # Check if file already processed
     if await check_file_processed(user_id=int(user_id), file_url=file_url, category=qa_type):
         return {"message": "File already processed", "results": []}
@@ -104,23 +108,23 @@ async def generate_qa_from_file(
     semaphore = asyncio.Semaphore(1)  # single-threaded for memory control
 
     results = []
+    qa_chunks = []
 
     async def process_chunk(index: int, chunk: str):
         async with semaphore:
             print(f"[DEBUG] Processing chunk {index + 1}/{len(chunks)} (len={len(chunk)})")
             prompt = make_prompt(qa_type, chunk, qa_per_chunk)
-            qa_text = await asyncio.to_thread(generate_qa, prompt)
-            if not qa_text.strip():
-                print(f"[WARN] Empty QA for chunk {index + 1}")
-                return ""
-            return qa_text
+            return await asyncio.to_thread(generate_qa, prompt)
 
-    # Sequentially process all chunks
-    qa_chunks = []
+    # Sequentially process chunks with quota handling
     for i, chunk in enumerate(chunks):
-        qa_text = await process_chunk(i, chunk)
-        if qa_text:
-            qa_chunks.append(qa_text)
+        try:
+            qa_text = await process_chunk(i, chunk)
+            if qa_text:
+                qa_chunks.append(qa_text)
+        except RuntimeError as e:
+            if str(e) == "GEMINI_QUOTA_EXCEEDED":
+                return {"error": "Gemini API quota exceeded. Please try again later."}
         await asyncio.sleep(0.5)
 
     if not qa_chunks:
