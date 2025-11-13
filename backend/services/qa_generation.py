@@ -16,22 +16,18 @@ if not GENAI_API_KEY:
 
 genai.configure(api_key=GENAI_API_KEY)
 
-
 # -------------------------
 # Chunking Function
 # -------------------------
 def chunk_text(text: str, chunk_size: int = 500) -> List[str]:
-    """
-    Splits text into smaller chunks for Gemini processing.
-    """
+    """Splits text into smaller chunks for Gemini processing."""
     return [text[i:i + chunk_size] for i in range(0, len(text), chunk_size)]
 
-
 # -------------------------
-# QA Generation Helpers
+# QA Generation Helper
 # -------------------------
 def generate_qa(prompt: str) -> str:
-    """Wrapper for Gemini API with better error handling."""
+    """Wrapper for Gemini API with error handling."""
     try:
         model = genai.GenerativeModel("gemini-2.0-flash")
         response = model.generate_content(prompt, safety_settings={"HARM_CATEGORY_DANGEROUS_CONTENT": "block_none"})
@@ -39,7 +35,6 @@ def generate_qa(prompt: str) -> str:
     except Exception as e:
         print(f"[ERROR] Gemini generation failed: {e}")
         return ""
-
 
 def make_prompt(qa_type: str, text_chunk: str, num_questions: int) -> str:
     if qa_type == "mcq":
@@ -73,7 +68,6 @@ def make_prompt(qa_type: str, text_chunk: str, num_questions: int) -> str:
     else:
         raise ValueError(f"Invalid QA type: {qa_type}")
 
-
 # -------------------------
 # Main QA Generation
 # -------------------------
@@ -83,13 +77,10 @@ async def generate_qa_from_file(
     num_questions_total: int = 20,
     user_id: int = None
 ) -> dict:
-    """
-    Downloads a file, extracts text, splits into chunks,
-    generates QA for each chunk, and saves incrementally to Supabase.
-    """
+    """Downloads file, splits into chunks, generates QA, and saves incrementally."""
     print(f"[DEBUG] Starting QA generation for user={user_id}, type={qa_type}, total={num_questions_total}")
 
-    # 1️⃣ Download and extract text
+    # Download + extract text
     local_path = download_file_from_url_qa(file_url)
     if not local_path:
         return {"error": "Failed to download the file"}
@@ -98,13 +89,13 @@ async def generate_qa_from_file(
     if text in ["EMPTY", "READ_ERROR", "PHOTO_ONLY"]:
         return {"error": f"Could not extract meaningful text: {text}"}
 
-    # 2️⃣ Chunking
+    # Chunk text
     chunks = chunk_text(text)
     if not chunks:
         return {"error": "No text chunks to process"}
 
     qa_per_chunk = max(1, math.ceil(num_questions_total / len(chunks)))
-    semaphore = asyncio.Semaphore(1)  # single-threaded generation to avoid memory issues
+    semaphore = asyncio.Semaphore(1)  # single-threaded to reduce memory usage
 
     print(f"[DEBUG] Total chunks: {len(chunks)}, QA per chunk: {qa_per_chunk}")
 
@@ -113,8 +104,6 @@ async def generate_qa_from_file(
             print(f"[DEBUG] Processing chunk {chunk_index + 1}/{len(chunks)} (len={len(chunk)})")
             try:
                 prompt = make_prompt(qa_type, chunk, qa_per_chunk)
-
-                # Timeout wrapper (avoid Render 50s kill)
                 qa_text = await asyncio.wait_for(
                     asyncio.to_thread(generate_qa, prompt),
                     timeout=25
@@ -141,17 +130,12 @@ async def generate_qa_from_file(
                 print(f"[ERROR] Chunk {chunk_index + 1} failed: {e}")
                 return {"error": str(e)}
 
-    # 3️⃣ Sequential / Concurrent processing
-    try:
-        results = []
-        for i, chunk in enumerate(chunks):
-            res = await process_and_save_chunk(i, chunk)
-            results.append(res)
-            await asyncio.sleep(1)  # tiny delay to avoid throttling
+    # Sequential processing with small delay
+    results = []
+    for i, chunk in enumerate(chunks):
+        res = await process_and_save_chunk(i, chunk)
+        results.append(res)
+        await asyncio.sleep(0.5)
 
-        print("[DEBUG] All chunks processed successfully")
-        return {"message": "QA generation complete", "results": results}
-
-    except Exception as e:
-        print(f"[FATAL] QA generation failed: {e}")
-        return {"error": f"QA generation failed: {e}"}
+    print("[DEBUG] All chunks processed")
+    return {"message": "QA generation complete", "results": results}
