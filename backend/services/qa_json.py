@@ -1,35 +1,54 @@
 import re
 import json
 
+# -------------------------
+# Fact-based QA
+# -------------------------
 def parse_fact_qa(qa_text: str):
-    pattern = r"(?:Q:|^\d+\.)\s*(.*?)\s*Answer:\s*(.*?)(?=\n\d+\.|\Z)"
+    """
+    Matches patterns like:
+    Q: Question text
+    Answer: Answer text
+    """
+    pattern = r"(?:Q:|^\d+\.)\s*(.*?)\s*Answer:\s*(.*?)(?=\n\d+\.|$)"
     matches = re.findall(pattern, qa_text, re.DOTALL | re.IGNORECASE | re.MULTILINE)
-    print("DEBUG: Matched QA count: ", len(matches))
     return [{"question": q.strip(), "answer": a.strip()} for q, a in matches]
 
-
+# -------------------------
+# True/False QA
+# -------------------------
 def parse_true_false_qa(qa_text: str):
-    # Match either Q: or 1., 2., etc. followed by text and "Answer: True/False"
+    """
+    Matches patterns like:
+    Q: Question text
+    Answer: True/False
+    """
     pattern = r"(?:Q:|^\d+\.)\s*(.*?)\s*Answer:\s*(True|False)"
     matches = re.findall(pattern, qa_text, re.DOTALL | re.IGNORECASE | re.MULTILINE)
-    print("DEBUG: Matched QA count: ", len(matches))
     return [{"question": q.strip(), "answer": a.strip().capitalize()} for q, a in matches]
 
-
+# -------------------------
+# MCQ QA
+# -------------------------
 def parse_mcq_qa(qa_text: str):
     """
-    Expected pattern:
-    1. What is AI?
-    A) Automated Interface
-    B) Artificial Intelligence
-    C) Algorithmic Input
-    D) Applied Innovation
+    Matches multiple-choice questions:
+    1. Question text
+    A) Option1
+    B) Option2
+    C) Option3
+    D) Option4
     Answer: B
     """
-    pattern = r"(?:Q:|^\d+\.)\s*(.*?)\s*A\)\s*(.*?)\s*B\)\s*(.*?)\s*C\)\s*(.*?)\s*D\)\s*(.*?)\s*Answer:\s*([A-D])"
+    pattern = (
+        r"(?:Q:|^\d+\.)\s*(.*?)\s*"      # Question
+        r"A\)\s*(.*?)\s*"                 # Option A
+        r"B\)\s*(.*?)\s*"                 # Option B
+        r"C\)\s*(.*?)\s*"                 # Option C
+        r"D\)\s*(.*?)\s*"                 # Option D
+        r"Answer:\s*([A-D])"              # Correct answer
+    )
     matches = re.findall(pattern, qa_text, re.DOTALL | re.MULTILINE | re.IGNORECASE)
-    print("DEBUG: Matched QA count: ", len(matches))
-
     qa_list = []
     for q, a, b, c, d, ans in matches:
         qa_list.append({
@@ -39,9 +58,17 @@ def parse_mcq_qa(qa_text: str):
         })
     return qa_list
 
-
+# -------------------------
+# Main Parser
+# -------------------------
 def parse_qa_to_json(qa_text: str, category: str):
-    """Pick the right parser based on QA type."""
+    """
+    Dispatch parser based on category.
+    Returns a list of QA dictionaries.
+    """
+    if not qa_text or not qa_text.strip():
+        return []
+
     if category == "fact":
         return parse_fact_qa(qa_text)
     elif category == "true_false":
@@ -49,4 +76,4 @@ def parse_qa_to_json(qa_text: str, category: str):
     elif category == "mcq":
         return parse_mcq_qa(qa_text)
     else:
-        raise ValueError(f"Invalid category: {category}")
+        raise ValueError(f"Invalid QA category: {category}")

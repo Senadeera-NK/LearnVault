@@ -5,43 +5,62 @@ from services.qa_json import parse_qa_to_json
 
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
+# -------------------------
+# Check if file already processed
+# -------------------------
+async def check_file_processed(user_id: int, file_url: str, category: str) -> bool:
+    """Return True if this file + category already exists for the user."""
+    try:
+        resp = supabase.table("qa_files") \
+            .select("id") \
+            .eq("user_id", user_id) \
+            .eq("file_url", file_url) \
+            .eq("category", category) \
+            .execute()
+        rows = resp.data or []
+        return len(rows) > 0
+    except Exception as e:
+        print(f"[ERROR] check_file_processed failed: {e}")
+        return False
+
+# -------------------------
+# Save QA incrementally (merge all chunks into one row)
+# -------------------------
 async def save_qa_incremental(user_id: int, file_url: str, category: str, qa_chunks: list):
     """
-    Safely save QA chunks incrementally.
-    Handles multiple existing rows and merges QA arrays.
+    Merge all QA chunks and upsert a single row per file/category.
     """
     try:
         print(f"[DEBUG] Saving QA for user={user_id}, category={category}")
 
-        # Fetch all existing rows for this user/file/category
-        existing_resp = supabase.table("qa_files") \
+        # Fetch existing QA row
+        resp = supabase.table("qa_files") \
             .select("*") \
             .eq("user_id", user_id) \
             .eq("file_url", file_url) \
             .eq("category", category) \
             .execute()
+        existing_rows = resp.data or []
 
-        existing_rows = existing_resp.data or []
-
-        qa_content = []
+        merged_qa = []
         for row in existing_rows:
-            qas = row.get("qa", [])
+            qas = row.get("qa_content", [])
             if isinstance(qas, str):
                 qas = json.loads(qas)
-            qa_content.extend(qas)
+            merged_qa.extend(qas)
 
-        # Parse new chunks and merge
+        # Parse new QA chunks and merge
         for chunk in qa_chunks:
             if chunk and chunk.strip():
                 parsed = parse_qa_to_json(chunk, category)
-                qa_content.extend(parsed)
+                merged_qa.extend(parsed)
 
-        # Upsert merged QA (ensuring only one row)
+        # Upsert single row
         payload = {
             "user_id": user_id,
             "file_url": file_url,
             "category": category,
-            "qa_content": json.dumps(qa_content)
+            "qa_content": json.dumps(merged_qa)
         }
 
         response = supabase.table("qa_files").upsert(payload).execute()
@@ -61,8 +80,11 @@ async def save_qa_incremental(user_id: int, file_url: str, category: str, qa_chu
         print(f"[ERROR] Error saving QA: {e}")
         return {"error": str(e)}
 
-async def get_existing_qa_for_user(user_id: int, file_url: str, category: str, num_questions:int=20):
-    """Fetch cached QA if it exists."""
+# -------------------------
+# Fetch cached QA
+# -------------------------
+async def get_existing_qa_for_user(user_id: int, file_url: str, category: str, num_questions: int = 20):
+    """Return cached QA if exists."""
     try:
         resp = supabase.table("qa_files") \
             .select("*") \
@@ -70,8 +92,8 @@ async def get_existing_qa_for_user(user_id: int, file_url: str, category: str, n
             .eq("file_url", file_url) \
             .eq("category", category) \
             .execute()
-
         rows = resp.data or []
+
         if not rows:
             return []
 
