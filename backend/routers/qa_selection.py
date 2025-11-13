@@ -39,7 +39,7 @@ async def generate_qa_selection(data: QASelectionRequest):
         raise HTTPException(status_code=500,detail=str(e))
 
 
-@router.get("/user_qa_count/{user_id}")
+@router.get("/qa/user_qa_count/{user_id}")
 async def user_qa_count(user_id: int):
     print(f"[DEBUG] /user_qa_count called with user_id={user_id}")
     result = await user_qa_count_service(user_id)
