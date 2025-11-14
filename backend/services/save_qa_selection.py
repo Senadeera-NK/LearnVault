@@ -135,3 +135,28 @@ async def user_qa_count_service(user_id: int):
         print("Error in user_qa_count_service:", e)
         return {"success": False, "error": str(e)}
 
+async def check_chunk_processed(user_id: int, file_url: str, category: str, chunk_index: int) -> bool:
+    """
+    Return True if the specific chunk for this user/file/category has already been processed.
+    Assumes your table stores chunk indices in 'processed_chunks' JSON array.
+    """
+    try:
+        resp = supabase.table("qa_files") \
+            .select("processed_chunks") \
+            .eq("user_id", user_id) \
+            .eq("file_url", file_url) \
+            .eq("category", category) \
+            .execute()
+        rows = resp.data or []
+
+        if not rows:
+            return False
+
+        processed_chunks = rows[0].get("processed_chunks", [])
+        return chunk_index in processed_chunks
+
+    except Exception as e:
+        print(f"[ERROR] check_chunk_processed failed: {e}")
+        return False
+
+
