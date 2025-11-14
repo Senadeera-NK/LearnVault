@@ -5,7 +5,7 @@ from typing import List, Literal
 from utils import extract_text
 from qa_utils import download_file_from_url_qa
 import google.generativeai as genai
-from services.save_qa_selection import save_qa_incremental, check_file_processed
+from services.save_qa_selection import save_qa_incremental, check_file_processed, check_chunk_processed
 
 # -------------------------
 # Gemini Configuration
@@ -23,24 +23,33 @@ def chunk_text(text: str, chunk_size: int = 500) -> List[str]:
     return [text[i:i + chunk_size] for i in range(0, len(text), chunk_size)]
 
 # -------------------------
-# Gemini QA Generation
+# Gemini QA Generation with Backoff
 # -------------------------
-def generate_qa(prompt: str) -> str:
-    try:
-        model = genai.GenerativeModel("gemini-2.0-flash")
-        response = model.generate_content(
-            prompt,
-            safety_settings={"HARM_CATEGORY_DANGEROUS_CONTENT": "block_none"}
-        )
-        return response.text or ""
-    except Exception as e:
-        error_msg = str(e)
-        if "quota" in error_msg.lower() or "429" in error_msg:
-            print("[ERROR] Gemini API quota exceeded. Try again later.")
-            raise RuntimeError("GEMINI_QUOTA_EXCEEDED")
-        print(f"[ERROR] Gemini generation failed: {e}")
-        return ""
+def generate_qa(prompt: str, max_retries: int = 5) -> str:
+    retries = 0
+    while retries <= max_retries:
+        try:
+            model = genai.GenerativeModel("gemini-2.0-flash")
+            response = model.generate_content(
+                prompt,
+                safety_settings={"HARM_CATEGORY_DANGEROUS_CONTENT": "block_none"}
+            )
+            return response.text or ""
+        except Exception as e:
+            error_msg = str(e)
+            if "quota" in error_msg.lower() or "429" in error_msg:
+                retries += 1
+                wait_time = 2 ** retries  # exponential backoff
+                print(f"[WARN] Gemini quota hit, retrying in {wait_time}s ({retries}/{max_retries})")
+                asyncio.sleep(wait_time)
+            else:
+                print(f"[ERROR] Gemini generation failed: {e}")
+                return ""
+    raise RuntimeError("GEMINI_QUOTA_EXCEEDED")
 
+# -------------------------
+# Prompt Creation
+# -------------------------
 def make_prompt(qa_type: str, text_chunk: str, num_questions: int) -> str:
     if qa_type == "mcq":
         return f"""
@@ -82,9 +91,9 @@ async def generate_qa_from_file(
     num_questions_total: int = 20,
     user_id: int = None
 ) -> dict:
-    """Generate QA for a file, skip if already processed, save once."""
+    """Generate QA for a file, skip if already processed, save incrementally."""
 
-    # Check if file already processed
+    # Check if file already fully processed
     if await check_file_processed(user_id=int(user_id), file_url=file_url, category=qa_type):
         return {"message": "File already processed", "results": []}
 
@@ -108,35 +117,32 @@ async def generate_qa_from_file(
     semaphore = asyncio.Semaphore(1)  # single-threaded for memory control
 
     results = []
-    qa_chunks = []
 
     async def process_chunk(index: int, chunk: str):
         async with semaphore:
+            # Skip chunk if already processed
+            if await check_chunk_processed(user_id, file_url, qa_type, index):
+                print(f"[DEBUG] Skipping already processed chunk {index + 1}")
+                return None
+
             print(f"[DEBUG] Processing chunk {index + 1}/{len(chunks)} (len={len(chunk)})")
             prompt = make_prompt(qa_type, chunk, qa_per_chunk)
-            return await asyncio.to_thread(generate_qa, prompt)
+            qa_text = await asyncio.to_thread(generate_qa, prompt)
 
-    # Sequentially process chunks with quota handling
+            if qa_text:
+                # Save immediately to avoid losing progress
+                await save_qa_incremental(user_id, file_url, qa_type, [qa_text])
+            return qa_text
+
+    # Sequentially process all chunks
     for i, chunk in enumerate(chunks):
         try:
-            qa_text = await process_chunk(i, chunk)
-            if qa_text:
-                qa_chunks.append(qa_text)
+            await process_chunk(i, chunk)
         except RuntimeError as e:
             if str(e) == "GEMINI_QUOTA_EXCEEDED":
                 return {"error": "Gemini API quota exceeded. Please try again later."}
-        await asyncio.sleep(0.5)
+        # Rate limit control
+        await asyncio.sleep(1.5)
 
-    if not qa_chunks:
-        return {"error": "No QA generated from file"}
-
-    # Save all QA chunks at once
-    save_result = await save_qa_incremental(
-        user_id=int(user_id),
-        file_url=file_url,
-        category=qa_type,
-        qa_chunks=qa_chunks
-    )
-
-    print("[DEBUG] QA generation complete and saved")
-    return {"message": "QA generation complete", "results": save_result}
+    print("[DEBUG] QA generation complete")
+    return {"message": "QA generation complete", "results": "Incrementally saved"}
