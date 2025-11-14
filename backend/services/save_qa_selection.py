@@ -6,18 +6,28 @@ from services.qa_json import parse_qa_to_json
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 # -------------------------
-# Check if file already fully processed
+# Check if file already processed (enough questions)
 # -------------------------
-async def check_file_processed(user_id: int, file_url: str, category: str) -> bool:
+async def check_file_processed(user_id: int, file_url: str, category: str, min_questions: int = 1) -> bool:
+    """
+    Return True if a row exists for this file/category AND it already contains
+    at least `min_questions` QA items.
+    """
     try:
         resp = supabase.table("qa_files") \
-            .select("id") \
+            .select("qa_content") \
             .eq("user_id", user_id) \
             .eq("file_url", file_url) \
             .eq("category", category) \
             .execute()
         rows = resp.data or []
-        return len(rows) > 0
+        if not rows:
+            return False
+
+        qa_content = rows[0].get("qa_content", [])
+        if isinstance(qa_content, str):
+            qa_content = json.loads(qa_content)
+        return len(qa_content) >= min_questions
     except Exception as e:
         print(f"[ERROR] check_file_processed failed: {e}")
         return False
@@ -26,6 +36,9 @@ async def check_file_processed(user_id: int, file_url: str, category: str) -> bo
 # Check if a specific chunk has been processed
 # -------------------------
 async def check_chunk_processed(user_id: int, file_url: str, category: str, chunk_index: int) -> bool:
+    """
+    Return True if the specific chunk index is present in processed_chunks for the row.
+    """
     try:
         resp = supabase.table("qa_files") \
             .select("processed_chunks") \
@@ -37,20 +50,24 @@ async def check_chunk_processed(user_id: int, file_url: str, category: str, chun
         if not rows:
             return False
 
-        processed_chunks = rows[0].get("processed_chunks", [])
+        processed_chunks = rows[0].get("processed_chunks", []) or []
         return chunk_index in processed_chunks
     except Exception as e:
         print(f"[ERROR] check_chunk_processed failed: {e}")
         return False
 
 # -------------------------
-# Save QA incrementally and merge all chunks
+# Save QA incrementally and merge to a single row
 # -------------------------
-async def save_qa_incremental(user_id: int, file_url: str, category: str, qa_chunks: list, chunk_index: int = None):
+async def save_qa_incremental(user_id: int, file_url: str, category: str, qa_chunks: list, chunk_index: int = None, max_questions: int = 20):
     """
-    Merge all QA chunks into a single row and track processed chunks.
+    Merge QA chunks into a single row (single row per user/file/category).
+    - qa_chunks is a list of raw chunk responses (strings) from the model.
+    - We parse them using parse_qa_to_json then merge and trim to max_questions.
+    - We track processed_chunks (list of ints).
     """
     try:
+        # read existing row (if any)
         resp = supabase.table("qa_files") \
             .select("*") \
             .eq("user_id", user_id) \
@@ -66,19 +83,40 @@ async def save_qa_incremental(user_id: int, file_url: str, category: str, qa_chu
             row = existing_rows[0]
             qas = row.get("qa_content", [])
             if isinstance(qas, str):
-                qas = json.loads(qas)
+                try:
+                    qas = json.loads(qas)
+                except Exception:
+                    qas = []
             merged_qa.extend(qas)
-            processed_chunks = row.get("processed_chunks", [])
+            processed_chunks = row.get("processed_chunks", []) or []
 
-        # Parse new QA chunks and merge
-        for chunk in qa_chunks:
-            if chunk and chunk.strip():
-                parsed = parse_qa_to_json(chunk, category)
-                merged_qa.extend(parsed)
+        # parse and append new QA chunks
+        for raw_chunk in qa_chunks:
+            if not raw_chunk or not raw_chunk.strip():
+                continue
+            parsed = parse_qa_to_json(raw_chunk, category) or []
+            # extend merged list
+            merged_qa.extend(parsed)
 
-        # Track processed chunk
+        # deduplicate lightly (optional): keep first occurrence order
+        seen = set()
+        unique_merged = []
+        for item in merged_qa:
+            # create a dedupe key (stringify). This works for dicts and strings.
+            key = json.dumps(item, sort_keys=True) if isinstance(item, dict) else str(item)
+            if key not in seen:
+                seen.add(key)
+                unique_merged.append(item)
+        merged_qa = unique_merged
+
+        # Trim to max_questions
+        if len(merged_qa) > max_questions:
+            merged_qa = merged_qa[:max_questions]
+
+        # update processed_chunks
         if chunk_index is not None and chunk_index not in processed_chunks:
             processed_chunks.append(chunk_index)
+            processed_chunks.sort()
 
         payload = {
             "user_id": user_id,
@@ -88,24 +126,36 @@ async def save_qa_incremental(user_id: int, file_url: str, category: str, qa_chu
             "processed_chunks": processed_chunks
         }
 
-        response = supabase.table("qa_files").upsert(payload, on_conflict=["user_id", "file_url", "category"]).execute()
+        # upsert single row using unique conflict keys
+        response = supabase.table("qa_files") \
+            .upsert(payload, on_conflict=["user_id", "file_url", "category"]) \
+            .execute()
+
+        if not response or not getattr(response, "data", None):
+            print(f"[ERROR] Upsert returned no data: {response}")
+            return {"error": "Failed to upsert QA row"}
+
+        row_id = response.data[0].get("id") if response.data else None
+
         return {
-            "id": response.data[0].get("id") if response.data else None,
+            "id": row_id,
             "category": category,
             "file_url": file_url,
-            "success": True
+            "success": True,
+            "qa_count": len(merged_qa),
+            "qa": merged_qa
         }
     except Exception as e:
-        print(f"[ERROR] Error saving QA: {e}")
+        print(f"[ERROR] Error saving QA incrementally: {e}")
         return {"error": str(e)}
 
 # -------------------------
-# Fetch cached QA
+# Fetch cached QA (trim to requested)
 # -------------------------
 async def get_existing_qa_for_user(user_id: int, file_url: str, category: str, num_questions: int = 20):
     try:
         resp = supabase.table("qa_files") \
-            .select("*") \
+            .select("qa_content") \
             .eq("user_id", user_id) \
             .eq("file_url", file_url) \
             .eq("category", category) \
@@ -121,8 +171,6 @@ async def get_existing_qa_for_user(user_id: int, file_url: str, category: str, n
     except Exception as e:
         print(f"[ERROR] Fetching existing QA failed: {e}")
         return []
-
-
 
 async def user_qa_count_service(user_id: int):
     """
