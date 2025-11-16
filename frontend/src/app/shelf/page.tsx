@@ -84,9 +84,10 @@ const extractFileName = (url: string) => {
       display="flex"
       flexDirection="column"
       justifyContent="flex-start"
-      pt="10px"
-      paddingLeft={5}
-      paddingRight={5}
+      pt={{base:"10px",md:"20px"}}
+      px={{base:3,sm:5,md:8}}
+      // paddingLeft={5}
+      // paddingRight={5}
     >
       <Heading mb="20px" textAlign="center" w="100%">
         Shelf
@@ -96,7 +97,7 @@ const extractFileName = (url: string) => {
       <SimpleGrid
         paddingTop={30}
         columns={{ base: 2, sm: 3, md: 4, lg: 5 }}
-        spacing="30px"
+        spacing={{base:"15px",md:"30px"}}
       >
         {uniqueCategories.map((category) => (
           <Box
@@ -104,9 +105,9 @@ const extractFileName = (url: string) => {
             border="2px solid"
             borderColor="gray.300"
             borderRadius="md"
-            p="20px"
-            h="90px"
-            w="200px"
+            p={{nase:"12px",md:"20px"}}
+            h={{base:"80px",md:"90px"}}
+            w={{base:"100%", sm:"150px",md:"180px",lg:"200px"}}
             display="flex"
             alignItems="left"
             justifyContent="center"
@@ -120,6 +121,7 @@ const extractFileName = (url: string) => {
               textAlign="center"
               color="gray.700"
               noOfLines={2}
+              fontSize={{base:"sm",md:"md"}}
             >
               {category}
             </Text>
