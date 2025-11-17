@@ -39,29 +39,46 @@ async def save_qa_incremental(
     user_id: int,
     file_url: str,
     category: str,
-    qa_chunks: list,
+    qa_chunks: list = None,          # existing param kept for backward compatibility
+    parsed_items: list = None,      # NEW optional param: already-parsed QA dicts
     max_questions: int = 20
 ):
     """
-    Saves QA data as a NEW ROW every time.
-    No merge, no dedupe, no upsert.
-    Simple append-only model.
+    Append-only save.
+    - If parsed_items is provided, it will be used directly (a list of QA dicts).
+    - Otherwise, qa_chunks (raw strings) will be parsed via parse_qa_to_json.
+    - Trims to max_questions before inserting.
     """
     try:
         all_qas = []
 
-        # Convert incoming raw chunks into parsed QA list
-        for raw in qa_chunks:
-            if not raw or not raw.strip():
-                continue
+        # If parsed_items provided, use them directly
+        if parsed_items:
+            if not isinstance(parsed_items, list):
+                return {"error": "parsed_items must be a list"}
+            all_qas = list(parsed_items)
+        else:
+            # Parse incoming raw chunks (backwards compatible)
+            for raw in qa_chunks or []:
+                if not raw or not raw.strip():
+                    continue
+                parsed = parse_qa_to_json(raw, category) or []
+                all_qas.extend(parsed)
 
-            parsed = parse_qa_to_json(raw, category) or []
-            all_qas.extend(parsed)
+        # Deduplicate within this batch (optional)
+        seen = set()
+        unique = []
+        for item in all_qas:
+            try:
+                key = json.dumps(item, sort_keys=True)
+            except Exception:
+                key = str(item)
+            if key not in seen:
+                seen.add(key)
+                unique.append(item)
 
-        # Trim
-        trimmed = all_qas[:max_questions]
+        trimmed = unique[:max_questions]
 
-        # Prepare row to insert
         new_row = {
             "user_id": user_id,
             "file_url": file_url,
@@ -69,7 +86,6 @@ async def save_qa_incremental(
             "qa_content": trimmed
         }
 
-        # Insert NEW ROW — NOT UPSERT
         response = (
             supabase.table("qa_files")
             .insert(new_row)

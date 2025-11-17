@@ -1,4 +1,5 @@
 import os
+import json
 import asyncio
 import math
 from typing import Literal, List
@@ -63,6 +64,9 @@ def generate_qa(prompt: str, max_retries: int = 5) -> str:
 # -------------------------
 # Main generator
 # -------------------------
+# at top of file, ensure parser import:
+from services.qa_json import parse_qa_to_json
+
 async def generate_qa_from_file(
     file_url: str,
     qa_type: Literal["fact", "true_false", "mcq"],
@@ -90,13 +94,19 @@ async def generate_qa_from_file(
     if not chunks:
         return {"error": "no-text"}
 
-    # Calculate evenly distributed questions per chunk
+    # Questions per chunk used only as a suggestion to model:
     per_chunk = max(1, math.ceil(num_questions_total / len(chunks)))
 
     # SERIAL PROCESSING for stability
     all_qa = []
+    seen = set()  # dedupe using JSON dumps
 
     for idx, chk in enumerate(chunks):
+        # Stop early if enough collected
+        if len(all_qa) >= num_questions_total:
+            print(f"[DEBUG] Reached target of {num_questions_total} questions; stopping at chunk {idx}.")
+            break
+
         print(f"[DEBUG] Chunk {idx+1}/{len(chunks)}")
 
         prompt = make_prompt(qa_type, chk, per_chunk)
@@ -107,27 +117,55 @@ async def generate_qa_from_file(
             print(f"[WARN] Empty chunk output {idx+1}")
             continue
 
+        # Parse model output here (once)
+        parsed_items = parse_qa_to_json(raw, qa_type) or []
+
+        # Add parsed items to the accumulated list (dedupe)
+        for item in parsed_items:
+            key = json.dumps(item, sort_keys=True)
+            if key not in seen:
+                seen.add(key)
+                all_qa.append(item)
+
+        # Trim in-memory list to requested length
+        if len(all_qa) > num_questions_total:
+            all_qa = all_qa[:num_questions_total]
+
+        # Save the current trimmed list to DB (append-only; we pass parsed items so save can insert exact list)
+        # We'll save the current snapshot (trimmed)
         save_res = await save_qa_incremental(
-            user_id,
-            file_url,
-            qa_type,
-            [raw],
+            user_id=user_id,
+            file_url=file_url,
+            category=qa_type,
+            qa_chunks=None,               # no raw chunks
+            parsed_items=all_qa,          # pass parsed list (current snapshot)
             max_questions=num_questions_total
         )
 
         if "error" in save_res:
             print("[ERROR] Save failed:", save_res["error"])
+            # continue — don't abort entire generation, but keep going if possible
             continue
 
-        all_qa = save_res["qa"]
+        print(f"[DEBUG] Total QA so far (in memory): {len(all_qa)}")
 
-        print(f"[DEBUG] Total QA so far: {len(all_qa)}")
+    # final trim (defensive)
+    final = all_qa[:num_questions_total]
 
-        # Stop early if fully filled
-        if len(all_qa) >= num_questions_total:
-            break
+    # final save of the final snapshot (optional - you can keep previous saves)
+    try:
+        await save_qa_incremental(
+            user_id=user_id,
+            file_url=file_url,
+            category=qa_type,
+            qa_chunks=None,
+            parsed_items=final,
+            max_questions=num_questions_total
+        )
+    except Exception as e:
+        print("[WARN] Final save failed:", e)
 
     return {
         "message": "QA generation complete",
-        "results": all_qa
+        "results": final
     }
