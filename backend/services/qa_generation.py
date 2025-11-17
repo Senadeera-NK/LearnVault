@@ -31,11 +31,31 @@ def chunk_text(text: str, chunk_size: int = 500):
 # -------------------------
 def make_prompt(qa_type: str, chunk: str, count: int):
     if qa_type == "mcq":
-        rule = f"Generate exactly {count} MCQs with 4 options and 'Answer:' line."
+        rule = (
+        f"Generate exactly {count} multiple-choice questions.\n"
+        "Format MUST be:\n"
+        "Q: <question>\n"
+        "A) <option1>\n"
+        "B) <option2>\n"
+        "C) <option3>\n"
+        "D) <option4>\n"
+        "Answer: <A/B/C/D>\n"
+        "Do not include numbering or extra text.")
     elif qa_type == "true_false":
-        rule = f"Generate exactly {count} True/False questions with answers."
+        rule = (
+        f"Generate exactly {count} True/False questions.\n"
+        "Format MUST be:\n"
+        "Q: <question>\n"
+        "Answer: True\n"
+        "OR\n"
+        "Answer: False\n")
     else:
-        rule = f"Generate exactly {count} fact-based QA pairs."
+        rule = (
+        f"Generate exactly {count} fact-based QA pairs.\n"
+        "Use ONLY this exact format for each pair:\n"
+        "Q: <question>\n"
+        "Answer: <answer>\n"
+        "Do not include numbering, bullet points, titles, or anything else.")
 
     return f"{rule}\n\nText:\n{chunk}\n\nReturn only questions and answers."
 
