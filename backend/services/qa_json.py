@@ -5,48 +5,37 @@ import json
 # Fact-based QA
 # -------------------------
 def parse_fact_qa(qa_text: str):
-    """
-    Matches patterns like:
-    Q: Question text
-    Answer: Answer text
-    """
     pattern = r"(?:Q:|^\d+\.)\s*(.*?)\s*Answer:\s*(.*?)(?=\n\d+\.|$)"
     matches = re.findall(pattern, qa_text, re.DOTALL | re.IGNORECASE | re.MULTILINE)
     return [{"question": q.strip(), "answer": a.strip()} for q, a in matches]
 
 # -------------------------
-# True/False QA
+# True/False QA  (UPDATED)
 # -------------------------
 def parse_true_false_qa(qa_text: str):
-    """
-    Matches patterns like:
-    Q: Question text
-    Answer: True/False
-    """
-    pattern = r"(?:Q:|^\d+\.)\s*(.*?)\s*Answer:\s*(True|False)"
-    matches = re.findall(pattern, qa_text, re.DOTALL | re.IGNORECASE | re.MULTILINE)
-    return [{"question": q.strip(), "answer": a.strip().capitalize()} for q, a in matches]
+    pattern = r"(?:Question\s*\d*:|Question:)\s*(.*?)\s*\*\*Answer:\*\*\s*(True|False)"
+    matches = re.findall(pattern, qa_text, flags=re.IGNORECASE | re.DOTALL)
+
+    qa_pairs = []
+    for q, a in matches:
+        qa_pairs.append({
+            "question": q.strip(),
+            "answer": a.strip()
+        })
+
+    return qa_pairs
 
 # -------------------------
 # MCQ QA
 # -------------------------
 def parse_mcq_qa(qa_text: str):
-    """
-    Matches multiple-choice questions:
-    1. Question text
-    A) Option1
-    B) Option2
-    C) Option3
-    D) Option4
-    Answer: B
-    """
     pattern = (
-        r"(?:Q:|^\d+\.)\s*(.*?)\s*"      # Question
-        r"A\)\s*(.*?)\s*"                 # Option A
-        r"B\)\s*(.*?)\s*"                 # Option B
-        r"C\)\s*(.*?)\s*"                 # Option C
-        r"D\)\s*(.*?)\s*"                 # Option D
-        r"Answer:\s*([A-D])"              # Correct answer
+        r"(?:Q:|^\d+\.)\s*(.*?)\s*"
+        r"A\)\s*(.*?)\s*"
+        r"B\)\s*(.*?)\s*"
+        r"C\)\s*(.*?)\s*"
+        r"D\)\s*(.*?)\s*"
+        r"Answer:\s*([A-D])"
     )
     matches = re.findall(pattern, qa_text, re.DOTALL | re.MULTILINE | re.IGNORECASE)
     qa_list = []
@@ -62,10 +51,6 @@ def parse_mcq_qa(qa_text: str):
 # Main Parser
 # -------------------------
 def parse_qa_to_json(qa_text: str, category: str):
-    """
-    Dispatch parser based on category.
-    Returns a list of QA dictionaries.
-    """
     if not qa_text or not qa_text.strip():
         return []
 
