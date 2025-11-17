@@ -112,7 +112,7 @@ async def generate_qa_from_file(
 
     # --- MCQ handling (single-call mode) ---
     if qa_type == "mcq":
-        excerpt = text[:6000]
+        excerpt = text[:6000]  # limit text length for single call
         prompt = make_prompt(qa_type, excerpt, num_questions_total)
         raw = await asyncio.to_thread(generate_qa, prompt)
         print("[DEBUG] RAW MODEL OUTPUT (repr):", repr(raw))
@@ -124,6 +124,7 @@ async def generate_qa_from_file(
         raw_clean = re.sub(r',\s*]', ']', raw_clean)
 
         parsed_items = []
+        # Attempt JSON parsing first
         try:
             data = json.loads(raw_clean)
             if isinstance(data, list):
@@ -145,13 +146,15 @@ async def generate_qa_from_file(
             print("[WARN] JSON parse failed, falling back to QA parser:", e)
             parsed_items = parse_qa_to_json(raw_clean, "mcq")
 
+        # Filter invalid entries
         final = []
         for item in parsed_items:
             ans = normalize_mcq_answer(item.get("answer", ""))
-            if ans and isinstance(item.get("options"), list) and len(item["options"]) == 4:
+            opts = item.get("options", [])
+            if ans and isinstance(opts, list) and len(opts) == 4:
                 final.append({
                     "question": item.get("question", "").strip(),
-                    "options": item["options"],
+                    "options": opts,
                     "answer": ans
                 })
 
@@ -189,7 +192,7 @@ async def generate_qa_from_file(
         print(f"[DEBUG] Chunk {idx+1}/{len(chunks)}")
         prompt = make_prompt(qa_type, chk, per_chunk)
         raw = await asyncio.to_thread(generate_qa, prompt)
-        print("RAW MODEL OUTPUT:\n", raw)
+        print("[DEBUG] RAW MODEL OUTPUT:\n", raw)
 
         if not raw.strip():
             print(f"[WARN] Empty chunk output {idx+1}")
