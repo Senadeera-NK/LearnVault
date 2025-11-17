@@ -101,6 +101,7 @@ async def generate_qa_from_file(
 
         prompt = make_prompt(qa_type, chk, per_chunk)
         raw = await asyncio.to_thread(generate_qa, prompt)
+        print("RAW MODEL OUTPUT:\n", raw)
 
         if not raw.strip():
             print(f"[WARN] Empty chunk output {idx+1}")
