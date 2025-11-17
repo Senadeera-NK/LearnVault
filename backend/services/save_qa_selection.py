@@ -33,7 +33,7 @@ async def check_file_processed(user_id: int, file_url: str, category: str, min_q
 
 
 # ----------------------------------------------------
-# MAIN SAVE FUNCTION — NO processed_chunks
+# SIMPLE SAVE FUNCTION — EACH UPLOAD = NEW ROW
 # ----------------------------------------------------
 async def save_qa_incremental(
     user_id: int,
@@ -43,76 +43,49 @@ async def save_qa_incremental(
     max_questions: int = 20
 ):
     """
-    Saves QA data incrementally in a single-row-per-file/category model.
-    - Takes list of raw QA chunk strings
-    - Parses them into JSON
-    - Merges with current DB content
-    - Trims to max_questions
+    Saves QA data as a NEW ROW every time.
+    No merge, no dedupe, no upsert.
+    Simple append-only model.
     """
     try:
-        # Read existing row
-        resp = (
-            supabase.table("qa_files")
-            .select("*")
-            .eq("user_id", user_id)
-            .eq("file_url", file_url)
-            .eq("category", category)
-            .execute()
-        )
-        rows = resp.data or []
+        all_qas = []
 
-        existing_qas = []
-        if rows:
-            qas = rows[0].get("qa_content", [])
-            if isinstance(qas, str):
-                try:
-                    qas = json.loads(qas)
-                except:
-                    qas = []
-            existing_qas = qas
-
-        merged = list(existing_qas)
-
-        # Parse new raw chunks
+        # Convert incoming raw chunks into parsed QA list
         for raw in qa_chunks:
             if not raw or not raw.strip():
                 continue
-            parsed = parse_qa_to_json(raw, category) or []
-            merged.extend(parsed)
 
-        # Deduplicate by converting each QA block into a sorted JSON string
-        seen = set()
-        unique = []
-        for item in merged:
-            key = json.dumps(item, sort_keys=True)
-            if key not in seen:
-                seen.add(key)
-                unique.append(item)
+            parsed = parse_qa_to_json(raw, category) or []
+            all_qas.extend(parsed)
 
         # Trim
-        merged = unique[:max_questions]
+        trimmed = all_qas[:max_questions]
 
-        data_to_upsert = {
+        # Prepare row to insert
+        new_row = {
             "user_id": user_id,
             "file_url": file_url,
             "category": category,
-            "qa_content": merged
+            "qa_content": trimmed
         }
 
+        # Insert NEW ROW — NOT UPSERT
         response = (
             supabase.table("qa_files")
-            .upsert(data_to_upsert, on_conflict=["user_id", "file_url", "category"])
+            .insert(new_row)
             .execute()
         )
 
         if not response.data:
-            return {"error": "Upsert failed"}
+            return {"error": "Insert failed"}
+
+        row = response.data[0]
 
         return {
             "success": True,
-            "qa": merged,
-            "qa_count": len(merged),
-            "id": response.data[0].get("id")
+            "qa": trimmed,
+            "qa_count": len(trimmed),
+            "id": row.get("id")
         }
 
     except Exception as e:
