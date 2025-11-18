@@ -17,6 +17,7 @@ import {
   Input,
   InputGroup,
   InputLeftElement,
+  List,ListItem, Divider
 } from "@chakra-ui/react";
 import { SearchIcon } from "@chakra-ui/icons";
 import { useState } from "react";
@@ -42,13 +43,12 @@ export default function ShelfWindow({
   );
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size="xl" scrollBehavior="inside">
+    <Modal isOpen={isOpen} onClose={onClose} size="4xl" scrollBehavior="inside">
       <ModalOverlay />
       <ModalContent>
-        <ModalHeader>Files</ModalHeader>
-        <ModalCloseButton />
-        <ModalBody>
-          <InputGroup mb={3}>
+        <ModalHeader>
+          Files
+        <InputGroup mb={3}>
             <InputLeftElement pointerEvents="none">
               <SearchIcon color="gray.400" />
             </InputLeftElement>
@@ -58,8 +58,11 @@ export default function ShelfWindow({
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </InputGroup>
-
-          <VStack align="stretch" spacing={3}>
+        </ModalHeader>
+        <ModalCloseButton />
+        <ModalBody p={4}>
+          <VStack align="stretch" spacing={3} h="full">
+          <VStack align="stretch" spacing={3} h="30vh" maxH="30vh" overflow="auto" border="1px solid #e2e88f0" borderRadius="md" p={2}>
             {filteredFiles.length === 0 ? (
               <Text>No matching files.</Text>
             ) : (
@@ -97,6 +100,38 @@ export default function ShelfWindow({
             </RadioGroup>
             )}
           </VStack>
+
+          <Divider borderColor="black"/>
+            {/* 20% CATEGORY SECTION */}
+          <VStack
+          align="stretch"
+          h="20vh"
+          maxH="20vh"
+          border="1px solid #e2e8f0"
+          borderRadius="md"
+          p={3}>
+            <Text fontWeight="bold">QA Categories</Text>
+            <List spacing={1}>
+              <ListItem border="1px solid #e2e8f0"
+          borderRadius="md" p={1}>MCQ</ListItem>
+              <ListItem border="1px solid #e2e8f0"
+          borderRadius="md" p={1}>QA Facts</ListItem>
+              <ListItem border="1px solid #e2e8f0"
+          borderRadius="md" p={1}>True/ False</ListItem>
+            </List>
+          </VStack>
+
+          <Divider borderColor="black"/>
+          {/* 10% Questions inpu */}
+          <VStack
+          align="stretch"
+          h="10vh"
+          maxH="10vh"
+          justifyContent="center">
+            <Text fontWeight="medium">Number of Questions: </Text>
+            <Input placeholder="Enter number..."/>
+          </VStack>
+        </VStack>
         </ModalBody>
 
         <ModalFooter justifyContent="space-between">
