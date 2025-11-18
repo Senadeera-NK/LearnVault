@@ -110,127 +110,90 @@ async def generate_qa_from_file(
     if text in ["EMPTY", "READ_ERROR", "PHOTO_ONLY"]:
         return {"error": text}
 
-    # --- MCQ handling (single-call mode) ---
+    # ------------------------------
+    # MCQ MODE — Single Call Strategy
+    # ------------------------------
     if qa_type == "mcq":
-        excerpt = text[:6000]  # limit text length for single call
-        prompt = make_prompt(qa_type, excerpt, num_questions_total)
+        excerpt = text[:6000]  # reasonable limit
+        prompt = make_prompt("mcq", excerpt, num_questions_total)
+
         raw = await asyncio.to_thread(generate_qa, prompt)
         print("[DEBUG] RAW MODEL OUTPUT (repr):", repr(raw))
 
         if not raw or not raw.strip():
             return {"message": "QA generation complete", "results": []}
 
+        # ---- CLEAN BACKTICKS AND NOISE ----
         raw_clean = raw.strip().replace("\ufeff", "")
-        raw_clean = re.sub(r',\s*]', ']', raw_clean)
+        raw_clean = re.sub(r'^```json\s*', '', raw_clean, flags=re.IGNORECASE)
+        raw_clean = re.sub(r'^```', '', raw_clean)
+        raw_clean = re.sub(r'```$', '', raw_clean)
+        raw_clean = re.sub(r',\s*]', ']', raw_clean)   # Fix trailing comma issues
 
+        # ---- JSON PARSING ----
         parsed_items = []
-        # Attempt JSON parsing first
         try:
             data = json.loads(raw_clean)
-            if isinstance(data, list):
-                for obj in data:
-                    if (
-                        isinstance(obj, dict)
-                        and "question" in obj
-                        and "options" in obj
-                        and isinstance(obj["options"], list)
-                        and len(obj["options"]) == 4
-                        and "answer" in obj
-                    ):
-                        parsed_items.append({
-                            "question": str(obj["question"]).strip(),
-                            "options": [str(o).strip() for o in obj["options"]],
-                            "answer": normalize_mcq_answer(obj["answer"])
-                        })
+
+            for obj in data:
+                if (
+                    isinstance(obj, dict)
+                    and "question" in obj
+                    and "options" in obj
+                    and isinstance(obj["options"], list)
+                    and len(obj["options"]) == 4
+                    and "answer" in obj
+                ):
+                    parsed_items.append({
+                        "question": str(obj["question"]).strip(),
+                        "options": [str(o).strip() for o in obj["options"]],
+                        "answer": normalize_mcq_answer(obj["answer"])
+                    })
+
         except Exception as e:
-            print("[WARN] JSON parse failed, falling back to QA parser:", e)
+            print("[WARN] JSON parse failed, falling back:", e)
             parsed_items = parse_qa_to_json(raw_clean, "mcq")
 
-        # Filter invalid entries
-        final = []
-        for item in parsed_items:
-            ans = normalize_mcq_answer(item.get("answer", ""))
-            opts = item.get("options", [])
-            if ans and isinstance(opts, list) and len(opts) == 4:
-                final.append({
-                    "question": item.get("question", "").strip(),
-                    "options": opts,
-                    "answer": ans
-                })
+        # --- Save incremental ---
+        if parsed_items:
+            await save_qa_incremental(
+                user_id=user_id,
+                file_url=file_url,
+                qa_type="mcq",
+                qa_items=parsed_items,
+                total=num_questions_total
+            )
 
-        final = final[:num_questions_total]
+        return {"message": "QA generation complete", "results": parsed_items}
 
-        for i, q in enumerate(final, start=1):
-            print(f"[DEBUG] MCQ {i}: {q}")
+    # ------------------------------
+    # FACT / TRUE-FALSE (old behavior)
+    # ------------------------------
+    chunks = chunk_text(text, 2000)
+    per_chunk = math.ceil(num_questions_total / len(chunks))
 
-        save_res = await save_qa_incremental(
-            user_id=user_id,
-            file_url=file_url,
-            category="mcq",
-            qa_chunks=None,
-            parsed_items=final,
-            max_questions=num_questions_total
-        )
-        if "error" in save_res:
-            print("[ERROR] Save failed:", save_res["error"])
+    final = []
 
-        return {"message": "QA generation complete", "results": final}
-
-    # --- Non-MCQ: chunked generation ---
-    chunks = chunk_text(text, 500)
-    if not chunks:
-        return {"error": "no-text"}
-
-    per_chunk = max(1, math.ceil(num_questions_total / len(chunks)))
-    all_qa = []
-    seen = set()
-
-    for idx, chk in enumerate(chunks):
-        if len(all_qa) >= num_questions_total:
-            break
-
-        print(f"[DEBUG] Chunk {idx+1}/{len(chunks)}")
-        prompt = make_prompt(qa_type, chk, per_chunk)
+    for idx, chunk in enumerate(chunks):
+        prompt = make_prompt(qa_type, chunk, per_chunk)
         raw = await asyncio.to_thread(generate_qa, prompt)
-        print("[DEBUG] RAW MODEL OUTPUT:\n", raw)
+        print(f"[DEBUG] Chunk {idx+1}/{len(chunks)} raw:", repr(raw))
 
-        if not raw.strip():
-            print(f"[WARN] Empty chunk output {idx+1}")
-            continue
+        items = parse_qa_to_json(raw, qa_type)
+        if items:
+            final.extend(items)
 
-        parsed_items = parse_qa_to_json(raw, qa_type) or []
-        for item in parsed_items:
-            key = json.dumps(item, sort_keys=True)
-            if key not in seen:
-                seen.add(key)
-                all_qa.append(item)
+    # trim to total count
+    final = final[:num_questions_total]
 
-        all_qa = all_qa[:num_questions_total]
-
-        save_res = await save_qa_incremental(
-            user_id=user_id,
-            file_url=file_url,
-            category=qa_type,
-            qa_chunks=None,
-            parsed_items=all_qa,
-            max_questions=num_questions_total
-        )
-        if "error" in save_res:
-            print("[ERROR] Save failed:", save_res["error"])
-
-        print(f"[DEBUG] Total QA so far (in memory): {len(all_qa)}")
-
-    final = all_qa[:num_questions_total]
-    try:
+    if final:
         await save_qa_incremental(
             user_id=user_id,
             file_url=file_url,
-            category=qa_type,
-            qa_chunks=None,
-            parsed_items=final,
-            max_questions=num_questions_total
+            qa_type=qa_type,
+            qa_items=final,
+            total=num_questions_total
         )
-    except Exception as e:
-        print("[WARN] Final save failed:", e)
 
     return {"message": "QA generation complete", "results": final}
+
