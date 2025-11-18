@@ -191,7 +191,7 @@ async def generate_qa_from_file(
             user_id=user_id,
             file_url=file_url,
             category=qa_type,
-            parsed_items=parsed_items,
+            parsed_items=final,
             max_questions=num_questions_total
         )
 
