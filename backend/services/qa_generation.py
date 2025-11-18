@@ -160,8 +160,8 @@ async def generate_qa_from_file(
                 user_id=user_id,
                 file_url=file_url,
                 category="mcq",
-                qa_items=parsed_items,
-                total=num_questions_total
+                parsed_items=parsed_items,
+                max_questions=num_questions_total
             )
 
         return {"message": "QA generation complete", "results": parsed_items}
@@ -191,8 +191,8 @@ async def generate_qa_from_file(
             user_id=user_id,
             file_url=file_url,
             category=qa_type,
-            qa_items=final,
-            total=num_questions_total
+            parsed_items=parsed_items,
+            max_questions=num_questions_total
         )
 
     return {"message": "QA generation complete", "results": final}
