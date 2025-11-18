@@ -43,9 +43,9 @@ export default function ShelfWindow({
   );
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size="4xl" scrollBehavior="inside">
+    <Modal isOpen={isOpen} onClose={onClose}>
       <ModalOverlay />
-      <ModalContent>
+      <ModalContent h="90vh" maxH="90vH" minH="90vh">
         <ModalHeader>
           Files
         <InputGroup mb={3}>
@@ -60,9 +60,15 @@ export default function ShelfWindow({
           </InputGroup>
         </ModalHeader>
         <ModalCloseButton />
-        <ModalBody p={4}>
-          <VStack align="stretch" spacing={3} h="full">
-          <VStack align="stretch" spacing={3} h="30vh" maxH="30vh" overflow="auto" border="1px solid #e2e88f0" borderRadius="md" p={2}>
+        <ModalBody p={{base:2, md:4}}>
+          <VStack align="stretch" spacing={3} h="full" overflow="hidden">
+          <VStack align="stretch" 
+          spacing={3} 
+          h={{base:"25vh", md:"30vh",lg:"35vh"}}
+          maxH={{base:"25vh",md:"30vh",lg:"35vh"}} 
+          overflow="auto" 
+          border="1px solid #e2e88f0" 
+          borderRadius="md" p={2}>
             {filteredFiles.length === 0 ? (
               <Text>No matching files.</Text>
             ) : (
@@ -101,15 +107,15 @@ export default function ShelfWindow({
             )}
           </VStack>
 
-          <Divider borderColor="black"/>
+          <Divider borderColor="gray.500"/>
             {/* 20% CATEGORY SECTION */}
           <VStack
           align="stretch"
-          h="20vh"
-          maxH="20vh"
+          h={{base:"18vh",md:"20vh",lg:"22vh"}}
+          maxH={{base:"18vh",md:"20vh",lg:"22vh"}}
           border="1px solid #e2e8f0"
           borderRadius="md"
-          p={3}>
+          p={{base:2,md:3}}>
             <Text fontWeight="bold">QA Categories</Text>
             <List spacing={1}>
               <ListItem border="1px solid #e2e8f0"
@@ -121,15 +127,15 @@ export default function ShelfWindow({
             </List>
           </VStack>
 
-          <Divider borderColor="black"/>
-          {/* 10% Questions inpu */}
+          <Divider borderColor="gray.500"/>
+          {/* 10% Questions number input */}
           <VStack
           align="stretch"
-          h="10vh"
-          maxH="10vh"
+          h={{base:"12vh",md:"12vh",lg:"12vh"}}
           justifyContent="center">
-            <Text fontWeight="medium">Number of Questions: </Text>
-            <Input placeholder="Enter number..."/>
+            <Text fontWeight="medium">Number of Questions:<Input placeholder="Enter number..."/>
+            </Text>
+            
           </VStack>
         </VStack>
         </ModalBody>
