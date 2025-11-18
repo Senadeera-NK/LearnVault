@@ -159,7 +159,7 @@ async def generate_qa_from_file(
             await save_qa_incremental(
                 user_id=user_id,
                 file_url=file_url,
-                qa_type="mcq",
+                category="mcq",
                 qa_items=parsed_items,
                 total=num_questions_total
             )
@@ -190,7 +190,7 @@ async def generate_qa_from_file(
         await save_qa_incremental(
             user_id=user_id,
             file_url=file_url,
-            qa_type=qa_type,
+            category=qa_type,
             qa_items=final,
             total=num_questions_total
         )
