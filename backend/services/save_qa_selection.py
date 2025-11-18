@@ -88,7 +88,7 @@ async def save_qa_incremental(
 
         response = (
             supabase.table("qa_files")
-            .insert(new_row)
+            .upsert(new_row, on_conflict="user_id,file_url,category")
             .execute()
         )
 
