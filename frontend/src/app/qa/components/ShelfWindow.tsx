@@ -45,7 +45,7 @@ export default function ShelfWindow({
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <ModalOverlay />
-      <ModalContent h="90vh" maxH="90vH" minH="90vh">
+      <ModalContent h="70vh" maxH="70vH" minH="70vh" w="auto" p={3}>
         <ModalHeader>
           Files
         <InputGroup mb={3}>
@@ -111,7 +111,7 @@ export default function ShelfWindow({
             {/* 20% CATEGORY SECTION */}
           <VStack
           align="stretch"
-          h={{base:"18vh",md:"20vh",lg:"22vh"}}
+          h={{base:"16vh",md:"18vh",lg:"20vh"}}
           maxH={{base:"18vh",md:"20vh",lg:"22vh"}}
           border="1px solid #e2e8f0"
           borderRadius="md"
@@ -131,11 +131,12 @@ export default function ShelfWindow({
           {/* 10% Questions number input */}
           <VStack
           align="stretch"
-          h={{base:"12vh",md:"12vh",lg:"12vh"}}
+          h={{base:"8vh",md:"8vh",lg:"8vh"}}
           justifyContent="center">
-            <Text fontWeight="medium">Number of Questions:<Input placeholder="Enter number..."/>
-            </Text>
-            
+            <HStack spacing={3}>
+              <Text fontWeight="medium" minW="fit-content">Number of Questions:</Text>
+              <Input type="number" maxW={{base:"12vw", md:"15vw", lg:"15vw"}} placeholder="Enter number..."/>
+            </HStack>
           </VStack>
         </VStack>
         </ModalBody>
