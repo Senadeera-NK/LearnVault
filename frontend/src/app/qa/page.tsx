@@ -38,22 +38,27 @@ export default function QA() {
     fetchShelfFiles();
   }, [user]);
 
-  const handleDoneFromShelf = async (file: { id: string; name: string; url: string }, category: string, qCount: number) => {
-    if (!user) return;
-    setIsShelfOpen(false);
-    setLoading(true);
+const handleDoneFromShelf = async (file: { id: string; name: string; url: string }, category: string, qCount: number) => {
+  if (!user) return;
+  setIsShelfOpen(false);
+  setLoading(true);
 
-    try {
-      const result = await send_qa_selection(user.id, file.url, category.toLowerCase(), qCount);
-      setQaCategory(category);
-      setQaContent(result.qa_content || []);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-      setCheckAnswersTrigger((prev) => prev + 1); // optional: trigger initial check
-    }
-  };
+  try {
+    const result = await send_qa_selection(user.id, file.url, category.toLowerCase(), qCount);
+    setQaCategory(category);
+
+    // Normalize response
+    const qaData = result?.qa_content || result?.cachedQA || [];
+    setQaContent(qaData);
+
+  } catch (err) {
+    console.error(err);
+  } finally {
+    setLoading(false);
+    setCheckAnswersTrigger((prev) => prev + 1);
+  }
+};
+
 
   const handleCheckAnswers = () => setCheckAnswersTrigger((prev) => prev + 1);
   const handleResetAnswers = () => setRefreshTrigger((prev) => prev + 1);
@@ -63,6 +68,23 @@ export default function QA() {
       <Heading textAlign="center" mb={6}>Q & A</Heading>
 
       <VStack spacing={4}>
+
+
+        {loading && (<Box
+        position="absolute"
+        top={0}
+        left={0}
+        width="100%"
+        height="100%"
+        bg="rgba(255,255,255,0.6)"
+        zIndex={10}
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        backdropFilter="blur(4px)"
+        ><Spinner size="xl" /></Box>)}
+
+        {qaContent.length===0 && !loading &&(
         <VStack spacing={12} minH="60vh" justify="center" align="center">
             <Heading color="gray.600" textAlign="center">
               Select file to generate questions
@@ -78,9 +100,8 @@ export default function QA() {
               boxSize="60px"
             />
           </VStack>
-
-        {loading && <Spinner size="xl" />}
-
+        )}
+        
         {!loading && qaCategory === "MCQ" && (
           <MCQskeleton data={qaContent} checkAnswerTrigger={checkAnswersTrigger} refreshTrigger={refreshTrigger} />
         )}

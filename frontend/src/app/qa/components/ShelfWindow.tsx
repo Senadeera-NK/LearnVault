@@ -15,7 +15,9 @@ import {
   List,
   ListItem,
   Input,
-  Divider,RadioGroup, Radio
+  Divider,
+  RadioGroup,
+  Radio
 } from "@chakra-ui/react";
 import { ChangeEvent, useState } from "react";
 
@@ -27,13 +29,16 @@ interface ShelfWindowProps {
 }
 
 export default function ShelfWindow({ isOpen, onClose, files, onDone }: ShelfWindowProps) {
-  const [selectedFile, setSelectedFile] = useState<{ id: string; name: string; url: string } | null>(null);
+  const [selectedFileId, setSelectedFileId] = useState<string>("");
   const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [qCount, setQCount] = useState<string>("");
+
+  const [searchQuery, setSearchQuery] = useState<string>("");
 
   const filteredFiles = files.filter((file) =>
     decodeURIComponent(file.name).toLowerCase().includes(searchQuery.toLowerCase())
   );
+
   const handleQCountChange = (e: ChangeEvent<HTMLInputElement>) => {
     let num = Number(e.target.value);
     if (num > 20) num = 20;
@@ -42,9 +47,10 @@ export default function ShelfWindow({ isOpen, onClose, files, onDone }: ShelfWin
   };
 
   const handleDone = () => {
-    if (!selectedFile || !selectedCategory || !qCount) return;
-    onDone(selectedFile, selectedCategory, Number(qCount));
-    setSelectedFile(null);
+    const file = files.find((f) => f.id === selectedFileId);
+    if (!file || !selectedCategory || !qCount) return;
+    onDone(file, selectedCategory, Number(qCount));
+    setSelectedFileId("");
     setSelectedCategory("");
     setQCount("");
   };
@@ -58,50 +64,51 @@ export default function ShelfWindow({ isOpen, onClose, files, onDone }: ShelfWin
         <ModalBody>
           <VStack spacing={4} align="stretch">
             {/* File Selection */}
-           <VStack align="stretch" 
-          spacing={3} 
-          h={{base:"25vh", md:"30vh",lg:"35vh"}}
-          maxH={{base:"25vh",md:"30vh",lg:"35vh"}} 
-          overflow="auto" 
-          border="1px solid #e2e88f0" 
-          borderRadius="md" p={2}>
-            {filteredFiles.length === 0 ? (
-              <Text>No matching files.</Text>
-            ) : (
-            <RadioGroup
-              value={selectedFile}
-              onChange={(val) => setSelectedFile(val)}
+            <VStack
+              align="stretch"
+              spacing={3}
+              h={{ base: "25vh", md: "30vh", lg: "35vh" }}
+              maxH={{ base: "25vh", md: "30vh", lg: "35vh" }}
+              overflow="auto"
+              border="1px solid #e2e8f0"
+              borderRadius="md"
+              p={2}
             >
-              <VStack align="stretch" spacing={2}>
-                {filteredFiles.map((file) => {
-                  const isSelected = selectedFile === file.id;
-                  return (
-                    <Button
-                      key={file.id}
-                      onClick={() => setSelectedFile(file.id)}
-                      justifyContent="space-between"
-                      variant="outline"
-                      w="100%"
-                      h="auto"
-                      py={3}
-                      px={4}
-                      borderColor={isSelected ? "teal.400" : "gray.200"}
-                      bg={isSelected ? "teal.50" : "white"}
-                      _hover={{ bg: "gray.50" }}
-                      display="flex"
-                      alignItems="center"
-                    >
-                      <Text textAlign="left" flex="1" whiteSpace="normal">
-                        {decodeURIComponent(file.name)}
-                      </Text>
-                      <Radio isChecked={isSelected} value={file.id} colorScheme="teal" pointerEvents="none" />
-                    </Button>
-                  );
-                })}
-              </VStack>
-            </RadioGroup>
-            )}
-          </VStack>
+              {filteredFiles.length === 0 ? (
+                <Text>No matching files.</Text>
+              ) : (
+                <RadioGroup value={selectedFileId} onChange={(val) => setSelectedFileId(val)}>
+                  <VStack align="stretch" spacing={2}>
+                    {filteredFiles.map((file) => {
+                      const isSelected = selectedFileId === file.id;
+                      return (
+                        <Button
+                          key={file.id}
+                          onClick={() => setSelectedFileId(file.id)}
+                          justifyContent="space-between"
+                          variant="outline"
+                          w="100%"
+                          h="auto"
+                          py={3}
+                          px={4}
+                          borderColor={isSelected ? "teal.400" : "gray.200"}
+                          bg={isSelected ? "teal.50" : "white"}
+                          _hover={{ bg: "gray.50" }}
+                          display="flex"
+                          alignItems="center"
+                        >
+                          <Text textAlign="left" flex="1" whiteSpace="normal">
+                            {decodeURIComponent(file.name)}
+                          </Text>
+                          <Radio isChecked={isSelected} value={file.id} colorScheme="teal" pointerEvents="none" />
+                        </Button>
+                      );
+                    })}
+                  </VStack>
+                </RadioGroup>
+              )}
+            </VStack>
+
             <Divider />
 
             {/* Category Selection */}
@@ -144,8 +151,10 @@ export default function ShelfWindow({ isOpen, onClose, files, onDone }: ShelfWin
         </ModalBody>
 
         <ModalFooter justifyContent="space-between">
-          <Button onClick={onClose} colorScheme="gray">Close</Button>
-          <Button onClick={handleDone} colorScheme="teal" isDisabled={!selectedFile || !selectedCategory || !qCount}>
+          <Button onClick={onClose} colorScheme="gray">
+            Close
+          </Button>
+          <Button onClick={handleDone} colorScheme="teal" isDisabled={!selectedFileId || !selectedCategory || !qCount}>
             Done
           </Button>
         </ModalFooter>
