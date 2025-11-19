@@ -55,7 +55,12 @@ const handleDoneFromShelf = async (file: { id: string; name: string; url: string
     setQaCategory(backendCategory);
 
     // Normalize response
-    const qaData = result?.qa_content || result?.cachedQA || [];
+    let qaData: any[]=[];
+    if(backendCategory=="fact"){
+      qaData = result?.results||[];
+    }else{
+    qaData = result?.qa_content || result?.cachedQA || [];
+    }
     setQaContent(qaData);
 
   } catch (err) {
