@@ -12,64 +12,53 @@ import {
   VStack,
   HStack,
   Text,
-  Radio,
-  RadioGroup,
+  List,
+  ListItem,
   Input,
-  InputGroup,
-  InputLeftElement,
-  List,ListItem, Divider
+  Divider,RadioGroup, Radio
 } from "@chakra-ui/react";
-import { SearchIcon } from "@chakra-ui/icons";
 import { ChangeEvent, useState } from "react";
 
 interface ShelfWindowProps {
   isOpen: boolean;
   onClose: () => void;
   files: { id: string; name: string; url: string }[];
-  onFileSelect: (file: { id: string; name: string; url: string }) => void;
+  onDone: (file: { id: string; name: string; url: string }, category: string, qCount: number) => void;
 }
 
-export default function ShelfWindow({
-  isOpen,
-  onClose,
-  files,
-  onFileSelect,
-}: ShelfWindowProps) {
-  const [selectedFileId, setSelectedFileId] = useState<string>("");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selected, setSelected] = useState("");
-  const [qcount,setQcount] = useState<string>("");
+export default function ShelfWindow({ isOpen, onClose, files, onDone }: ShelfWindowProps) {
+  const [selectedFile, setSelectedFile] = useState<{ id: string; name: string; url: string } | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string>("");
+  const [qCount, setQCount] = useState<string>("");
+
   const filteredFiles = files.filter((file) =>
     decodeURIComponent(file.name).toLowerCase().includes(searchQuery.toLowerCase())
   );
-
-  function handleChange(e: ChangeEvent<HTMLInputElement>){
+  const handleQCountChange = (e: ChangeEvent<HTMLInputElement>) => {
     let num = Number(e.target.value);
-    if(num>20) num=20;
-    if (num<1) num=1;
-    setQcount(String(num));
-  }
+    if (num > 20) num = 20;
+    if (num < 1) num = 1;
+    setQCount(String(num));
+  };
+
+  const handleDone = () => {
+    if (!selectedFile || !selectedCategory || !qCount) return;
+    onDone(selectedFile, selectedCategory, Number(qCount));
+    setSelectedFile(null);
+    setSelectedCategory("");
+    setQCount("");
+  };
+
   return (
     <Modal isOpen={isOpen} onClose={onClose} size="3xl">
       <ModalOverlay />
       <ModalContent>
-        <ModalHeader>
-          Files
-        <InputGroup mb={3}>
-            <InputLeftElement pointerEvents="none">
-              <SearchIcon color="gray.400" />
-            </InputLeftElement>
-            <Input
-              placeholder="Search files..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </InputGroup>
-        </ModalHeader>
+        <ModalHeader>Select File & QA Options</ModalHeader>
         <ModalCloseButton />
-        <ModalBody p={{base:2, md:4}}>
-          <VStack align="stretch" spacing={3} h="full" overflow="hidden">
-          <VStack align="stretch" 
+        <ModalBody>
+          <VStack spacing={4} align="stretch">
+            {/* File Selection */}
+           <VStack align="stretch" 
           spacing={3} 
           h={{base:"25vh", md:"30vh",lg:"35vh"}}
           maxH={{base:"25vh",md:"30vh",lg:"35vh"}} 
@@ -80,16 +69,16 @@ export default function ShelfWindow({
               <Text>No matching files.</Text>
             ) : (
             <RadioGroup
-              value={selectedFileId}
-              onChange={(val) => setSelectedFileId(val)}
+              value={selectedFile}
+              onChange={(val) => setSelectedFile(val)}
             >
               <VStack align="stretch" spacing={2}>
                 {filteredFiles.map((file) => {
-                  const isSelected = selectedFileId === file.id;
+                  const isSelected = selectedFile === file.id;
                   return (
                     <Button
                       key={file.id}
-                      onClick={() => setSelectedFileId(file.id)}
+                      onClick={() => setSelectedFile(file.id)}
                       justifyContent="space-between"
                       variant="outline"
                       w="100%"
@@ -113,66 +102,52 @@ export default function ShelfWindow({
             </RadioGroup>
             )}
           </VStack>
+            <Divider />
 
-          <Divider borderColor="gray.500"/>
-            {/* 20% CATEGORY SECTION */}
-          <VStack
-          align="stretch"
-          h={{base:"16vh",md:"18vh",lg:"20vh"}}
-          maxH={{base:"18vh",md:"20vh",lg:"22vh"}}
-          border="1px solid #e2e8f0"
-          borderRadius="md"
-          p={{base:2,md:3}}>
-            <Text fontWeight="bold">QA Categories</Text>
-            <List spacing={1}>
-              <ListItem border="1px solid #e2e8f0"
-          borderRadius="md" p={1} _hover={{ bg: "gray.50" }} cursor="pointer" 
-          bg={selected=='MCQ'?"teal.50":"transparent"} 
-          onClick={()=>setSelected("MCQ")}>MCQ</ListItem>
-              <ListItem border="1px solid #e2e8f0"
-          borderRadius="md" p={1} _hover={{ bg: "gray.50" }} cursor="pointer" 
-          bg={selected=='QA Facts'?"teal.50":"transparent"} 
-          onClick={()=>setSelected("QA Facts")}>QA Facts</ListItem>
-              <ListItem border="1px solid #e2e8f0"
-          borderRadius="md" p={1} _hover={{ bg: "gray.50" }}  cursor="pointer" 
-          bg={selected=='True/ False'?"teal.50":"transparent"} 
-          onClick={()=>setSelected("True/ False")}>True/ False</ListItem>
-            </List>
-          </VStack>
+            {/* Category Selection */}
+            <VStack spacing={1} align="stretch">
+              <Text fontWeight="bold">QA Categories</Text>
+              <List spacing={1}>
+                {["MCQ", "True/ False", "QA Facts"].map((cat) => (
+                  <ListItem
+                    key={cat}
+                    border="1px solid #e2e8f0"
+                    borderRadius="md"
+                    p={2}
+                    cursor="pointer"
+                    bg={selectedCategory === cat ? "teal.50" : "transparent"}
+                    _hover={{ bg: "gray.50" }}
+                    onClick={() => setSelectedCategory(cat)}
+                  >
+                    {cat}
+                  </ListItem>
+                ))}
+              </List>
+            </VStack>
 
-          <Divider borderColor="gray.500"/>
-          {/* 10% Questions number input */}
-          <VStack
-          align="stretch"
-          h={{base:"8vh",md:"8vh",lg:"8vh"}}
-          justifyContent="center">
+            <Divider />
+
+            {/* Number of Questions */}
             <HStack spacing={3}>
-              <Text fontWeight="medium" minW="fit-content">Number of Questions:</Text>
-              <Input value={qcount} onChange={handleChange} type="number" max={20} min={1} maxW={{base:"12vw", md:"15vw", lg:"15vw"}} placeholder="Enter number..."/>
+              <Text fontWeight="medium">Number of Questions:</Text>
+              <Input
+                type="number"
+                value={qCount}
+                onChange={handleQCountChange}
+                placeholder="Enter number..."
+                max={20}
+                min={1}
+                maxW="12vw"
+              />
             </HStack>
           </VStack>
-        </VStack>
         </ModalBody>
 
         <ModalFooter justifyContent="space-between">
-          <Button onClick={onClose} colorScheme="gray">
-            Close
+          <Button onClick={onClose} colorScheme="gray">Close</Button>
+          <Button onClick={handleDone} colorScheme="teal" isDisabled={!selectedFile || !selectedCategory || !qCount}>
+            Done
           </Button>
-        <Button
-          isDisabled={!selectedFileId}
-          onClick={() => {
-            const selected = files.find((f) => f.id === selectedFileId);
-            if (selected) {
-              onFileSelect(selected);
-              setSelectedFileId("");
-              onClose();
-            }
-          }}
-          colorScheme="teal"
-        >
-          Done
-        </Button>
-
         </ModalFooter>
       </ModalContent>
     </Modal>
