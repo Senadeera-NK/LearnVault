@@ -79,7 +79,8 @@ export default function FactQAskeleton({ data, checkAnswerTrigger,refreshTrigger
                                 placeholder="Write the answer here..."
                                 size="md"
                                 minH="40px"
-                                border="1px solid gray.200"
+                                borderColor="gray.300"
+                                _focus={{ borderColor: "gray.400", boxShadow: "none" }}
                                 />
                     </Box>
                 ))}

@@ -141,10 +141,10 @@ export default function ShelfWindow({ isOpen, onClose, files, onDone }: ShelfWin
                 type="number"
                 value={qCount}
                 onChange={handleQCountChange}
-                placeholder="Enter number..."
+                placeholder="Enter a number..."
                 max={20}
                 min={1}
-                maxW="12vw"
+                maxW="15vw"
               />
             </HStack>
           </VStack>

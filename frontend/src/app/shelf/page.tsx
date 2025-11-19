@@ -1,11 +1,12 @@
 "use client";
 import { useEffect, useState, useCallback } from "react";
-import { Box, Heading, SimpleGrid, Text } from "@chakra-ui/react";
+import { Box, Heading, SimpleGrid, Text,Image } from "@chakra-ui/react";
 import { usePageTimer } from "../../components/UsePageTimer";
 import { recordUsage } from "../../../api/api";
 import { useAuth } from "@/components/AuthContext";
 import { fetch_user_pdfs } from "../../../api/api";
 import FileListWindow from "./components/FileListWindow";
+import  fileCategoryPic from "./../../../pics/file_category.jpg"
 
 export default function Shelf() {
   const { user } = useAuth();
@@ -96,38 +97,49 @@ const extractFileName = (url: string) => {
       {/* Grid of categories */}
       <SimpleGrid
         paddingTop={30}
-        columns={{ base: 2, sm: 3, md: 4, lg: 5 }}
-        spacing={{base:"15px",md:"30px"}}
+        columns={{ base: 2, sm: 3, md: 4, lg: 5, xl:8}}
+        spacing={{ base: "6px", md: "10px" }}
+        mt="4px"
       >
         {uniqueCategories.map((category) => (
           <Box
             key={category}
-            border="2px solid"
-            borderColor="gray.300"
-            borderRadius="md"
-            p={{nase:"12px",md:"20px"}}
-            h={{base:"80px",md:"90px"}}
-            w={{base:"100%", sm:"150px",md:"180px",lg:"200px"}}
-            display="flex"
-            alignItems="left"
-            justifyContent="center"
             cursor="pointer"
-            _hover={{ bg: "gray.100", transform: "scale(1.03)" }}
-            transition="all 0.2s ease"
             onClick={() => handleCategoryClick(category)}
+            textAlign="center"
+            w={{ base: "110px", sm: "130px", md: "150px" }}
           >
+            {/* Image */}
+            <Box
+              overflow="hidden"
+              p="0"
+              _hover={{ transform: "scale(1.03)" }}
+              transition="all 0.2s ease"
+            >
+              <Image
+                src={fileCategoryPic.src}
+                alt="Category"
+                w="100%"
+                h={{base:"70px",sm:"90px",md:"110px"}}
+                objectFit="cover"
+                borderRadius="md"
+              />
+            </Box>
+
+            {/* Category Name Under Image */}
             <Text
+              mt="8px"
               fontWeight="semibold"
-              textAlign="center"
+              fontSize={{ base: "sm", md: "md" }}
               color="gray.700"
               noOfLines={2}
-              fontSize={{base:"sm",md:"md"}}
             >
               {category}
             </Text>
           </Box>
         ))}
       </SimpleGrid>
+
 
       {/* File list modal */}
       <FileListWindow

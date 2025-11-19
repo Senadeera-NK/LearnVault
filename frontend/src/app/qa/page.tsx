@@ -77,8 +77,9 @@ const handleDoneFromShelf = async (file: { id: string; name: string; url: string
 
   return (
     <>
-      <Heading textAlign="center" mb={6}>Q & A</Heading>
-
+      <Box p={6} bg="white"position="sticky" zIndex="999" >
+      <Heading top="0" textAlign="center" mb={6}>Q & A</Heading>
+      </Box>
       <VStack spacing={4}>
 
 
@@ -125,10 +126,21 @@ const handleDoneFromShelf = async (file: { id: string; name: string; url: string
         )}
 
         {!loading && qaContent.length > 0 && (
-          <Flex gap={3}>
-            <Button onClick={handleCheckAnswers}>Check Answers</Button>
-            <Button onClick={handleResetAnswers}>Reset</Button>
-          </Flex>
+        <Flex gap={{ base: 8, md: 12, lg: 16 }}>
+          <Button
+            onClick={handleCheckAnswers}
+            w={{ base: "140px", md: "160px", lg: "180px" }}
+          >
+            Check Answers
+          </Button>
+
+          <Button
+            onClick={handleResetAnswers}
+            w={{ base: "140px", md: "160px", lg: "180px" }}
+          >
+            Reset
+          </Button>
+        </Flex>
         )}
       </VStack>
 
