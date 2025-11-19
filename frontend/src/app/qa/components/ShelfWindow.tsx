@@ -115,7 +115,7 @@ export default function ShelfWindow({ isOpen, onClose, files, onDone }: ShelfWin
             <VStack spacing={1} align="stretch">
               <Text fontWeight="bold">QA Categories</Text>
               <List spacing={1}>
-                {["MCQ", "True/ False", "QA Facts"].map((cat) => (
+                {["MCQ", "True/False", "Facts Questions"].map((cat) => (
                   <ListItem
                     key={cat}
                     border="1px solid #e2e8f0"

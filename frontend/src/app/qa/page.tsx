@@ -38,14 +38,21 @@ export default function QA() {
     fetchShelfFiles();
   }, [user]);
 
+  const categoryMap: Record<string, "mcq"|"true_false"|"fact">={
+    "MCQ":"mcq",
+    "True/False":"true_false",
+    "Facts Questions":"fact"
+  };
+
 const handleDoneFromShelf = async (file: { id: string; name: string; url: string }, category: string, qCount: number) => {
   if (!user) return;
   setIsShelfOpen(false);
   setLoading(true);
 
   try {
-    const result = await send_qa_selection(user.id, file.url, category.toLowerCase(), qCount);
-    setQaCategory(category);
+    const backendCategory = categoryMap[category];
+    const result = await send_qa_selection(user.id, file.url, backendCategory, qCount);
+    setQaCategory(backendCategory);
 
     // Normalize response
     const qaData = result?.qa_content || result?.cachedQA || [];
@@ -101,14 +108,14 @@ const handleDoneFromShelf = async (file: { id: string; name: string; url: string
             />
           </VStack>
         )}
-        
-        {!loading && qaCategory === "MCQ" && (
+
+        {!loading && qaCategory === "mcq" && (
           <MCQskeleton data={qaContent} checkAnswerTrigger={checkAnswersTrigger} refreshTrigger={refreshTrigger} />
         )}
-        {!loading && qaCategory === "True/ False" && (
+        {!loading && qaCategory === "true_false" && (
           <TrueFalseSkeleton data={qaContent} checkAnswerTrigger={checkAnswersTrigger} refreshTrigger={refreshTrigger} />
         )}
-        {!loading && qaCategory === "QA Facts" && (
+        {!loading && qaCategory === "qa_facts" && (
           <FactQAskeleton data={qaContent} checkAnswerTrigger={checkAnswersTrigger} refreshTrigger={refreshTrigger} />
         )}
 
