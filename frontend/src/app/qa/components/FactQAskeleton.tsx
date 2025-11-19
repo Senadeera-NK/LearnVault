@@ -52,7 +52,7 @@ export default function FactQAskeleton({ data, checkAnswerTrigger,refreshTrigger
     return(
             <VStack align="stretch" spacing={3}>
                 {data.map((qa,index)=>(
-                    <Box key={index} p={3} border="1px solid"
+                    <Box key={index} p={3} border="1px solid" borderRadius="md"
                     borderColor={
                         results[index]==="correct"
                         ?"green.400"
@@ -68,8 +68,8 @@ export default function FactQAskeleton({ data, checkAnswerTrigger,refreshTrigger
                         :results[index]==="nearly correct"
                         ?"yellow.100"
                         :results[index]==="incorrect"
-                        ?"red.10"
-                        :"gray.200"
+                        ?"red.100"
+                        :"white"
                     }
                     w="100%">
                         <Text fontWeight="semibold" pb={3}>{index+1}. {qa.question}</Text>
@@ -79,6 +79,7 @@ export default function FactQAskeleton({ data, checkAnswerTrigger,refreshTrigger
                                 placeholder="Write the answer here..."
                                 size="md"
                                 minH="40px"
+                                border="1px solid gray.200"
                                 />
                     </Box>
                 ))}

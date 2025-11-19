@@ -46,7 +46,7 @@ export default function TrueFalseSkeleton({
     });
 
     setResult(newResults);
-  }, [checkAnswerTrigger, data, selectedAnswer]);
+  }, [checkAnswerTrigger, data]);
 
   // Reset when refresh trigger changes
   useEffect(() => {
