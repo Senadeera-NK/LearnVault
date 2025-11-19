@@ -20,7 +20,7 @@ import {
   List,ListItem, Divider
 } from "@chakra-ui/react";
 import { SearchIcon } from "@chakra-ui/icons";
-import { useState } from "react";
+import { ChangeEvent, useState } from "react";
 
 interface ShelfWindowProps {
   isOpen: boolean;
@@ -37,15 +37,22 @@ export default function ShelfWindow({
 }: ShelfWindowProps) {
   const [selectedFileId, setSelectedFileId] = useState<string>("");
   const [searchQuery, setSearchQuery] = useState("");
-
+  const [selected, setSelected] = useState("");
+  const [qcount,setQcount] = useState<string>("");
   const filteredFiles = files.filter((file) =>
     decodeURIComponent(file.name).toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  function handleChange(e: ChangeEvent<HTMLInputElement>){
+    let num = Number(e.target.value);
+    if(num>20) num=20;
+    if (num<1) num=1;
+    setQcount(String(num));
+  }
   return (
-    <Modal isOpen={isOpen} onClose={onClose}>
+    <Modal isOpen={isOpen} onClose={onClose} size="3xl">
       <ModalOverlay />
-      <ModalContent h="70vh" maxH="70vH" minH="70vh" w="auto" p={3}>
+      <ModalContent>
         <ModalHeader>
           Files
         <InputGroup mb={3}>
@@ -119,11 +126,17 @@ export default function ShelfWindow({
             <Text fontWeight="bold">QA Categories</Text>
             <List spacing={1}>
               <ListItem border="1px solid #e2e8f0"
-          borderRadius="md" p={1}>MCQ</ListItem>
+          borderRadius="md" p={1} _hover={{ bg: "gray.50" }} cursor="pointer" 
+          bg={selected=='MCQ'?"teal.50":"transparent"} 
+          onClick={()=>setSelected("MCQ")}>MCQ</ListItem>
               <ListItem border="1px solid #e2e8f0"
-          borderRadius="md" p={1}>QA Facts</ListItem>
+          borderRadius="md" p={1} _hover={{ bg: "gray.50" }} cursor="pointer" 
+          bg={selected=='QA Facts'?"teal.50":"transparent"} 
+          onClick={()=>setSelected("QA Facts")}>QA Facts</ListItem>
               <ListItem border="1px solid #e2e8f0"
-          borderRadius="md" p={1}>True/ False</ListItem>
+          borderRadius="md" p={1} _hover={{ bg: "gray.50" }}  cursor="pointer" 
+          bg={selected=='True/ False'?"teal.50":"transparent"} 
+          onClick={()=>setSelected("True/ False")}>True/ False</ListItem>
             </List>
           </VStack>
 
@@ -135,7 +148,7 @@ export default function ShelfWindow({
           justifyContent="center">
             <HStack spacing={3}>
               <Text fontWeight="medium" minW="fit-content">Number of Questions:</Text>
-              <Input type="number" maxW={{base:"12vw", md:"15vw", lg:"15vw"}} placeholder="Enter number..."/>
+              <Input value={qcount} onChange={handleChange} type="number" max={20} min={1} maxW={{base:"12vw", md:"15vw", lg:"15vw"}} placeholder="Enter number..."/>
             </HStack>
           </VStack>
         </VStack>
