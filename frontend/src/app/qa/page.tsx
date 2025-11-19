@@ -57,7 +57,7 @@ const handleDoneFromShelf = async (file: { id: string; name: string; url: string
     // Normalize response
     let qaData: any[]=[];
     if(backendCategory=="fact"){
-      qaData = result?.results||[];
+      qaData = result?.results|| result?.cachedQA||[];
     }else{
     qaData = result?.qa_content || result?.cachedQA || [];
     }
@@ -120,7 +120,7 @@ const handleDoneFromShelf = async (file: { id: string; name: string; url: string
         {!loading && qaCategory === "true_false" && (
           <TrueFalseSkeleton data={qaContent} checkAnswerTrigger={checkAnswersTrigger} refreshTrigger={refreshTrigger} />
         )}
-        {!loading && qaCategory === "qa_facts" && (
+        {!loading && qaCategory === "fact" && (
           <FactQAskeleton data={qaContent} checkAnswerTrigger={checkAnswersTrigger} refreshTrigger={refreshTrigger} />
         )}
 
