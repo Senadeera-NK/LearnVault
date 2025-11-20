@@ -1,8 +1,7 @@
 // services/api.ts
 
 // Use your Codespaces-provided forwarded URL here
-const API_URL = process.env.NEXT_PUBLIC_API_URL ||"https://learnvault-jdbg.onrender.com";
-// "proxy": "http://localhost:8000"
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export async function signup(name: string, email: string, password: string) {
   const response = await fetch(`${API_URL}/signup`, {
