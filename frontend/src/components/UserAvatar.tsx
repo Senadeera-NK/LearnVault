@@ -1,7 +1,6 @@
 "use client"
 
 import { Box } from "@chakra-ui/react"
-import { HamburgerIcon, AddIcon, AttachmentIcon, EditIcon} from "@chakra-ui/icons"
 import {useAuth} from "./AuthContext"
 
 export default function UserAvatar() {

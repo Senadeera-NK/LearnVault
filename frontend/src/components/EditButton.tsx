@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { IconButton, DialogRoot as Modal, DialogBackdrop as ModalOverlay, DialogContent as ModalContent, DialogHeader as ModalHeader, DialogFooter as ModalFooter, DialogBody as ModalBody, DialogCloseTrigger as ModalCloseButton, Button, Textarea, } from "@chakra-ui/react"
-import { EditIcon } from "@chakra-ui/icons"
+import { FiEdit } from "react-icons/fi";
 import {txt_file_convert} from "../../api/api"
 import { useAuth } from "./AuthContext";
 
@@ -45,7 +45,7 @@ export default function EditNotepad() {
         zIndex={1}
         onClick={openModal}
       >
-        <EditIcon />
+        <FiEdit />
       </IconButton>
 
       <Modal open={isOpen} onOpenChange={(open) => { if (!open) closeModal(); }} size="xl">
