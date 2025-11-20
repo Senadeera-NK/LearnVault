@@ -6,7 +6,7 @@ import { useAuth } from "../../components/AuthContext";
 import { recordUsage,fetch_user_qa_count } from "../../../api/api";
 
 // Chakra UI imports
-import { Box, Grid, Card, Text, Heading, Spinner } from "@chakra-ui/react";
+import { Box, Grid, CardRoot as Card, Text, Heading, Spinner } from "@chakra-ui/react";
 
 // Dynamic imports with SSR disabled
 import dynamic from "next/dynamic";

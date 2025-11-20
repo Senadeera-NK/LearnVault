@@ -65,7 +65,7 @@ export default function TrueFalseSkeleton({
 
   // Main render
   return (
-    <VStack align="stretch" spacing={3}>
+    <VStack align="stretch" gap={3}>
       {data.map((qa, index) => {
         const status = result[index];
         return (
@@ -94,7 +94,7 @@ export default function TrueFalseSkeleton({
               {index + 1}. {qa.question}
             </Text>
 
-            <HStack spacing={2}>
+            <HStack gap={2}>
               <Button
                 size="sm"
                 colorScheme={selectedAnswer[index] === "true" ? "blue" : "gray"}

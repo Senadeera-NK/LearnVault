@@ -98,7 +98,7 @@ const extractFileName = (url: string) => {
       <SimpleGrid
         paddingTop={30}
         columns={{ base: 2, sm: 3, md: 4, lg: 5, xl:8}}
-        spacing={{ base: "6px", md: "10px" }}
+        gap={{ base: "6px", md: "10px" }}
         mt="4px"
       >
         {uniqueCategories.map((category) => (
@@ -132,7 +132,7 @@ const extractFileName = (url: string) => {
               fontWeight="semibold"
               fontSize={{ base: "sm", md: "md" }}
               color="gray.700"
-              noOfLines={2}
+            //  noOfLines={2}
             >
               {category}
             </Text>

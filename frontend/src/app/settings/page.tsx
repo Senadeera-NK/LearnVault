@@ -1,16 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Box, Heading, VStack, HStack, Text, Switch,useColorMode } from "@chakra-ui/react";
+import { useState } from "react";
+import { Box, Heading, VStack, HStack, Text, Switch } from "@chakra-ui/react";
 import {usePageTimer} from "../../components/UsePageTimer";
 import {recordUsage} from "../../../api/api";
 import { useAuth } from "@/components/AuthContext";
-import { optionsReducer } from "recharts/types/state/optionsSlice";
 
 export default function Settings() {
       const { user } = useAuth();
-      const{colorMode, toggleColorMode} = useColorMode();
-      const [darkMode, setDarkMode] = useState(colorMode==="dark");
+      // const{colorMode, toggleColorMode} = useColorMode();
+      // const [darkMode, setDarkMode] = useState(colorMode==="dark");
 
       // Track page usage
       usePageTimer("Settings", async (duration) => {
@@ -28,8 +27,9 @@ export default function Settings() {
        const settingsOptions = [
             {label:"Enable Notifications", key:"notifications"},
             {label:"Dark Mode", key:"DarkMode", func:()=>{
-                  toggleColorMode();
-                  setDarkMode(!darkMode)}
+                  // toggleColorMode();
+                  // setDarkMode(!darkMode)
+            }
             },
             {label:"Auto-Save", key:"autoSave"},
             {label:"Enable/Disable show answers function",key:"Enable/Disable show answers function"}
@@ -53,7 +53,7 @@ export default function Settings() {
             mb={8}
             p={3}
             >
-            <VStack spacing={4} align="stretch">
+            <VStack gap={4} align="stretch">
             {settingsOptions.map((option) => (
                   <HStack
                   key={option.key}
@@ -65,12 +65,12 @@ export default function Settings() {
                   borderRadius="md"
                   >
                   <Text>{option.label}</Text>
-                  {option.func?(
-                        <Switch isChecked={darkMode} onChange={option.func}/>
-                  ):(
-                        <Switch/>
-                  )
-            }
+                  {/* {option.func ? (
+                        // <Switch isChecked={darkMode} onChange={() => option.func?.()} />
+                  ) : (
+                        // <Switch />
+                        console.log("switch error");
+                  )} */}
                   </HStack>
             ))}
             </VStack>

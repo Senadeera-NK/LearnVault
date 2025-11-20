@@ -38,7 +38,6 @@ export default function AttachmentButton() {
     <>
       {/* Upload Button */}
       <IconButton
-        icon={<AttachmentIcon />}
         aria-label="Attach file"
         colorScheme="teal"
         position="fixed"
@@ -48,7 +47,9 @@ export default function AttachmentButton() {
         size="md"
         zIndex={9999}
         onClick={handleAttachmentClick}
-      />
+      >
+        <AttachmentIcon />
+        </IconButton>
 
       {/* Hidden File Input */}
       <input
@@ -77,8 +78,8 @@ export default function AttachmentButton() {
         >
           <Spinner
             size="xl"
-            thickness="5px"
-            speed="0.65s"
+            //  thickness="5px"
+           //   speed="0.65s"
             color="blue.500"
           />
         </Box>

@@ -50,7 +50,7 @@ export default function FactQAskeleton({ data, checkAnswerTrigger,refreshTrigger
     }
 
     return(
-            <VStack align="stretch" spacing={3}>
+            <VStack align="stretch" gap={3}>
                 {data.map((qa,index)=>(
                     <Box key={index} p={3} border="1px solid" borderRadius="md"
                     borderColor={

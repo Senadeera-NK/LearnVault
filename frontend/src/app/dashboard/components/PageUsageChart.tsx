@@ -59,7 +59,7 @@ export default function PageUsageChart({ userId }: PageUsageChartProps) {
 //total hours
 const totalHours = data.reduce((sum,d)=>sum + d.hours, 0);
   return (
-    <VStack spacing={4} align="stretch" p={4} width="100%" mt={6}>
+    <VStack gap={4} align="stretch" p={4} width="100%" mt={6}>
       {data.map((d) => {
         const percent = totalHours ? (d.hours/totalHours) * 100:0;
 

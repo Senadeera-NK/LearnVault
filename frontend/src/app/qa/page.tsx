@@ -80,7 +80,7 @@ const handleDoneFromShelf = async (file: { id: string; name: string; url: string
       <Box p={6} bg="white"position="sticky" top={0} zIndex="999" w="100%">
       <Heading top="0" textAlign="center" mb={0}>Q & A</Heading>
       </Box>
-      <VStack spacing={4}>
+      <VStack gap={4}>
 
 
         {loading && (<Box
@@ -98,20 +98,21 @@ const handleDoneFromShelf = async (file: { id: string; name: string; url: string
         ><Spinner size="xl" /></Box>)}
 
         {qaContent.length===0 && !loading &&(
-        <VStack spacing={12} minH="60vh" justify="center" align="center">
+        <VStack gap={12} minH="60vh" justify="center" align="center">
             <Heading color="gray.600" textAlign="center">
               Select file to generate questions
             </Heading>
 
             <IconButton
               aria-label="Add item"
-              icon={<AddIcon boxSize={8} />}
               onClick={() => setIsShelfOpen(true)}
               colorScheme="gray"
-              size="3xl"
+              size="2xs"
               borderRadius="full"
               boxSize="60px"
-            />
+            >
+              <AddIcon boxSize={8} />
+              </IconButton>
           </VStack>
         )}
 

@@ -1,23 +1,22 @@
 "use client";
 
 import {
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalCloseButton,
-  ModalBody,
-  ModalFooter,
+  DialogRoot,
+  DialogBackdrop,
+  DialogPositioner,
+  DialogContent,
+  DialogHeader,
+  DialogCloseTrigger,
+  DialogBody,
+  DialogFooter,
   Button,
+  Box,
   VStack,
   HStack,
   Text,
-  List,
-  ListItem,
+  
   Input,
-  Divider,
-  RadioGroup,
-  Radio
+    Separator,
 } from "@chakra-ui/react";
 import { ChangeEvent, useState } from "react";
 
@@ -56,29 +55,29 @@ export default function ShelfWindow({ isOpen, onClose, files, onDone }: ShelfWin
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size="3xl">
-      <ModalOverlay />
-      <ModalContent>
-        <ModalHeader>Select File & QA Options</ModalHeader>
-        <ModalCloseButton />
-        <ModalBody>
-          <VStack spacing={4} align="stretch">
-            {/* File Selection */}
-            <VStack
-              align="stretch"
-              spacing={3}
-              h={{ base: "25vh", md: "30vh", lg: "35vh" }}
-              maxH={{ base: "25vh", md: "30vh", lg: "35vh" }}
-              overflow="auto"
-              border="1px solid #e2e8f0"
-              borderRadius="md"
-              p={2}
-            >
-              {filteredFiles.length === 0 ? (
-                <Text>No matching files.</Text>
-              ) : (
-                <RadioGroup value={selectedFileId} onChange={(val) => setSelectedFileId(val)}>
-                  <VStack align="stretch" spacing={2}>
+    <DialogRoot open={isOpen} onOpenChange={(open) => { if (!open) onClose(); }}>
+      <DialogBackdrop />
+      <DialogPositioner>
+        <DialogContent maxW="3xl">
+          <DialogHeader>Select File & QA Options</DialogHeader>
+          <DialogCloseTrigger />
+          <DialogBody>
+            <VStack gap={4} align="stretch">
+              {/* File Selection */}
+              <VStack
+                align="stretch"
+                gap={3}
+                h={{ base: "25vh", md: "30vh", lg: "35vh" }}
+                maxH={{ base: "25vh", md: "30vh", lg: "35vh" }}
+                overflow="auto"
+                border="1px solid #e2e8f0"
+                borderRadius="md"
+                p={2}
+              >
+                {filteredFiles.length === 0 ? (
+                  <Text>No matching files.</Text>
+                ) : (
+                  <VStack align="stretch" gap={2}>
                     {filteredFiles.map((file) => {
                       const isSelected = selectedFileId === file.id;
                       return (
@@ -97,68 +96,68 @@ export default function ShelfWindow({ isOpen, onClose, files, onDone }: ShelfWin
                           display="flex"
                           alignItems="center"
                         >
-                          <Text textAlign="left" flex="1" whiteSpace="normal">
+                          <Text textAlign="left" flex="1" whiteSpace="normal" wordBreak="break-word" maxW="100%">
                             {decodeURIComponent(file.name)}
                           </Text>
-                          <Radio isChecked={isSelected} value={file.id} colorScheme="teal" pointerEvents="none" />
+                          <input type="radio" checked={isSelected} readOnly style={{ pointerEvents: "none" }} />
                         </Button>
                       );
                     })}
                   </VStack>
-                </RadioGroup>
-              )}
+                )}
+              </VStack>
+
+              <Separator />
+
+              {/* Category Selection */}
+              <VStack gap={1} align="stretch">
+                <Text fontWeight="bold">QA Categories</Text>
+                <VStack gap={1} align="stretch">
+                  {(["MCQ", "True/False", "Facts Questions"]).map((cat) => (
+                    <Box
+                      key={cat}
+                      border="1px solid #e2e8f0"
+                      borderRadius="md"
+                      p={2}
+                      cursor="pointer"
+                      bg={selectedCategory === cat ? "teal.50" : "transparent"}
+                      _hover={{ bg: "gray.50" }}
+                      onClick={() => setSelectedCategory(cat)}
+                    >
+                      {cat}
+                    </Box>
+                  ))}
+                </VStack>
+              </VStack>
+
+              <Separator />
+
+              {/* Number of Questions */}
+              <HStack gap={3}>
+                <Text fontWeight="medium">Number of Questions:</Text>
+                <Input
+                  type="number"
+                  value={qCount}
+                  onChange={handleQCountChange}
+                  placeholder="Enter a number..."
+                  max={20}
+                  min={1}
+                  maxW={{ base: "40%", md: "15vw" }}
+                />
+              </HStack>
             </VStack>
+          </DialogBody>
 
-            <Divider />
-
-            {/* Category Selection */}
-            <VStack spacing={1} align="stretch">
-              <Text fontWeight="bold">QA Categories</Text>
-              <List spacing={1}>
-                {["MCQ", "True/False", "Facts Questions"].map((cat) => (
-                  <ListItem
-                    key={cat}
-                    border="1px solid #e2e8f0"
-                    borderRadius="md"
-                    p={2}
-                    cursor="pointer"
-                    bg={selectedCategory === cat ? "teal.50" : "transparent"}
-                    _hover={{ bg: "gray.50" }}
-                    onClick={() => setSelectedCategory(cat)}
-                  >
-                    {cat}
-                  </ListItem>
-                ))}
-              </List>
-            </VStack>
-
-            <Divider />
-
-            {/* Number of Questions */}
-            <HStack spacing={3}>
-              <Text fontWeight="medium">Number of Questions:</Text>
-              <Input
-                type="number"
-                value={qCount}
-                onChange={handleQCountChange}
-                placeholder="Enter a number..."
-                max={20}
-                min={1}
-                maxW="15vw"
-              />
-            </HStack>
-          </VStack>
-        </ModalBody>
-
-        <ModalFooter justifyContent="space-between">
-          <Button onClick={onClose} colorScheme="gray">
-            Close
-          </Button>
-          <Button onClick={handleDone} colorScheme="teal" isDisabled={!selectedFileId || !selectedCategory || !qCount}>
-            Done
-          </Button>
-        </ModalFooter>
-      </ModalContent>
-    </Modal>
+          <DialogFooter justifyContent="space-between">
+            <Button onClick={onClose} colorScheme="gray">
+              Close
+            </Button>
+            <Button onClick={handleDone} colorScheme="teal" disabled={!selectedFileId || !selectedCategory || !qCount}>
+              Done
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </DialogPositioner>
+    </DialogRoot>
   );
 }

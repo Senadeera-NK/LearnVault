@@ -51,7 +51,7 @@ useEffect(()=>{
 },[refreshTrigger]);
 
   return (
-    <VStack align="stretch" spacing={3}>
+    <VStack align="stretch" gap={3}>
       {data.map((qa, index) => {
         const userAnswer = selectedAnswer[index];
         const isCorrect = result[index];
@@ -82,7 +82,7 @@ useEffect(()=>{
               {index + 1}. {qa.question}
             </Text>
 
-            <VStack align="stretch" spacing={2}>
+            <VStack align="stretch" gap={2}>
               {qa.options?.map((opt, i) => {
                 const letter = letters[i];
                 const isSelected = userAnswer === opt;
