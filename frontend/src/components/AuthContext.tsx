@@ -1,6 +1,12 @@
 "use client";
 
-import { createContext, useState, useContext, ReactNode, useEffect } from "react";
+import {
+  createContext,
+  useState,
+  useContext,
+  ReactNode,
+  useEffect,
+} from "react";
 
 type User = {
   name: string;
@@ -10,30 +16,28 @@ type User = {
 
 type AuthContextType = {
   user: User | null;
-  login: (user: User) => void;
+  login: (u: User) => void;
   logout: () => void;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider = ({ children }: { children: ReactNode }) => {
+export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
 
-  // ✅ Load user from localStorage when app starts
+  // Load user once
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
+    const stored = localStorage.getItem("user");
+    if (stored) {
+      setUser(JSON.parse(stored));
     }
   }, []);
 
-  // ✅ When login happens, store user in both state + localStorage
-  const login = (newUser: User) => {
-    setUser(newUser);
-    localStorage.setItem("user", JSON.stringify(newUser));
+  const login = (u: User) => {
+    setUser(u);
+    localStorage.setItem("user", JSON.stringify(u));
   };
 
-  // ✅ When logout happens, remove from both
   const logout = () => {
     setUser(null);
     localStorage.removeItem("user");
@@ -44,12 +48,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       {children}
     </AuthContext.Provider>
   );
-};
+}
 
 export function useAuth() {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error("useAuth must be used within an AuthProvider");
-  }
-  return context;
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error("useAuth must be inside AuthProvider");
+  return ctx;
 }
