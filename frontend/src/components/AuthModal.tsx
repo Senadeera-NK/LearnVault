@@ -1,24 +1,21 @@
 "use client";
 
-import {
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalCloseButton,
-  ModalBody,
-  ModalFooter,
-  Button,
-  Input,
-  FormControl,
-  FormLabel,
-  Tabs,
-  TabList,
-  TabPanels,
-  Tab,
-  TabPanel,useToast,
-} from "@chakra-ui/react";
-import {useState, useEffect} from "react";
+import * as Chakra from "@chakra-ui/react";
+
+// Cast Chakra components to `any` where typings differ in installed @chakra-ui/react
+const Modal: any = Chakra.DialogRoot;
+const ModalOverlay: any = Chakra.DialogBackdrop;
+const ModalContent: any = Chakra.DialogContent;
+const ModalHeader: any = Chakra.DialogHeader;
+const ModalCloseButton: any = Chakra.DialogCloseTrigger;
+const ModalBody: any = Chakra.DialogBody;
+const ModalFooter: any = Chakra.DialogFooter;
+const Button: any = Chakra.Button;
+const Input: any = Chakra.Input;
+const FormControl: any = null;
+const FormLabel: any = null;
+
+import { useState, useEffect } from "react";
 import { signup, signin, fetchUsers} from "../../api/api";
 import {useAuth} from "./AuthContext";
 
@@ -35,7 +32,19 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
   const[signinPassword, setSigninPassword] = useState("");
   const[signinEmail, setSigninEmail] = useState("");
 
-  const toast = useToast();
+  // simple fallback toast replacement while aligning to Chakra v3 types
+  const showToast = (opts: { title?: string; description?: string; status?: string }) => {
+    try {
+      if (typeof window !== 'undefined') {
+        // basic alert as a fallback
+        window.alert(`${opts.title || ''}\n${opts.description || ''}`);
+      } else {
+        console.log('TOAST', opts);
+      }
+    } catch (e) {
+      console.log('TOAST', opts);
+    }
+  };
 
   // creating a variable for AuthContext
   const {login} = useAuth();
@@ -69,41 +78,17 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
         console.log("Signup response:", response);
 
         if (response.message=='user created successfully') {
-          toast({
-            title: "Account created.",
-            description: "You have signed up successfully!",
-            status: "success",
-            duration: 3000,
-            isClosable: true,
-          });
+          showToast({ title: "Account created.", description: "You have signed up successfully!", status: "success" });
           login({name:response.user.name, email:response.user.email, id:response.user.id})
           onClose();
           SignupResetFields();
         } else if(response.error && response.error.includes("already exists")) {
-          toast({
-            title: "user already exists, try login",
-            description: "Please try login instead",
-            status: "error",
-            duration: 3000,
-            isClosable: true,
-          });
+          showToast({ title: "user already exists, try login", description: "Please try login instead", status: "error" });
         } else {
-          toast({
-            title: "Signup failed",
-            description: response.error || "Please try again",
-            status: "error",
-            duration: 3000,
-            isClosable: true,
-          });
+          showToast({ title: "Signup failed", description: response.error || "Please try again", status: "error" });
         }
       } catch (err: any) {
-        toast({
-          title: "Error",
-          description: err.message || "Signup failed",
-          status: "error",
-          duration: 3000,
-          isClosable: true,
-        });
+        showToast({ title: "Error", description: err.message || "Signup failed", status: "error" });
       }
     };
 
@@ -113,84 +98,63 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
         console.log("Signin response:", response);
 
         if (response.message=='signin successful') {
-          toast({
-            title: "Login successful.",
-            description: "You have logged in successfully!",
-            status: "success",
-            duration: 3000,
-            isClosable: true,
-          });
+          showToast({ title: "Login successful.", description: "You have logged in successfully!", status: "success" });
           login({name:response.user.name, email:response.user.email, id:response.user.id})
           onClose();
           SigninResetFields();
         } else {
-          toast({
-            title: "Login failed",
-            description: response.error || "Please try again",
-            status: "error",
-            duration: 3000,
-            isClosable: true,
-          });
+          showToast({ title: "Login failed", description: response.error || "Please try again", status: "error" });
           SigninResetFields();
         }
       } catch (err: any) {
-        toast({
-          title: "Error",
-          description: err.message || "Login failed",
-          status: "error",
-          duration: 3000,
-          isClosable: true,
-        });
+        showToast({ title: "Error", description: err.message || "Login failed", status: "error" });
           SigninResetFields();
       }
     };
 
+  const [activeTab, setActiveTab] = useState<'login'|'signup'>('login');
+
   return (
-    <Modal isOpen={isOpen} onClose={onClose} isCentered>
+    <Modal open={isOpen} onOpenChange={(open: boolean) => { if (!open) onClose(); }} isCentered>
       <ModalOverlay />
       <ModalContent>
         <ModalHeader>Welcome</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
-          <Tabs isFitted variant="enclosed">
-            <TabList mb="1em">
-              <Tab>Login</Tab>
-              <Tab>Sign Up</Tab>
-            </TabList>
-            <TabPanels>
-              <TabPanel>
-                <FormControl mb={4}>
-                  <FormLabel>Email</FormLabel>
-                  <Input value={signinEmail} onChange={(e)=>setSigninEmail(e.target.value)} type="email" placeholder="Enter email" />
-                </FormControl>
-                <FormControl mb={4}>
-                  <FormLabel>Password</FormLabel>
-                  <Input value={signinPassword} onChange={(e)=>setSigninPassword(e.target.value)}type="password" placeholder="Enter password" />
-                </FormControl>
-                <Button colorScheme="teal" width="100%" onClick={handleSignin}>
-                  Login
-                </Button>
-              </TabPanel>
-              <TabPanel>
+          <div style={{ display: 'flex', gap: 8, marginBottom: '1em' }}>
+            <Button colorScheme={activeTab === 'login' ? 'teal' : undefined} onClick={() => setActiveTab('login')}>Login</Button>
+            <Button colorScheme={activeTab === 'signup' ? 'teal' : undefined} onClick={() => setActiveTab('signup')}>Sign Up</Button>
+          </div>
 
-                <FormControl mb={4}>
-                  <FormLabel>Full Name</FormLabel>
-                  <Input value={signupName} onChange={(e)=> setSignupName(e.target.value)} placeholder="Your name" />
-                </FormControl>
-                <FormControl mb={4}>
-                  <FormLabel>Email</FormLabel>
-                  <Input value={signupEmail} onChange={(e)=> setSignupEmail(e.target.value)} type="email" placeholder="Enter email" />
-                </FormControl>
-                <FormControl mb={4}>
-                  <FormLabel>Password</FormLabel>
-                  <Input value={signupPassword} onChange={(e)=> setSignupPassword(e.target.value)} type="password" placeholder="Create password" />
-                </FormControl>
-                <Button colorScheme="teal" width="100%" onClick={handleSignup}>
-                  Sign Up
-                </Button>
-              </TabPanel>
-            </TabPanels>
-          </Tabs>
+          {activeTab === 'login' ? (
+            <div>
+              <div style={{ marginBottom: 12 }}>
+                <label style={{ display: 'block', marginBottom: 6 }}>Email</label>
+                <Input value={signinEmail} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSigninEmail(e.target.value)} type="email" placeholder="Enter email" />
+              </div>
+              <div style={{ marginBottom: 12 }}>
+                <label style={{ display: 'block', marginBottom: 6 }}>Password</label>
+                <Input value={signinPassword} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSigninPassword(e.target.value)} type="password" placeholder="Enter password" />
+              </div>
+              <Button colorScheme="teal" width="100%" onClick={handleSignin}>Login</Button>
+            </div>
+          ) : (
+            <div>
+              <div style={{ marginBottom: 12 }}>
+                <label style={{ display: 'block', marginBottom: 6 }}>Full Name</label>
+                <Input value={signupName} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSignupName(e.target.value)} placeholder="Your name" />
+              </div>
+              <div style={{ marginBottom: 12 }}>
+                <label style={{ display: 'block', marginBottom: 6 }}>Email</label>
+                <Input value={signupEmail} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSignupEmail(e.target.value)} type="email" placeholder="Enter email" />
+              </div>
+              <div style={{ marginBottom: 12 }}>
+                <label style={{ display: 'block', marginBottom: 6 }}>Password</label>
+                <Input value={signupPassword} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSignupPassword(e.target.value)} type="password" placeholder="Create password" />
+              </div>
+              <Button colorScheme="teal" width="100%" onClick={handleSignup}>Sign Up</Button>
+            </div>
+          )}
         </ModalBody>
       </ModalContent>
     </Modal>

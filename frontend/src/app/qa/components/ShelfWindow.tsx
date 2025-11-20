@@ -18,7 +18,7 @@ import {
   Input,
     Separator,
 } from "@chakra-ui/react";
-import { ChangeEvent, useState } from "react";
+import { ChangeEvent, useState, useRef, useEffect } from "react";
 
 interface ShelfWindowProps {
   isOpen: boolean;
@@ -28,6 +28,7 @@ interface ShelfWindowProps {
 }
 
 export default function ShelfWindow({ isOpen, onClose, files, onDone }: ShelfWindowProps) {
+  const contentRef = useRef<HTMLElement | null>(null);
   const [selectedFileId, setSelectedFileId] = useState<string>("");
   const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [qCount, setQCount] = useState<string>("");
@@ -54,11 +55,26 @@ export default function ShelfWindow({ isOpen, onClose, files, onDone }: ShelfWin
     setQCount("");
   };
 
+  useEffect(() => {
+    if (!isOpen) return;
+
+    function handleDocClick(event: MouseEvent) {
+      const target = event.target as Node;
+      if (contentRef.current && !contentRef.current.contains(target)) {
+        onClose();
+      }
+    }
+
+    document.addEventListener('mousedown', handleDocClick);
+    return () => document.removeEventListener('mousedown', handleDocClick);
+  }, [isOpen, onClose]);
+
   return (
     <DialogRoot open={isOpen} onOpenChange={(open) => { if (!open) onClose(); }}>
-      <DialogBackdrop />
+      {/* Clicking the backdrop should close the dialog */}
+      <DialogBackdrop onClick={() => onClose()} />
       <DialogPositioner>
-        <DialogContent maxW="3xl">
+        <DialogContent ref={(el: any) => (contentRef.current = el)} maxW="3xl">
           <DialogHeader>Select File & QA Options</DialogHeader>
           <DialogCloseTrigger />
           <DialogBody>

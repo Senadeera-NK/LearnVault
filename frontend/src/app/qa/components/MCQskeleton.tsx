@@ -72,9 +72,9 @@ useEffect(()=>{
             bg={
               result[index] !== undefined
                 ? isCorrect
-                  ? "green.100"
-                  : "red.100"
-                : "gray.200"
+                  ? "green.200"
+                  : "red.200"
+                : "white"
             }
             borderRadius="md"
           >
@@ -89,24 +89,42 @@ useEffect(()=>{
                 const isCorrectAnswer =
                  result[index] !== undefined && qa.answer === letter;
 
+                // Determine appearance: use outline for unselected, solid for selected
+                let variant: "solid" | "outline" = "outline";
+                let colorScheme: string | undefined = undefined;
+
+                if (result[index] !== undefined) {
+                  // After checking answers: highlight correct in green, wrong selection in red
+                  if (isCorrectAnswer) {
+                    variant = "solid";
+                    colorScheme = "green";
+                  } else if (isSelected) {
+                    variant = "solid";
+                    colorScheme = "red";
+                  } else {
+                    variant = "outline";
+                    colorScheme = undefined;
+                  }
+                } else {
+                  // Before checking: selected = blue solid, unselected = outline
+                  if (isSelected) {
+                    variant = "solid";
+                    colorScheme = "blue";
+                  } else {
+                    variant = "outline";
+                    colorScheme = undefined;
+                  }
+                }
+
                 return (
                   <Button
                     key={i}
                     width="100%"
                     justifyContent="flex-start"
-                    variant="solid"
-                    colorScheme={
-                      result[index] !== undefined
-                        ? isCorrectAnswer
-                          ? "green"
-                          : isSelected
-                          ? "red"
-                          : "gray"
-                        : isSelected
-                        ? "blue"
-                        : "gray"
-                    }
+                    variant={variant}
+                    colorScheme={colorScheme}
                     onClick={() => handleClick(index, opt)}
+                    aria-pressed={isSelected}
                   >
                     {i + 1}. {opt}
                   </Button>

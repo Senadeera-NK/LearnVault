@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import {IconButton,Modal,ModalOverlay,ModalContent,ModalHeader,ModalFooter,ModalBody,ModalCloseButton,Button,Textarea,} from "@chakra-ui/react"
+import { IconButton, DialogRoot as Modal, DialogBackdrop as ModalOverlay, DialogContent as ModalContent, DialogHeader as ModalHeader, DialogFooter as ModalFooter, DialogBody as ModalBody, DialogCloseTrigger as ModalCloseButton, Button, Textarea, } from "@chakra-ui/react"
 import { EditIcon } from "@chakra-ui/icons"
 import {txt_file_convert} from "../../api/api"
 import { useAuth } from "./AuthContext";
@@ -35,7 +35,6 @@ export default function EditNotepad() {
   return (
     <>
       <IconButton
-        icon={<EditIcon />}
         aria-label="Edit"
         colorScheme="teal"
         position="fixed"
@@ -45,10 +44,12 @@ export default function EditNotepad() {
         size="md"
         zIndex={1}
         onClick={openModal}
-      />
+      >
+        <EditIcon />
+      </IconButton>
 
-      <Modal isOpen={isOpen} onClose={closeModal} size="xl">
-        <ModalOverlay zIndex={1400}/>
+      <Modal open={isOpen} onOpenChange={(open) => { if (!open) closeModal(); }} size="xl">
+        <ModalOverlay zIndex={1400} />
         <ModalContent zIndex={1500}>
           <ModalHeader>Edit Note</ModalHeader>
           <ModalCloseButton />

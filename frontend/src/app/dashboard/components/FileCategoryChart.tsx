@@ -86,17 +86,9 @@ export default function FileCategoryChart({userId, onStats}: FileCategoryChartPr
       ref={containerRef}
       width="100%"
     >
-      <Box
-        sx={{
-          overflow: "visible",
-          width: "100%",
-          display: "flex",
-          justifyContent: "center",
-          "& .MuiChartsLegend-root": { display: "none" }, // hide built-in legend
-        }}
-      >
-        <PieChart
-          series={[
+      <Box overflow="visible" width="100%" display="flex" justifyContent="center">
+          <PieChart
+            series={[
             {
               type: "pie" as const,
               data: data,
@@ -109,9 +101,10 @@ export default function FileCategoryChart({userId, onStats}: FileCategoryChartPr
               highlightScope: { fade: "global", highlight: "item" },
               valueFormatter: (item: any) => `${item.value.toFixed(1)}%`,
             },
-          ]}
-          width={chartWidth}
-          height={chartHeight}
+            ]}
+            hideLegend={true}
+            width={chartWidth}
+            height={chartHeight}
         />
       </Box>
 
@@ -120,10 +113,10 @@ export default function FileCategoryChart({userId, onStats}: FileCategoryChartPr
       </Text> */}
 
       {/* Bottom legend */}
-      <VStack spacing={1} mt={-2} width="100%">
-        <HStack wrap="wrap" spacing={3} justify="center">
+      <VStack gap={1} mt={-2} width="100%">
+        <HStack wrap="wrap" gap={3} justify="center">
           {data.map((d, i) => (
-            <HStack key={d.label} spacing={1}>
+            <HStack key={d.label} gap={1}>
               <Box
                 w="12px"
                 h="12px"

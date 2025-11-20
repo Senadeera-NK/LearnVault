@@ -82,9 +82,9 @@ export default function TrueFalseSkeleton({
             }
             bg={
               status === "correct"
-                ? "green.50"
+                ? "green.200"
                 : status === "wrong"
-                ? "red.50"
+                ? "red.200"
                 : "white"
             }
             borderRadius="md"
@@ -97,15 +97,19 @@ export default function TrueFalseSkeleton({
             <HStack gap={2}>
               <Button
                 size="sm"
-                colorScheme={selectedAnswer[index] === "true" ? "blue" : "gray"}
                 onClick={() => handleSelect(index, "true")}
+                variant={selectedAnswer[index] === "true" ? "solid" : "outline"}
+                colorScheme={selectedAnswer[index] === "true" ? "blue" : undefined}
+                aria-pressed={selectedAnswer[index] === "true"}
               >
                 True
               </Button>
               <Button
                 size="sm"
-                colorScheme={selectedAnswer[index] === "false" ? "blue" : "gray"}
                 onClick={() => handleSelect(index, "false")}
+                variant={selectedAnswer[index] === "false" ? "solid" : "outline"}
+                colorScheme={selectedAnswer[index] === "false" ? "blue" : undefined}
+                aria-pressed={selectedAnswer[index] === "false"}
               >
                 False
               </Button>

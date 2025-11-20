@@ -64,11 +64,11 @@ export default function FactQAskeleton({ data, checkAnswerTrigger,refreshTrigger
                     }
                     bg={
                         results[index]==="correct"
-                        ?"green.100"
+                        ?"green.200"
                         :results[index]==="nearly correct"
-                        ?"yellow.100"
+                        ?"yellow.200"
                         :results[index]==="incorrect"
-                        ?"red.100"
+                        ?"red.200"
                         :"white"
                     }
                     w="100%">

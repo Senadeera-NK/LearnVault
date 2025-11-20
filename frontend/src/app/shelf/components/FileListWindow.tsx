@@ -1,21 +1,23 @@
 "use client";
 
 import {
-  Modal,
-  ModalOverlay,
-  ModalContent,
-  ModalHeader,
-  ModalCloseButton,
-  ModalBody,
-  ModalFooter,
+  DialogRoot as Modal,
+  DialogBackdrop as ModalOverlay,
+  DialogPositioner as ModalPositioner,
+  DialogContent as ModalContent,
+  DialogHeader as ModalHeader,
+  DialogCloseTrigger as ModalCloseButton,
+  DialogBody as ModalBody,
+  DialogFooter as ModalFooter,
   Button,
   VStack,
   HStack,
   Text,
   Box,
+  IconButton,
 } from "@chakra-ui/react";
-import { IconButton } from "@chakra-ui/react";
 import { DownloadIcon } from "@chakra-ui/icons";
+import { useEffect, useRef } from "react";
 interface FileListWindowProps {
   isOpen: boolean;
   onClose: () => void;
@@ -29,6 +31,8 @@ export default function FileListWindow({
   category,
   files,
 }: FileListWindowProps) {
+
+  const contentRef = useRef<HTMLElement | null>(null);
 
   // Helper to download file
 const downloadFile = async (url: string, filename: string) => {
@@ -63,13 +67,15 @@ const downloadAll = () => {
 }
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size="xl" scrollBehavior="inside">
-      <ModalOverlay />
-      <ModalContent>
+    <Modal open={isOpen} onOpenChange={(open) => { if (!open) onClose(); }} scrollBehavior="inside">
+      {/* clicking overlay/backdrop should close modal */}
+      <ModalOverlay onClick={() => onClose()} />
+      <ModalPositioner>
+        <ModalContent ref={(el: any) => (contentRef.current = el)} maxW="3xl" w={{ base: "90%", md: "640px" }}>
         <ModalHeader>{category || "Uncategorized"} Files</ModalHeader>
         <ModalCloseButton />
         <ModalBody>
-          <VStack align="stretch" spacing={3}>
+          <VStack align="stretch" gap={3}>
             {files.length === 0 ? (
               <Text>No files in this category.</Text>
             ) : (
@@ -82,14 +88,9 @@ const downloadAll = () => {
                   p={2}
                 >
                   <Text>{decodeURIComponent(file.name)}</Text>
-                    <IconButton
-                      aria-label={`Download ${file.name}`}
-                      icon={<DownloadIcon />}
-                      size="sm"
-                      colorScheme="teal"
-                      variant="ghost"
-                      onClick={() => downloadFile(file.url, file.name)}
-                    />
+                    <IconButton aria-label={`Download ${file.name}`} size="sm" colorScheme="teal" variant="ghost" onClick={() => downloadFile(file.url, file.name)}>
+                      <DownloadIcon />
+                    </IconButton>
 
                 </HStack>
               ))
@@ -105,6 +106,7 @@ const downloadAll = () => {
           </Button>
         </ModalFooter>
       </ModalContent>
+      </ModalPositioner>
     </Modal>
   );
 }
