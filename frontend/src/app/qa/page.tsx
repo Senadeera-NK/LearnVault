@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Box, Heading, Button, VStack, Spinner, Flex, IconButton} from "@chakra-ui/react";
-import {AddIcon} from '@chakra-ui/icons';
+import { FaPlus } from 'react-icons/fa';
 import ShelfWindow from "./components/ShelfWindow";
 import MCQskeleton from "./components/MCQskeleton";
 import TrueFalseSkeleton from "./components/TrueFalseSkeleton";
@@ -111,7 +111,7 @@ const handleDoneFromShelf = async (file: { id: string; name: string; url: string
               borderRadius="full"
               boxSize="60px"
             >
-              <AddIcon boxSize={8} />
+              <FaPlus size={8} />
               </IconButton>
           </VStack>
         )}

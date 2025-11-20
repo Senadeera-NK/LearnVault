@@ -16,7 +16,7 @@ import {
   Box,
   IconButton,
 } from "@chakra-ui/react";
-import { DownloadIcon } from "@chakra-ui/icons";
+import { MdFileDownload } from "react-icons/md";
 import { useEffect, useRef } from "react";
 interface FileListWindowProps {
   isOpen: boolean;
@@ -89,7 +89,7 @@ const downloadAll = () => {
                 >
                   <Text>{decodeURIComponent(file.name)}</Text>
                     <IconButton aria-label={`Download ${file.name}`} size="sm" colorScheme="teal" variant="ghost" onClick={() => downloadFile(file.url, file.name)}>
-                      <DownloadIcon />
+                      <MdFileDownload  />
                     </IconButton>
 
                 </HStack>

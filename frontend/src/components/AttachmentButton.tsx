@@ -1,11 +1,11 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { IconButton, Spinner, Box } from "@chakra-ui/react";
-import { AttachmentIcon } from "@chakra-ui/icons";
+import { IconButton, Spinner, Box, Icon } from "@chakra-ui/react";
+import { FiPaperclip } from "react-icons/fi";
 import { insertPdfFiles } from "../../api/api";
 import { useAuth } from "./AuthContext";
-import {fetch_user_pdfs,classifyUserFiles} from "../../api/api";
+import { fetch_user_pdfs, classifyUserFiles } from "../../api/api";
 
 export default function AttachmentButton() {
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -24,9 +24,9 @@ export default function AttachmentButton() {
     try {
       await insertPdfFiles(user.id, Array.from(files));
       console.log("✅ Files uploaded successfully");
-      //const classificationResult = await classifyUserFiles(user.id);
-      console.log("Triggerig classification for user: ", user.id);
-     // console.log("files classified successfully", classificationResult);
+      console.log("Triggering classification for user: ", user.id);
+      // const classificationResult = await classifyUserFiles(user.id);
+      // console.log("Files classified successfully", classificationResult);
     } catch (error) {
       console.error("❌ Error uploading files or classifying files", error);
     } finally {
@@ -37,7 +37,7 @@ export default function AttachmentButton() {
   return (
     <>
       {/* Upload Button */}
-      <IconButton
+     <IconButton
         aria-label="Attach file"
         colorScheme="teal"
         position="fixed"
@@ -48,8 +48,9 @@ export default function AttachmentButton() {
         zIndex={9999}
         onClick={handleAttachmentClick}
       >
-        <AttachmentIcon />
-        </IconButton>
+        <Icon as={FiPaperclip} boxSize={5} />
+      </IconButton>
+
 
       {/* Hidden File Input */}
       <input
@@ -73,15 +74,10 @@ export default function AttachmentButton() {
           justifyContent="center"
           alignItems="center"
           backdropFilter="blur(6px)"
-          backgroundColor="rgba(0, 0, 0, 0.05)" // very light overlay
+          backgroundColor="rgba(0, 0, 0, 0.05)"
           zIndex={10000}
         >
-          <Spinner
-            size="xl"
-            //  thickness="5px"
-           //   speed="0.65s"
-            color="blue.500"
-          />
+          <Spinner size="xl" color="blue.500" />
         </Box>
       )}
     </>

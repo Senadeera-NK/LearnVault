@@ -1,7 +1,8 @@
 "use client";
 
 import { useDisclosure, Box, DrawerRoot as Drawer, DrawerBody, DrawerHeader, DrawerBackdrop as DrawerOverlay, DrawerContent, DrawerCloseTrigger as DrawerCloseButton, Button, IconButton, VStack } from "@chakra-ui/react";
-import { HamburgerIcon, AddIcon } from "@chakra-ui/icons";
+import { FaPlus } from 'react-icons/fa';
+import { FaBars } from 'react-icons/fa';
 import Link from "next/link";
 import { useState, useRef, useEffect } from "react";
 import { usePathname } from "next/navigation";
@@ -77,7 +78,7 @@ export default function Sidebar() {
         color="white"
         borderRadius="md"
       >
-        <HamburgerIcon />
+        <FaBars />
       </IconButton>
       
 
@@ -140,7 +141,7 @@ export default function Sidebar() {
           transition="width 200ms ease"
         >
           <IconButton aria-label="Open menu" onClick={() => { setCollapsed(false); onOpen(); }} size="sm" bg="black" color="white" w="full" h="48px">
-            <HamburgerIcon />
+            <FaBars />
           </IconButton>
 
           <VStack gap={3} mt={4}>
@@ -180,7 +181,7 @@ export default function Sidebar() {
 
       {/* Floating Plus Button (Bottom Right) */}
       <IconButton aria-label="Add new item" colorScheme="teal" position="fixed" bottom="1.5rem" right="1.5rem" borderRadius="full" size="lg" zIndex="1000" onClick={() => setShowActions(!showActions)}>
-        <AddIcon />
+        <FaPlus />
       </IconButton>
 
       {showActions && (
