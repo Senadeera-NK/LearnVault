@@ -78,7 +78,9 @@ const handleDoneFromShelf = async (file: { id: string; name: string; url: string
   return (
     <>
       <Box p={6} bg="white"position="sticky" top={0} zIndex="999" w="100%">
-      <Heading top="0" textAlign="center" mb={0}>Q & A</Heading>
+      <Heading top="0" textAlign="center" mb={0}
+      fontSize={{ base: "2xl", md: "4xl", lg: "5xl" }}
+      >Q & A</Heading>
       </Box>
       <VStack gap={4}>
 

@@ -41,7 +41,8 @@ export default function Settings() {
             flexDirection="column"
             justifyContent="flex-start"
             pt="10px" >
-      <Heading mb="20px" textAlign="center" w="100%">Settings</Heading>
+      <Heading mb="20px" textAlign="center" w="100%"
+       fontSize={{ base: "2xl", md: "4xl", lg: "5xl" }}>Settings</Heading>
       </Box>
       <Box
             w="70%"

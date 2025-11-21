@@ -79,7 +79,7 @@ export default function Dashboard() {
     <Box p={6} bg="gray.50" minH="100vh">
       {/* Welcome */}
       <Box position="sticky" top="0" zIndex="999" px={8} py={4} mb={6} borderBottom="1px solid" borderColor="gray.200"  bg="gray.50">
-        <Heading fontSize="2xl" fontWeight="bold">Welcome back, {userName}!</Heading>
+        <Heading  fontSize={{ base: "xl", md: "2xl", lg: "3xl" }} fontWeight="bold">Welcome back, {userName}!</Heading>
       </Box>
 
       {/* Top Stats */}

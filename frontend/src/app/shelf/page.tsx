@@ -90,7 +90,9 @@ const extractFileName = (url: string) => {
       // paddingLeft={5}
       // paddingRight={5}
     >
-      <Heading mb="20px" textAlign="center" w="100%">
+      <Heading mb="20px" textAlign="center" w="100%"
+       fontSize={{ base: "2xl", md: "4xl", lg: "5xl" }}
+      >
         Shelf
       </Heading>
 
