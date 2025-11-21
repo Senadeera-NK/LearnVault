@@ -85,8 +85,14 @@ export default function Sidebar() {
           {/* Close button */}
             <IconButton
               aria-label="Close menu"
-              m={2}
               onClick={onClose}
+              position="fixed"
+              top="1rem"
+              left="1rem"
+              zIndex={1100}
+              bg="black"
+              color="white"
+              borderRadius="md"
             >
               <FaBars />
             </IconButton>
