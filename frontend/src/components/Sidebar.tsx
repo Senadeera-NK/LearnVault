@@ -99,15 +99,19 @@ export default function Sidebar() {
 
 
           <VStack align="stretch" gap={4} p={4}>
-            {["/dashboard", "/qa", "/shelf", "/settings"].map((href) => (
+            {[{href:"/dashboard", label:"Dashboard"},
+            {href:"/qa", label:"Q & A"},
+             {href:"/shelf", label:"Shelf"},
+              {href:"/settings",label:"Settings"}].map(({href,label}) => (
               <Link key={href} href={href}>
                 <Button
                   w="full"
                   colorScheme={isActive(href) ? "teal" : undefined}
                   variant={isActive(href) ? "solid" : "ghost"}
                   onClick={onClose}
+                  fontWeight="bold"
                 >
-                  {href.slice(1).charAt(0).toUpperCase() + href.slice(2)}
+                  {label}
                 </Button>
               </Link>
             ))}
@@ -116,7 +120,7 @@ export default function Sidebar() {
       )}
 
       {/* Collapsed Narrow Sidebar */}
-      {collapsed && (
+      {/* {collapsed && (
         <Box
           position="fixed"
           left={0}
@@ -201,7 +205,7 @@ export default function Sidebar() {
             </IconButton>
           </Link>
         </Box>
-      )}
+      )} */}
 
       {/* Floating Plus Button */}
       <IconButton
