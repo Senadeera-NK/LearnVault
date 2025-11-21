@@ -129,6 +129,12 @@ const handleDoneFromShelf = async (file: { id: string; name: string; url: string
         {!loading && qaContent.length > 0 && (
         <Flex gap={{ base: 8, md: 12, lg: 16 }}>
           <Button
+          onClick={()=>window.location.reload()}
+           w={{ base: "140px", md: "160px", lg: "180px" }}
+          >
+              Back
+          </Button>
+          <Button
             onClick={handleCheckAnswers}
             w={{ base: "140px", md: "160px", lg: "180px" }}
           >

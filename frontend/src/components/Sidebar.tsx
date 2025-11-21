@@ -110,6 +110,7 @@ export default function Sidebar() {
                   variant={isActive(href) ? "solid" : "ghost"}
                   onClick={onClose}
                   fontWeight="bold"
+                  fontSize={{base:18, md:15, sm:15}}
                 >
                   {label}
                 </Button>

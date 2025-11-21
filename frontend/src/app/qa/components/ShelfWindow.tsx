@@ -55,6 +55,13 @@ export default function ShelfWindow({ isOpen, onClose, files, onDone }: ShelfWin
     setQCount("");
   };
 
+  const handleClose = () =>{
+    setSelectedFileId("");
+    setSelectedCategory("");
+    setQCount("");
+    onClose();
+  }
+
   useEffect(() => {
     if (!isOpen) return;
 
@@ -106,9 +113,9 @@ export default function ShelfWindow({ isOpen, onClose, files, onDone }: ShelfWin
                           h="auto"
                           py={3}
                           px={4}
-                          borderColor={isSelected ? "teal.400" : "gray.200"}
-                          bg={isSelected ? "teal.50" : "white"}
-                          _hover={{ bg: "gray.50" }}
+                          borderColor={isSelected ? "gray.500" : "gray.200"}
+                          bg={isSelected ? "gray.500" : "white"}
+                          // _hover={{ bg: "gray.50" }}
                           display="flex"
                           alignItems="center"
                         >
@@ -136,8 +143,8 @@ export default function ShelfWindow({ isOpen, onClose, files, onDone }: ShelfWin
                       borderRadius="md"
                       p={2}
                       cursor="pointer"
-                      bg={selectedCategory === cat ? "teal.50" : "transparent"}
-                      _hover={{ bg: "gray.50" }}
+                      bg={selectedCategory === cat ? "gray.500" : "transparent"}
+                    //  _hover={{ bg: "gray.50" }}
                       onClick={() => setSelectedCategory(cat)}
                     >
                       {cat}
@@ -165,7 +172,7 @@ export default function ShelfWindow({ isOpen, onClose, files, onDone }: ShelfWin
           </DialogBody>
 
           <DialogFooter justifyContent="space-between">
-            <Button onClick={onClose} colorScheme="gray">
+            <Button onClick={handleClose} colorScheme="gray" >
               Close
             </Button>
             <Button onClick={handleDone} colorScheme="teal" disabled={!selectedFileId || !selectedCategory || !qCount}>
