@@ -133,7 +133,6 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
           ×
         </button>
 
-        <h2 style={{ marginTop: 0 }}>Welcome</h2>
 
         <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
           <button
@@ -142,7 +141,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
               padding: "8px 12px",
               borderRadius: 6,
               border: "1px solid #ddd",
-              background: tab === "login" ? "#0ea5a2" : "white",
+              background: tab === "login" ? "#090a0aff" : "white",
               color: tab === "login" ? "white" : "black",
               cursor: "pointer",
             }}
