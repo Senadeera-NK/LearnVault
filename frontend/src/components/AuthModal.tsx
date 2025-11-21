@@ -125,7 +125,8 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
             top: 8,
             right: 8,
             background: "transparent",
-            border: "none",
+            border: "1px solid gray",
+            padding:3,
             fontSize: 18,
             cursor: "pointer",
           }}
