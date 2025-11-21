@@ -68,18 +68,18 @@ export default function ShelfWindow({ isOpen, onClose, files, onDone }: ShelfWin
     function handleDocClick(event: MouseEvent) {
       const target = event.target as Node;
       if (contentRef.current && !contentRef.current.contains(target)) {
-        onClose();
+        handleClose();
       }
     }
 
     document.addEventListener('mousedown', handleDocClick);
     return () => document.removeEventListener('mousedown', handleDocClick);
-  }, [isOpen, onClose]);
+  }, [isOpen, handleClose]);
 
   return (
-    <DialogRoot open={isOpen} onOpenChange={(open) => { if (!open) onClose(); }}>
+    <DialogRoot open={isOpen} onOpenChange={(open) => { if (!open) handleClose(); }}>
       {/* Clicking the backdrop should close the dialog */}
-      <DialogBackdrop onClick={() => onClose()} />
+      <DialogBackdrop onClick={handleClose} />
       <DialogPositioner>
         <DialogContent ref={(el: any) => (contentRef.current = el)} maxW="3xl">
           <DialogHeader>Select File & QA Options</DialogHeader>
