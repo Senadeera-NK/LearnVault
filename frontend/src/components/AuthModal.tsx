@@ -154,7 +154,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
               padding: "8px 12px",
               borderRadius: 6,
               border: "1px solid #ddd",
-              background: tab === "signup" ? "#0ea5a2" : "white",
+              background: tab === "signup" ? "#090a0aff" : "white",
               color: tab === "signup" ? "white" : "black",
               cursor: "pointer",
             }}
