@@ -4,7 +4,7 @@ from services.supabase_service_users_usage import insert_user_usage, user_usage
 from services import supabase_service_users_usage
 
 router = APIRouter()
-
+# trying out different
 class UsageRequest(BaseModel):
     user_id:int
     page_name:str
