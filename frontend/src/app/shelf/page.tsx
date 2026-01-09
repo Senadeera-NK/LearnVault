@@ -88,7 +88,7 @@ export default function Shelf() {
         textAlign="center"
         w="100%"
         fontSize={{ base: "2xl", md: "4xl", lg: "5xl" }}
-        color={colors.brand[600]}
+        color="black"
       >
         Shelf
       </Heading>
@@ -111,7 +111,7 @@ export default function Shelf() {
               overflow="hidden"
               p={0}
               borderRadius="md"
-              border={`2px solid ${colors.accent[300]}`}
+              border={`2px solid black`}
               bg="white"
               boxShadow="md"
             >
@@ -127,7 +127,7 @@ export default function Shelf() {
               mt="8px"
               fontWeight="semibold"
               fontSize={{ base: "sm", md: "md" }}
-              color={colors.brand[700]}
+              color="black"
             >
               {category}
             </Text>

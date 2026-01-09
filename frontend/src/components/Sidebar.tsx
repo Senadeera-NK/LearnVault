@@ -228,11 +228,13 @@ export default function Sidebar() {
         <Box
           ref={actionsRef}
           position="fixed"
-          bottom="5.5rem"
-          right="1.5rem"
+          bottom="1.5rem"
+          right="5.5rem"
           display="flex"
-          flexDirection="column"
-          gap={2}
+          flexDirection="row"
+          gap={4}
+          zIndex={10000}
+          alignItems="center"
         >
           <AttachmentButton />
           <EditButton />

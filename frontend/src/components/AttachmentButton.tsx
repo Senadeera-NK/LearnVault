@@ -35,14 +35,14 @@ export default function AttachmentButton() {
   };
 
   return (
-    <>
+    <Box zIndex={9999}>
       {/* Upload Button */}
      <IconButton
         aria-label="Attach file"
         colorScheme="teal"
-        position="fixed"
-        bottom="1.5rem"
-        right="6rem"
+        // position="fixed"
+        // bottom="1.5rem"
+        // right="6rem"
         borderRadius="full"
         size="md"
         zIndex={9999}
@@ -80,6 +80,6 @@ export default function AttachmentButton() {
           <Spinner size="xl" color="blue.500" />
         </Box>
       )}
-    </>
+    </Box>
   );
 }
