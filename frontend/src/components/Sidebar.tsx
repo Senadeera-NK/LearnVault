@@ -9,8 +9,10 @@ import AttachmentButton from "./AttachmentButton";
 import EditButton from "./EditButton";
 import UserAvatar from "./UserAvatar";
 import { useDisclosure } from "@chakra-ui/react";
+import {useAuth} from "./AuthContext";
 
 export default function Sidebar() {
+  const {user} = useAuth();
   const { open, onOpen, onClose, setOpen } = useDisclosure();
   const [collapsed, setCollapsed] = useState(false);
   const [showActions, setShowActions] = useState(false);
@@ -19,6 +21,7 @@ export default function Sidebar() {
   const pathname = usePathname();
 
   const isActive = (href: string) => pathname === href;
+  if (!user || pathname === "/") return null;
 
   // Close floating actions when clicking outside
   useEffect(() => {

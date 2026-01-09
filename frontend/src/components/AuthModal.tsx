@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { signup, signin, fetchUsers } from "../../api/api";
 import { useAuth } from "./AuthContext";
+import router from "next/router";
 
 type AuthModalProps = {
   isOpen: boolean;
@@ -75,6 +76,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
         login({ name: res.user.name, email: res.user.email, id: res.user.id });
         resetSignin();
         onClose();
+        router.push("/dashboard");
       } else {
         toast(res.error || "Login failed");
       }
