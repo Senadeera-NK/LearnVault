@@ -94,7 +94,9 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
       style={{
         position: "fixed",
         inset: 0,
-        background: "rgba(0,0,0,0.45)",
+        background: "rgba(255, 255, 255, 0.4)", 
+        backdropFilter: "blur(10px)",
+        WebkitBackdropFilter: "blur(10px)",
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
