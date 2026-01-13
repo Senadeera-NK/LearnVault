@@ -21,7 +21,6 @@ export default function Sidebar() {
   const pathname = usePathname();
 
   const isActive = (href: string) => pathname === href;
-  if (!user || pathname === "/") return null;
 
   // Close floating actions when clicking outside
   useEffect(() => {
@@ -53,6 +52,8 @@ export default function Sidebar() {
     return () => document.removeEventListener("mousedown", handleDocClick);
   }, [open, onClose]);
 
+
+  if (!user || pathname === "/") return null;
   return (
     <>
       <UserAvatar />
