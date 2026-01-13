@@ -41,7 +41,7 @@ const HowItWorks = () => {
                 
                 {/* Left Side: Sticky Header */}
                 <Box position={{ lg: "sticky" }} top="32" flex="1">
-                    <Heading fontSize={{ base: "4xl", lg: "6xl" }} fontWeight="bold" letterSpacing="tighter" color="gray.900">
+                    <Heading fontSize={{ base: "3xl", lg: "5xl" }} fontWeight="bold" letterSpacing="tighter" color="gray.900">
                         HOW IT <Text as="span" color="teal.600">WORKS</Text>
                     </Heading>
                     <Text mt="6" fontSize="xl" color="gray.500" maxW="md">
@@ -50,26 +50,7 @@ const HowItWorks = () => {
                     
                     {/* Scroll Button */}
                     <Box mt="12" display={{ base: "none", lg: "block" }}>
-                        <Box 
-                            as="button" 
-                            onClick={handleScroll}
-                            display="flex"
-                            alignItems="center"
-                            justifyContent="center"
-                            w="12"
-                            h="12"
-                            borderRadius="full"
-                            border="2px solid"
-                            borderColor="teal.600"
-                            color="teal.600"
-                            cursor="pointer"
-                            transition="all 0.3s"
-                            _hover={{ bg: "teal.50", transform: "translateY(5px)" }}
-                        >
-                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
-                                <path d="M19 13l-7 7-7-7" strokeLinecap="round" strokeLinejoin="round"/>
-                            </svg>
-                        </Box>
+        
                     </Box>
                 </Box>
 
