@@ -1,81 +1,38 @@
 'use client'
-import { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-// Note: Container and Collapse may need to be imported from specific locations 
-// or replaced with Box in v3
-import { Box, Heading, Text, VStack, Button } from '@chakra-ui/react'
-
-const faqs = [
-    {
-        q: "Is my 'LearnVault' dashboard private?",
-        a: "Yes. Your personal dashboard is designed for individual focus. Your data remains yours."
-    },
-    {
-        q: "How do I upload documents?",
-        a: "You can use the floating '+' button in your dashboard to upload PDFs or create notes instantly."
-    }
-]
+import { Accordion, Box, Heading } from '@chakra-ui/react'
 
 const FAQ = () => {
-    const [active, setActive] = useState<number | null>(null);
+  const faqs = [
+    { q: "How does the automatic categorization work?", a: "We use the Gemini API to analyze the text content of your uploads and match them with existing categories automatically." },
+    { q: "What file formats are supported?", a: "Currently, LearnVault supports PDF and standard text files for question generation." },
+    { q: "Can I track my progress over time?", a: "Yes! Your home dashboard shows your study hours and accuracy trends." }
+  ];
 
-    return (
-        <Box as="section" id="faq" py="24" bg="white" px="6">
-            {/* Using Box with maxW instead of Container if Container export is missing */}
-            <Box maxW="1000px" mx="auto">
-                <Box mb="16">
-                    <Heading 
-                        fontSize={{ base: "4xl", lg: "6xl" }} 
-                        color="teal.600" 
-                    >
-                        COMMON QUESTIONS
-                    </Heading>
-                    <Text mt="3" fontSize="2xl" fontWeight="extrabold">
-                        Everything you need to know.
-                    </Text>
-                </Box>
-
-                <VStack gap="4" align="stretch" maxW="80%" mx="auto">
-                    {faqs.map((faq, i) => (
-                        <Box key={i} borderBottom="1px solid" borderColor="gray.200" pb="4">
-                            <Button
-                                variant="ghost"
-                                width="full"
-                                display="flex"
-                                justifyContent="space-between"
-                                py="8"
-                                fontSize="xl"
-                                fontWeight="bold"
-                                onClick={() => setActive(active === i ? null : i)}
-                                _hover={{ bg: "gray.50" }}
-                            >
-                                <Text as="span">{faq.q}</Text>
-                                <Box as="span" color="teal.500">
-                                    {active === i ? '−' : '+'}
-                                </Box>
-                            </Button>
-                            
-                            <AnimatePresence>
-                                {active === i && (
-                                    <motion.div
-                                        initial={{ height: 0, opacity: 0 }}
-                                        animate={{ height: "auto", opacity: 1 }}
-                                        exit={{ height: 0, opacity: 0 }}
-                                        transition={{ duration: 0.3 }}
-                                        style={{ overflow: 'hidden' }}
-                                    >
-                                        <Box pb="6" pt="2" color="gray.600" fontSize="lg">
-                                            {faq.a}
-                                        </Box>
-                                    </motion.div>
-                                )}
-                            </AnimatePresence>
-                        </Box>
-                    ))}
-                </VStack>
-            </Box>
-        </Box>
-    )
+  return (
+    <Box id="faq" py="20" px={{ base: "6", md: "10" }} maxW="8xl" mx="auto">
+      <Heading mb="10" textAlign="center">Frequently Asked Questions</Heading>
+      
+      {/* In v3, allowToggle is now 'collapsible' */}
+      <Accordion.Root collapsible defaultValue={[]}>
+        {faqs.map((item, i) => (
+          <Accordion.Item key={i} value={`item-${i}`} borderBottomWidth="1px">
+            <Accordion.ItemTrigger py="4" cursor="pointer" _hover={{ bg: "gray.50" }} w="full">
+              <Box flex="1" textAlign="left" fontWeight="bold">
+                {item.q}
+              </Box>
+              <Accordion.ItemIndicator />
+            </Accordion.ItemTrigger>
+            
+            <Accordion.ItemContent>
+              <Box pb="4" pt="2" color="gray.600">
+                {item.a}
+              </Box>
+            </Accordion.ItemContent>
+          </Accordion.Item>
+        ))}
+      </Accordion.Root>
+    </Box>
+  )
 }
 
 export default FAQ;

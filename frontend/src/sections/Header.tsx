@@ -1,7 +1,7 @@
 'use client'
 import React, { useState } from 'react';
-import { Box, Flex, HStack, List, BoxProps, IconButton, Image, Button } from '@chakra-ui/react';
-import Link from 'next/link';
+import { Box, Flex, HStack, Heading, Link as ChakraLink, IconButton, Stack } from '@chakra-ui/react';
+import NextLink from 'next/link';
 
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -10,127 +10,99 @@ const Header = () => {
     <Box
       as="header"
       position="fixed"
-      top="0"
-      zIndex="50"
-      w="full"
-      py={{ base: "4", lg: "6" }}
-      px="4"
-      bg="white"
-      borderBottom="1px solid"
-      borderColor="zinc.100"
-      transition="all 500ms"
+      top="4" // Floating off the top
+      left="50%"
+      transform="translateX(-50%)"
+      zIndex="100"
+     w={{ base: "90%", md: "80%", lg: "90%" }} 
+      minW={{ lg: "1200px" }}
+      bg="rgba(255, 255, 255, 0.8)"
+      backdropFilter="blur(10px)"
+      borderRadius="full" // Pill shape
+      border="1px solid"
+      borderColor="gray.200"
+      boxShadow="0 4px 20px rgba(0, 0, 0, 0.05)"
+      px="6"
+      py="3"
     >
-      <Flex
-        mx="auto"
-        h="14"
-        alignItems="center"
-        maxW="7xl"
-        justifyContent="space-between"
-      >
-        {/* LOGO Placeholder */}
-        <Box zIndex="60" p="1" mr="10" border="2px solid"  fontWeight="bold">LearnVault</Box>
+      <Flex align="center" justify="space-between">
+        {/* LOGO */}
+        <Heading size="md" color="teal.700" letterSpacing="tight">
+          LearnVault
+        </Heading>
 
         {/* NAVIGATION - Desktop */}
-        <Flex display={{ base: "none", lg: "flex" }} flex="1" alignItems="center" justifyContent="space-between">
-          <Box as="nav">
-            <HStack as="ul" gap={{ lg: "8", xl: "12" }} listStyleType="none">
-              <Link href="#features">
-                <Box as="li" fontWeight="medium" cursor="pointer" _hover={{ color: "teal.600" }} whiteSpace="nowrap">
-                  Features
-                </Box>
-              </Link>
-              <Link href="#howItWorks">
-                <Box as="li" fontWeight="medium" cursor="pointer" _hover={{ color: "teal.600" }} whiteSpace="nowrap">
-                  How It Works
-                </Box>
-              </Link>
-              <Link href="#faq">
-                <Box as="li" fontWeight="medium" cursor="pointer" _hover={{ color: "teal.600" }} whiteSpace="nowrap">
-                  FAQ
-                </Box>
-              </Link>
-            </HStack>
-          </Box>
+        <HStack 
+          as="nav" 
+          gap="8" 
+          display={{ base: "none", lg: "flex" }} 
+          mx="10"
+        >
+          <ChakraLink asChild fontSize="sm" fontWeight="semibold" color="gray.600" _hover={{ color: "teal.600" }}>
+            <NextLink href="#features">Features</NextLink>
+          </ChakraLink>
+          <ChakraLink asChild fontSize="sm" fontWeight="semibold" color="gray.600" _hover={{ color: "teal.600" }}>
+            <NextLink href="#howItWorks">How It Works</NextLink>
+          </ChakraLink>
+          <ChakraLink asChild fontSize="sm" fontWeight="semibold" color="gray.600" _hover={{ color: "teal.600" }}>
+            <NextLink href="#faq">FAQ</NextLink>
+          </ChakraLink>
+        </HStack>
 
-          {/* Auth Buttons */}
-          <HStack gap={{ base: "5", xl: "8" }}>
-            <Link href="/auth/signin">
-              <Box as="button" fontWeight="bold" fontSize="sm" cursor="pointer" _hover={{ color: "teal.600" }} whiteSpace="nowrap">
-                SIGN IN
-              </Box>
-            </Link>
-            <Link href="/auth/signup">
-              <Box 
-                as="button"
-                border="2px solid" 
-                borderColor="teal.700" 
-                fontWeight="bold" 
-                fontSize="sm" 
-                px="6" 
-                py="2"
-                transition="300ms"
-                whiteSpace="nowrap"
-                _hover={{ bg: "teal.700", color: "white" }}
-              >
-                GET STARTED
-              </Box>
-            </Link>
-          </HStack>
-        </Flex>
+        {/* AUTH BUTTONS - Desktop */}
+        <HStack gap="4" display={{ base: "none", lg: "flex" }}>
+          <ChakraLink asChild fontSize="sm" fontWeight="bold">
+            <NextLink href="/auth/signin">Sign In</NextLink>
+          </ChakraLink>
+          <ChakraLink 
+            asChild 
+            bg="teal.600" 
+            color="white" 
+            px="5" 
+            py="2" 
+            borderRadius="full" 
+            fontSize="sm" 
+            fontWeight="bold"
+            _hover={{ bg: "teal.700" }}
+          >
+            <NextLink href="/auth/signup">Get Started</NextLink>
+          </ChakraLink>
+        </HStack>
 
         {/* MOBILE TOGGLE */}
-        <Box 
-          display={{ base: "block", lg: "none" }} 
-          ml="auto" 
-          zIndex="60" 
-          cursor="pointer" 
-          onClick={() => setIsOpen(!isOpen)}
-        >
-          <Image 
-            src={`/images/${isOpen ? "delete" : "menu"}.png`} 
-            alt="menu" 
-            w="30px" 
-            h="30px" 
-          />
+        <Box display={{ base: "block", lg: "none" }} onClick={() => setIsOpen(!isOpen)} cursor="pointer">
+            <Box w="6" h="0.5" bg="gray.800" mb="1.5" transition="0.3s" transform={isOpen ? "rotate(45deg) translate(5px, 5px)" : "none"} />
+            <Box w="6" h="0.5" bg="gray.800" mb="1.5" opacity={isOpen ? 0 : 1} />
+            <Box w="6" h="0.5" bg="gray.800" transition="0.3s" transform={isOpen ? "rotate(-45deg) translate(5px, -5px)" : "none"} />
         </Box>
-
-        {/* MOBILE MENU */}
-        {isOpen && (
-          <Box
-            position="fixed"
-            inset="0"
-            display={{ base: "block", lg: "none" }}
-            w="full"
-            h="100vh"
-            bg="white"
-            zIndex="50"
-            transition="500ms"
-          >
-            <Flex as="nav" flexDirection="column" alignItems="center" justifyContent="center" h="full">
-              <Flex as="ul" flexDirection="column" gap={{ base: "10", md: "20" }} alignItems="center" listStyleType="none">
-                <Link href="#features" onClick={() => setIsOpen(false)}>
-                  <Box as="li" cursor="pointer" fontWeight="bold" fontSize={{ base: "2xl", md: "4xl" }}>Features</Box>
-                </Link>
-                <Link href="#howItWorks" onClick={() => setIsOpen(false)}>
-                  <Box as="li" cursor="pointer" fontWeight="bold" fontSize={{ base: "2xl", md: "4xl" }}>How It Works</Box>
-                </Link>
-                <Link href="#faq" onClick={() => setIsOpen(false)}>
-                  <Box as="li" cursor="pointer" fontWeight="bold" fontSize={{ base: "2xl", md: "4xl" }}>FAQ</Box>
-                </Link>
-                
-                <Box as="hr" w="20" borderColor="gray.200" />
-
-                <Link href="auth/signin" onClick={() => setIsOpen(false)}>
-                  <Box as="li" cursor="pointer" fontSize={{ base: "xl", md: "4xl" }} fontWeight="bold" color="teal.700">Sign In</Box>
-                </Link>
-                <Link href="auth/signup" onClick={() => setIsOpen(false)}>
-                  <Box as="li" cursor="pointer" fontSize={{ base: "xl", md: "4xl" }} fontWeight="bold" color="teal.700">Get Started</Box>
-                </Link>
-              </Flex>
-            </Flex>
-          </Box>
-        )}
       </Flex>
+
+      {/* MOBILE MENU (Slide Down) */}
+      {isOpen && (
+        <Stack 
+          display={{ base: "flex", lg: "none" }}
+          position="absolute"
+          top="120%"
+          left="0"
+          w="full"
+          bg="white"
+          p="6"
+          borderRadius="2xl"
+          border="1px solid"
+          borderColor="gray.100"
+          boxShadow="xl"
+          gap="4"
+        >
+          <NextLink href="#features" onClick={() => setIsOpen(false)}>Features</NextLink>
+          <NextLink href="#howItWorks" onClick={() => setIsOpen(false)}>How it Works</NextLink>
+          <NextLink href="#faq" onClick={() => setIsOpen(false)}>FAQ</NextLink>
+          <Box h="1px" bg="gray.100" />
+          <NextLink href="/auth/signin" onClick={() => setIsOpen(false)}>Sign In</NextLink>
+          <ChakraLink asChild bg="teal.600" color="white" p="3" textAlign="center" borderRadius="xl">
+            <NextLink href="/auth/signup" onClick={() => setIsOpen(false)}>Get Started</NextLink>
+          </ChakraLink>
+        </Stack>
+      )}
     </Box>
   );
 };
