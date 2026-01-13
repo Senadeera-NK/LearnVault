@@ -9,12 +9,12 @@ import AttachmentButton from "./AttachmentButton";
 import EditButton from "./EditButton";
 import UserAvatar from "./UserAvatar";
 import { useDisclosure } from "@chakra-ui/react";
-import {useAuth} from "./AuthContext";
+import { useAuth } from "./AuthContext";
 
 export default function Sidebar() {
-  const {user} = useAuth();
-  const { open, onOpen, onClose, setOpen } = useDisclosure();
-  const [collapsed, setCollapsed] = useState(false);
+  const { user } = useAuth();
+  const { open, onOpen, onClose } = useDisclosure(); // Removed setOpen
+  const [_, setCollapsed] = useState(false);        // Changed collapsed to _
   const [showActions, setShowActions] = useState(false);
   const actionsRef = useRef<HTMLDivElement>(null);
   const drawerContentRef = useRef<HTMLDivElement | null>(null);
@@ -22,8 +22,13 @@ export default function Sidebar() {
 
   const isActive = (href: string) => pathname === href;
 
-  // Close floating actions when clicking outside
+  // Check visibility status here instead of returning early
+  const isVisible = user && pathname !== "/";
+
   useEffect(() => {
+    // Only run logic if the sidebar should actually be visible
+    if (!isVisible || !showActions) return;
+
     function handleOutside(event: MouseEvent) {
       const target = event.target as HTMLElement;
       if (target.closest('[role="dialog"]')) return;
@@ -32,13 +37,13 @@ export default function Sidebar() {
       }
     }
 
-    if (showActions) document.addEventListener("mousedown", handleOutside);
+    document.addEventListener("mousedown", handleOutside);
     return () => document.removeEventListener("mousedown", handleOutside);
-  }, [showActions]);
+  }, [showActions, isVisible]);
 
-  // Close drawer when clicking outside
   useEffect(() => {
-    if (!open) return;
+    // Only run logic if the sidebar should actually be visible
+    if (!isVisible || !open) return;
 
     function handleDocClick(event: MouseEvent) {
       const target = event.target as Node;
@@ -50,15 +55,14 @@ export default function Sidebar() {
 
     document.addEventListener("mousedown", handleDocClick);
     return () => document.removeEventListener("mousedown", handleDocClick);
-  }, [open, onClose]);
+  }, [open, onClose, isVisible]);
 
+  // FINAL RENDER LOGIC
+  if (!isVisible) return null;
 
-  if (!user || pathname === "/") return null;
   return (
     <>
       <UserAvatar />
-
-      {/* Hamburger Button */}
       <IconButton
         aria-label="Open menu"
         onClick={() => { setCollapsed(false); onOpen(); }}
@@ -73,7 +77,6 @@ export default function Sidebar() {
         <FaBars />
       </IconButton>
 
-      {/* Sidebar Drawer */}
       {open && (
         <Box
           ref={drawerContentRef}
@@ -86,27 +89,27 @@ export default function Sidebar() {
           shadow="md"
           zIndex={1000}
         >
-          {/* Close button */}
-            <IconButton
-              aria-label="Close menu"
-              onClick={onClose}
-              position="fixed"
-              top="1rem"
-              left="1rem"
-              zIndex={1100}
-              bg="black"
-              color="white"
-              borderRadius="md"
-            >
-              <FaBars />
-            </IconButton>
-
+          <IconButton
+            aria-label="Close menu"
+            onClick={onClose}
+            position="fixed"
+            top="1rem"
+            left="1rem"
+            zIndex={1100}
+            bg="black"
+            color="white"
+            borderRadius="md"
+          >
+            <FaBars />
+          </IconButton>
 
           <VStack align="stretch" gap={4} p={4}>
-            {[{href:"/dashboard", label:"Dashboard"},
-            {href:"/qa", label:"Q & A"},
-             {href:"/shelf", label:"Shelf"},
-              {href:"/settings",label:"Settings"}].map(({href,label}) => (
+            {[
+              { href: "/dashboard", label: "Dashboard" },
+              { href: "/qa", label: "Q & A" },
+              { href: "/shelf", label: "Shelf" },
+              { href: "/settings", label: "Settings" }
+            ].map(({ href, label }) => (
               <Link key={href} href={href}>
                 <Button
                   w="full"
@@ -114,7 +117,7 @@ export default function Sidebar() {
                   variant={isActive(href) ? "solid" : "ghost"}
                   onClick={onClose}
                   fontWeight="bold"
-                  fontSize={{base:18, md:15, sm:15}}
+                  fontSize={{ base: 18, md: 15, sm: 15 }}
                 >
                   {label}
                 </Button>
@@ -124,95 +127,6 @@ export default function Sidebar() {
         </Box>
       )}
 
-      {/* Collapsed Narrow Sidebar */}
-      {/* {collapsed && (
-        <Box
-          position="fixed"
-          left={0}
-          top={0}
-          height="100vh"
-          width="56px"
-          bg="gray.50"
-          borderRight="1px solid"
-          borderColor="gray.200"
-          display="flex"
-          flexDirection="column"
-          alignItems="center"
-          gap={4}
-          py={4}
-          zIndex={1000}
-          transition="width 200ms ease"
-        >
-          <IconButton
-            aria-label="Open menu"
-            onClick={() => { setCollapsed(false); onOpen(); }}
-            size="sm"
-            bg="black"
-            color="white"
-            w="full"
-            h="48px"
-          >
-            <FaBars />
-          </IconButton>
-
-          <VStack gap={3} mt={4}>
-            {["/dashboard", "/qa", "/shelf", "/settings"].map((href) => (
-              <Link key={href} href={href}>
-                <IconButton
-                  title={href.slice(1)}
-                  aria-label={href.slice(1)}
-                  size="sm"
-                  variant={isActive(href) ? "solid" : "ghost"}
-                  colorScheme={isActive(href) ? "teal" : undefined}
-                  onClick={() => setCollapsed(false)}
-                  w="full"
-                  h="40px"
-                  display="flex"
-                  justifyContent="center"
-                >
-                  <Box
-                    width="6px"
-                    height="6px"
-                    borderRadius="full"
-                    bg={isActive(href) ? "teal.500" : "gray.400"}
-                  />
-                </IconButton>
-              </Link>
-            ))}
-          </VStack>
-
-          <Box flex={1} />
-
-          <Link href="/settings">
-            <IconButton
-              aria-label="Profile"
-              size="sm"
-              variant="ghost"
-              title="Settings"
-              w="full"
-              h="48px"
-              display="flex"
-              justifyContent="center"
-            >
-              <Box
-                width="20px"
-                height="20px"
-                borderRadius="full"
-                bg="gray.400"
-                color="white"
-                display="flex"
-                alignItems="center"
-                justifyContent="center"
-                fontSize="12px"
-              >
-                N
-              </Box>
-            </IconButton>
-          </Link>
-        </Box>
-      )} */}
-
-      {/* Floating Plus Button */}
       <IconButton
         aria-label="Add new item"
         colorScheme="teal"
@@ -227,7 +141,6 @@ export default function Sidebar() {
         <FaPlus />
       </IconButton>
 
-      {/* Floating Action Buttons */}
       {showActions && (
         <Box
           ref={actionsRef}
