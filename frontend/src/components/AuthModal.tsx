@@ -3,7 +3,8 @@
 import { useState, useEffect } from "react";
 import { signup, signin, fetchUsers } from "../../api/api";
 import { useAuth } from "./AuthContext";
-import router from "next/router";
+import {useRouter} from "next/navigation";
+import { Portal } from "@chakra-ui/react"; // Add this
 
 type AuthModalProps = {
   isOpen: boolean;
@@ -11,6 +12,7 @@ type AuthModalProps = {
 };
 
 export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
+  const router = useRouter();
   const { login } = useAuth();
 
   const [tab, setTab] = useState<"login" | "signup">("login");
@@ -88,6 +90,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
   if (!isOpen) return null;
 
   return (
+    <Portal>
     <div
       aria-modal="true"
       role="dialog"
@@ -281,5 +284,6 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
         )}
       </div>
     </div>
+    </Portal>
   );
 }

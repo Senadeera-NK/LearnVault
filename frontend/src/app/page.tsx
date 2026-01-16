@@ -11,18 +11,19 @@ import Footer from "@/sections/Footer";
 
 export default function Home() {
   const [showAuth, setShowAuth] = useState(false);
+  const [isAuthOpen, setIsAuthOpen] = useState(false);
 
   return (
     <Box as="main" minH="100vh" bg="white">
       {/* Hero Section */}
-      <Header/>
-      <Hero/>
+      <Header onOpenAuth={() => setIsAuthOpen(true)} />
+      <Hero onOpenAuth={() => setIsAuthOpen(true)} />
       <Features/>
       <HowItWorks/>
       <FAQ/>
       <Footer/>
 
-      <AuthModal isOpen={showAuth} onClose={() => setShowAuth(false)} />
+      <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} />
     </Box>
   );
 }

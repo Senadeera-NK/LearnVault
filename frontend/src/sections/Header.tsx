@@ -1,10 +1,13 @@
 'use client'
 import React, { useState } from 'react';
-import { Box, Flex, HStack, Heading, Link as ChakraLink, Stack } from '@chakra-ui/react';
+import { Box, Flex, HStack, Heading, Link as ChakraLink, Stack, Button } from '@chakra-ui/react';
 import NextLink from 'next/link';
 import AuthModal from '../components/AuthModal'; 
 
-const Header = () => {
+interface HeaderProps {
+  onOpenAuth: () => void;
+}
+const Header = ({onOpenAuth}: HeaderProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
 
@@ -47,21 +50,20 @@ const Header = () => {
 
           <HStack gap="4" display={{ base: "none", lg: "flex" }}>
             {/* SIGN IN - Triggers Modal */}
-            <Box 
-              as="button" 
-              onClick={() => setIsAuthOpen(true)} 
-              fontSize="sm" 
+            <Button 
+              onClick={onOpenAuth} 
+              variant="ghost"
+              size="sm" 
               fontWeight="bold" 
               cursor="pointer"
-              _hover={{ color: "teal.600" }}
+              _hover={{ bg: "transparent", color:"teal.600" }}
             >
               Sign In
-            </Box>
+            </Button>
 
             {/* GET STARTED - Triggers Modal */}
-            <Box 
-              as="button"
-              onClick={() => setIsAuthOpen(true)}
+            <Button 
+              onClick={onOpenAuth}
               bg="teal.600" 
               color="white" 
               px="5" 
@@ -73,7 +75,7 @@ const Header = () => {
               cursor="pointer"
             >
               Get Started
-            </Box>
+            </Button>
           </HStack>
 
           <Box display={{ base: "block", lg: "none" }} onClick={() => setIsOpen(!isOpen)} cursor="pointer">
@@ -123,7 +125,7 @@ const Header = () => {
       </Box>
 
       {/* --- ATTACHED MODAL --- */}
-      <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} />
+      {/* <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} /> */}
     </>
   );
 };

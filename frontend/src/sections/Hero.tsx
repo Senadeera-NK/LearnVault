@@ -3,7 +3,10 @@ import { Box, Button, Flex, Heading, Text, Image, Badge, Stack } from '@chakra-u
 import AuthModal from '../components/AuthModal'; 
 import { useState } from 'react';
 
-const Hero = () => {
+interface HeroProps {
+  onOpenAuth: () => void;
+}
+const Hero = ({onOpenAuth}:HeroProps) => {
     const [isAuthOpen, setIsAuthOpen] = useState(false);
 
   return (
@@ -21,7 +24,7 @@ const Hero = () => {
             Stop scrolling through endless PDFs. LearnVault automatically categorizes your study materials and generates interactive quizzes to help you master concepts 3x faster.
           </Text>
           <Flex gap="4" direction={{ base: "column", sm: "row" }}>
-            <Button size="xl" colorPalette="teal" px="8" onClick={() => setIsAuthOpen(true)} >Start Learning Free</Button>
+            <Button size="xl" colorPalette="teal" px="8" onClick={onOpenAuth} >Start Learning Free</Button>
             <Button size="xl" variant="outline" px="8">Watch Demo</Button>
           </Flex>
         </Stack>
@@ -43,7 +46,7 @@ const Hero = () => {
           </Box>
         </Box>
       </Flex>
-            <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} />
+            {/* <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} /> */}
     </Box>
   )
 }

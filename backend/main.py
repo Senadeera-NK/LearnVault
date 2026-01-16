@@ -11,9 +11,14 @@ app = FastAPI()
 # ✅ Debug print to confirm assigned port
 print("⚙️ Running on PORT:", os.getenv("PORT"))
 
+allowed_origins = [
+    "http://localhost:3000",
+    "https://learnvault-jdbg.onrender.com"
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
