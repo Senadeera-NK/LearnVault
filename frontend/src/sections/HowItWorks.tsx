@@ -1,11 +1,20 @@
 'use client'
-import React from 'react'
+import React, {useRef,useEffect} from 'react'
 import { Box, Flex, Heading, Text, Circle, Stack, Icon } from '@chakra-ui/react'
 import { useLenis } from '@studio-freight/react-lenis'
 
 const HowItWorks = () => {
     const lenis = useLenis();
+    const videoRef = useRef<HTMLVideoElement>(null);
 
+    useEffect(() => {
+    if (videoRef.current) {
+        videoRef.current.play().catch(error => {
+        console.error("Autoplay failed:", error);
+        });
+    }
+    }, []);
+    
     const handleScroll = () => {
         lenis?.scrollTo('#faq', {
             duration: 1.5,
@@ -17,18 +26,21 @@ const HowItWorks = () => {
     const steps = [
         {
             tag: "Upload",
+            src:"/videos/shelf.mp4",
             title: "Feed the Vault",
             desc: "Drag and drop your PDFs, lecture notes, or ebooks. Gemini AI reads your content and categorizes it instantly.",
             color: "teal.500"
         },
         {
             tag: "Analyze",
+            src:"/videos/qa.mp4",
             title: "Deep Dive Analysis",
             desc: "Our AI extracts the most important concepts and creates a structured knowledge graph of your files.",
             color: "blue.500"
         },
         {
             tag: "Master",
+            src:"/videos/dashboard.mp4",
             title: "Track Your Growth",
             desc: "Monitor accuracy trends and study hours on a beautiful, data-driven dashboard.",
             color: "purple.500"
@@ -81,8 +93,9 @@ const HowItWorks = () => {
                             {/* Visual Placeholder for a "Mockup" or Image */}
                             <Box 
                                 mt="8" 
-                                h="48" 
-                                bg="white" 
+                                h="68" 
+                                bg="white"
+                                overflow="hidden" 
                                 borderRadius="2xl" 
                                 borderStyle="dashed" 
                                 borderWidth="2px" 
@@ -91,10 +104,22 @@ const HowItWorks = () => {
                                 alignItems="center"
                                 justifyContent="center"
                             >
-                                <Text fontSize="xs" color="gray.400" textTransform="uppercase">Visual for {step.tag}</Text>
+                            <video
+                                src={step.src}
+                                ref={videoRef}
+                                loop
+                                muted
+                                autoPlay
+                                playsInline
+                                style={{
+                                width: '100%',
+                                height: '100%',
+                                objectFit: 'cover', 
+                                }}
+                            />                            
                             </Box>
-                        </Box>
-                    ))}
+                            </Box>
+                            ))}
                 </Stack>
             </Flex>
         </Box>

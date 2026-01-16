@@ -1,13 +1,25 @@
 'use client'
 import { Box, Button, Flex, Heading, Text, Image, Badge, Stack } from '@chakra-ui/react'
 import AuthModal from '../components/AuthModal'; 
-import { useState } from 'react';
+import { useState, useEffect,useRef } from 'react';
+import {DemoModal} from './DemoModal';
 
 interface HeroProps {
   onOpenAuth: () => void;
 }
 const Hero = ({onOpenAuth}:HeroProps) => {
     const [isAuthOpen, setIsAuthOpen] = useState(false);
+    const [isDemoOpen, setIsDemoOpen] = useState(false);
+
+const videoRef = useRef<HTMLVideoElement>(null);
+
+useEffect(() => {
+  if (videoRef.current) {
+    videoRef.current.play().catch(error => {
+      console.error("Autoplay failed:", error);
+    });
+  }
+}, []);
 
   return (
     <Box bg="white" pt="32" pb="20" px={{ base: "6", md: "20" }}>
@@ -25,7 +37,8 @@ const Hero = ({onOpenAuth}:HeroProps) => {
           </Text>
           <Flex gap="4" direction={{ base: "column", sm: "row" }}>
             <Button size="xl" colorPalette="teal" px="8" onClick={onOpenAuth} >Start Learning Free</Button>
-            <Button size="xl" variant="outline" px="8">Watch Demo</Button>
+            <Button size="xl" variant="outline" px="8" onClick={()=>setIsDemoOpen(true)}>Watch Demo</Button>
+            <DemoModal isOpen={isDemoOpen} onClose={() => setIsDemoOpen(false)} />
           </Flex>
         </Stack>
 
@@ -40,8 +53,20 @@ const Hero = ({onOpenAuth}:HeroProps) => {
             boxShadow="2xl"
           >
             {/* You can replace this with a real image of your dashboard */}
-            <Box bg="white" h="300px" borderRadius="xl" borderStyle="dashed" borderWidth="2px" borderColor="gray.200" display="flex" alignItems="center" justifyContent="center">
-                <Text color="gray.400">App Dashboard Mockup</Text>
+            <Box bg="white" overflow="hidden" h="300px" borderRadius="xl" borderStyle="dashed" borderWidth="2px" borderColor="gray.200" display="flex" alignItems="center" justifyContent="center">
+                <video
+                    src="/videos/hero.mp4"
+                    ref={videoRef}
+                    loop
+                    muted
+                    autoPlay
+                    playsInline
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'contain', 
+                    }}
+                  />
             </Box>
           </Box>
         </Box>
