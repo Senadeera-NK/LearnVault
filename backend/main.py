@@ -13,7 +13,7 @@ print("⚙️ Running on PORT:", os.getenv("PORT"))
 
 allowed_origins = [
     "http://localhost:3000",
-    "https://learnvault-jdbg.onrender.com"
+    "https://learn-vault-five.vercel.app/"
 ]
 
 app.add_middleware(
