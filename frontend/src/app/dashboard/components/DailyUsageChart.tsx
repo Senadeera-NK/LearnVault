@@ -96,8 +96,7 @@ export default function DailyUsageChart({ userId, onStats }: DailyUsageChartProp
             style:{textAnchor:"middle", fill:"#888"}
           }}
            />
-          <Tooltip formatter={(value:number) =>`${value.toFixed(1)} min`} />
-
+<Tooltip formatter={(value: any) => `${Number(value || 0).toFixed(1)} min`} />
           <Area
             type="linear"          // straight lines instead of monotone curve
             dataKey="hours"
