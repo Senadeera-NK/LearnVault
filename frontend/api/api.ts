@@ -3,6 +3,7 @@
 // Use your Codespaces-provided forwarded URL here
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
+//signup function
 export async function signup(name: string, email: string, password: string) {
   const response = await fetch(`${API_URL}/signup`, {
     method: "POST",
@@ -14,7 +15,7 @@ export async function signup(name: string, email: string, password: string) {
 
   if (!response.ok) {
     const errData = await response.json().catch(() => ({}));
-    console.log("❌ Signup failed:", errData);
+    console.log(" Signup failed:", errData);
     const message = errData.detail || errData.error || "Failed to sign up";
     throw new Error(message);
   }
@@ -22,6 +23,7 @@ export async function signup(name: string, email: string, password: string) {
   return response.json();
 }
 
+//sign in function
 export async function signin(email: string, password: string) {
   const response = await fetch(`${API_URL}/signin?email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`, {
     method: "GET",
@@ -32,7 +34,7 @@ export async function signin(email: string, password: string) {
 
   if (!response.ok) {
     const errData = await response.json().catch(() => ({}));
-    console.log("❌ Signin failed:", errData);
+    console.log(" Signin failed:", errData);
     const message = errData.detail || errData.error || "Failed to sign in";
     throw new Error(message);
   }
@@ -40,6 +42,7 @@ export async function signin(email: string, password: string) {
   return response.json();
 }
 
+//fetching users to the frontend
 export async function fetchUsers() {
   const res = await fetch(`${API_URL}/users`);
   if (!res.ok) {
@@ -61,13 +64,14 @@ export async function recordUsage(userId: number, pageName: string, durationseco
 
   if (!response.ok) {
     const errData = await response.json().catch(() => ({}));
-    console.log("❌ Recording usage failed:", errData);
+    console.log("Recording usage failed:", errData);
     const message = errData.detail || errData.error || "Failed to record usage";
     throw new Error(message);
   }
 
   return response.json();
 }
+
 
 export async function fetchUserUsage(userId: number) {
   const response = await fetch(`${API_URL}/user_usage/${userId}`, {
@@ -79,7 +83,7 @@ export async function fetchUserUsage(userId: number) {
 
   if (!response.ok) {
     const errData = await response.json().catch(() => ({}));
-    console.log("❌ Fetching user usage failed:", errData);
+    console.log("Fetching user usage failed:", errData);
     const message = errData.detail || errData.error || "Failed to fetch user usage";
     throw new Error(message);
   }
@@ -87,6 +91,7 @@ export async function fetchUserUsage(userId: number) {
   return response.json();
 }
 
+//adding pdf files to the storage of the user
 export async function insertPdfFiles(userId: number, files: File[]) {
   const formData = new FormData();
   files.forEach(file => formData.append("files", file));
@@ -163,7 +168,7 @@ export async function send_qa_selection(
   try {
     console.log("DEBUG: Checking existing QA for:", fileURL, category);
 
-    // 1️⃣ Check if QA already exists
+    //  Check if QA already exists
     const checkRes = await fetch(`${API_URL}/qa/check_existing`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -181,7 +186,7 @@ export async function send_qa_selection(
       return { message: "QA already exists", cachedQA: checkData.qa };
     }
 
-    // 2️⃣ If not existing, generate QA
+    //  If not existing, generate QA
     console.log("DEBUG: Sending QA generation request to:", `${API_URL}/qa/selection`);
     const res = await fetch(`${API_URL}/qa/selection`, {
       method: "POST",
@@ -237,38 +242,3 @@ export async function fetch_user_qa_count(user_id:number){
   }
   return res.json();
 }
-
-//
-
-//Example usage:
-// (async () => {
-//   try {
-//     const signupData = await signup("Alice", "alice@example.com", "password123");
-//     console.log("✅ Signup successful:", signupData);
-//   } catch (error) {
-//     console.error("❌ Signup failed:", error);
-//   }
-// })(); 
-
-// ------ neon auth -----------
-// export async function neon_signup(name:string, email:string, password:string){
-//   const res = await fetch(`${API_URL}/neon/signup`,{
-//     method:"POST",
-//     headers:{"content-type":"application/json"},
-//     body:JSON.stringify({ name, email, password})
-//   });
-//   return res.json();
-// }
-
-// export async function neon_signin(email:string, password:string){
-//   const res = await fetch(`${API_URL}/neon/signin`,{
-//   method : "POST",
-//   headers: {"content-type":"application/json"},
-//   body:JSON.stringify({email,password})
-//   });
-//   return res.json();
-// }
-
-// export function neon_oauth(provider: string) {
-//   window.location.href = `${API_URL}/neon/oauth/${provider}`;
-// }
