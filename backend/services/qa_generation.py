@@ -5,6 +5,8 @@ import math
 import re
 from typing import Literal
 import google.generativeai as genai
+
+# Internal imports
 from utils import extract_text
 from qa_utils import download_file_from_url_qa
 from services.save_qa_selection import (
@@ -12,7 +14,9 @@ from services.save_qa_selection import (
     check_file_processed,
     get_existing_qa_for_user
 )
-from services.qa_json import parse_qa_to_json, normalize_mcq_answer
+from services.qa_json import normalize_mcq_answer
+# This import is key - it moves the "thinking" logic to your new agent
+from agents.orchestrator import agentic_chunk_processor 
 
 GENAI_API_KEY = os.environ.get("GENAI_API_KEY")
 if not GENAI_API_KEY:
@@ -20,69 +24,15 @@ if not GENAI_API_KEY:
 
 genai.configure(api_key=GENAI_API_KEY)
 
-
 # -------------------------
 # Text chunking
 # -------------------------
-def chunk_text(text: str, chunk_size: int = 500):
+def chunk_text(text: str, chunk_size: int = 2500):
+    """
+    Chunks text to ensure Render doesn't timeout and 
+    Gemini stays focused on context.
+    """
     return [text[i:i + chunk_size] for i in range(0, len(text), chunk_size)]
-
-
-# -------------------------
-# Prompt builder
-# -------------------------
-def make_prompt(qa_type: str, chunk: str, count: int):
-    if qa_type == "mcq":
-        rule = (
-            f"You will produce exactly {count} multiple-choice questions (MCQs) based ONLY on the provided Text.\n\n"
-            "RETURN RULES (MCQ):\n"
-            "1) Return ONLY valid JSON — a single JSON array of objects with this exact schema:\n"
-            "[\n"
-            "  {\n"
-            "    \"question\": \"<question text>\",\n"
-            "    \"options\": [\"<opt1>\", \"<opt2>\", \"<opt3>\", \"<opt4>\"],\n"
-            "    \"answer\": \"A\"\n"
-            "  }\n"
-            "]\n"
-            "2) Options array MUST have 4 strings. 'answer' MUST be one of 'A','B','C','D'.\n"
-            "3) Do NOT include extra text, numbering, explanation, or commentary — ONLY the JSON array.\n"
-        )
-    elif qa_type == "true_false":
-        rule = (
-            f"Generate exactly {count} True/False questions.\n"
-            "Format MUST be (plain text):\n"
-            "Q: <question>\nAnswer: True\nOR\nAnswer: False\n"
-        )
-    else:  # fact
-        rule = (
-            f"Generate exactly {count} fact-based QA pairs.\n"
-            "Use ONLY this exact format:\n"
-            "Q: <question>\nAnswer: <answer>\n"
-        )
-    return f"{rule}\n\nText:\n{chunk}\n\nReturn only the requested format."
-
-
-# -------------------------
-# Model call with retries
-# -------------------------
-def generate_qa(prompt: str, max_retries: int = 4) -> str:
-    for attempt in range(max_retries):
-        try:
-            model = genai.GenerativeModel("gemini-2.0-flash")
-            res = model.generate_content(prompt)
-            return res.text or ""
-        except Exception as e:
-            txt = str(e).lower()
-            if "429" in txt or "quota" in txt or "rate limit" in txt:
-                import time
-                wait = 2 ** (attempt + 1)
-                print(f"[WARN] Quota/Rate hit. Retrying in {wait}s…")
-                time.sleep(wait)
-                continue
-            print(f"[ERROR] Gemini error: {e}")
-            return ""
-    return ""
-
 
 # -------------------------
 # Main generator
@@ -93,7 +43,7 @@ async def generate_qa_from_file(
     num_questions_total: int = 20,
     user_id: int = None
 ):
-    # --- Cached QA check ---
+    # --- 1. Cached QA check ---
     if await check_file_processed(user_id, file_url, qa_type, num_questions_total):
         print("[DEBUG] Cached QA available.")
         cached = await get_existing_qa_for_user(user_id, file_url, qa_type, num_questions_total)
@@ -101,7 +51,7 @@ async def generate_qa_from_file(
 
     print(f"[DEBUG] Generating QA for user={user_id}, type={qa_type}")
 
-    # --- Download and extract text ---
+    # --- 2. Download and extract text ---
     local = download_file_from_url_qa(file_url)
     if not local:
         return {"error": "download-failed"}
@@ -110,90 +60,46 @@ async def generate_qa_from_file(
     if text in ["EMPTY", "READ_ERROR", "PHOTO_ONLY"]:
         return {"error": text}
 
-    # ------------------------------
-    # MCQ MODE — Single Call Strategy
-    # ------------------------------
-    if qa_type == "mcq":
-        excerpt = text[:6000]  # reasonable limit
-        prompt = make_prompt("mcq", excerpt, num_questions_total)
+    # --- 3. Determine Chunks ---
+    chunks = chunk_text(text, 2500) 
+    questions_per_chunk = math.ceil(num_questions_total / len(chunks))
+    
+    final_results = []
 
-        raw = await asyncio.to_thread(generate_qa, prompt)
-        print("[DEBUG] RAW MODEL OUTPUT (repr):", repr(raw))
-
-        if not raw or not raw.strip():
-            return {"message": "QA generation complete", "results": []}
-
-        # ---- CLEAN BACKTICKS AND NOISE ----
-        raw_clean = raw.strip().replace("\ufeff", "")
-        raw_clean = re.sub(r'^```json\s*', '', raw_clean, flags=re.IGNORECASE)
-        raw_clean = re.sub(r'^```', '', raw_clean)
-        raw_clean = re.sub(r'```$', '', raw_clean)
-        raw_clean = re.sub(r',\s*]', ']', raw_clean)   # Fix trailing comma issues
-
-        # ---- JSON PARSING ----
-        parsed_items = []
-        try:
-            data = json.loads(raw_clean)
-
-            for obj in data:
-                if (
-                    isinstance(obj, dict)
-                    and "question" in obj
-                    and "options" in obj
-                    and isinstance(obj["options"], list)
-                    and len(obj["options"]) == 4
-                    and "answer" in obj
-                ):
-                    parsed_items.append({
-                        "question": str(obj["question"]).strip(),
-                        "options": [str(o).strip() for o in obj["options"]],
-                        "answer": normalize_mcq_answer(obj["answer"])
-                    })
-
-        except Exception as e:
-            print("[WARN] JSON parse failed, falling back:", e)
-            parsed_items = parse_qa_to_json(raw_clean, "mcq")
-
-        # --- Save incremental ---
-        if parsed_items:
-            await save_qa_incremental(
-                user_id=user_id,
-                file_url=file_url,
-                category="mcq",
-                parsed_items=parsed_items,
-                max_questions=num_questions_total
-            )
-
-        return {"message": "QA generation complete", "results": parsed_items}
-
-    # ------------------------------
-    # FACT / TRUE-FALSE (old behavior)
-    # ------------------------------
-    chunks = chunk_text(text, 2000)
-    per_chunk = math.ceil(num_questions_total / len(chunks))
-
-    final = []
-
+    # --- 4. Sequential Agentic Processing ---
     for idx, chunk in enumerate(chunks):
-        prompt = make_prompt(qa_type, chunk, per_chunk)
-        raw = await asyncio.to_thread(generate_qa, prompt)
-        print(f"[DEBUG] Chunk {idx+1}/{len(chunks)} raw:", repr(raw))
+        if len(final_results) >= num_questions_total:
+            break
+            
+        print(f"[DEBUG] Agent processing chunk {idx+1}/{len(chunks)}")
+        
+        # The agentic_chunk_processor handles the model call and JSON formatting
+        chunk_items = await agentic_chunk_processor(
+            chunk=chunk, 
+            qa_type=qa_type, 
+            count=questions_per_chunk
+        )
+        
+        if chunk_items:
+            # We still normalize MCQ answers to be safe
+            if qa_type == "mcq":
+                for item in chunk_items:
+                    if "answer" in item:
+                        item["answer"] = normalize_mcq_answer(item["answer"])
+            
+            final_results.extend(chunk_items)
 
-        items = parse_qa_to_json(raw, qa_type)
-        if items:
-            final.extend(items)
+    # --- 5. Final Trimming ---
+    final_results = final_results[:num_questions_total]
 
-    # trim to total count
-    final = final[:num_questions_total]
-
-    if final:
+    # --- 6. Save results incrementally ---
+    if final_results:
         await save_qa_incremental(
             user_id=user_id,
             file_url=file_url,
             category=qa_type,
-            parsed_items=final,
+            parsed_items=final_results,
             max_questions=num_questions_total
         )
 
-    return {"message": "QA generation complete", "results": final}
-
+    return {"message": "QA generation complete", "results": final_results}
