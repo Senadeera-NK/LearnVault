@@ -1,1 +1,18 @@
+# Dependencies
+node_modules/
+__pycache__/
+*.py[cod]
+
+# Environments
 .env
+.env.local
+
+# Build outputs
+.next/
+out/
+dist/
+build/
+target/   # For your Spring Boot / Java projects
+
+# OS files
+.DS_Store
