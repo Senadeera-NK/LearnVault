@@ -10,6 +10,8 @@ The system follows a **Planner-Reviewer pattern** to minimize LLM hallucinations
 * **Planner Agent:** Parses PDF structure and determines the optimal extraction strategy.
 * **Generator Agent:** Executes the content extraction and formats structured Q&A pairs.
 * **Reviewer Agent:** Cross-references generated questions against the source text to validate factual accuracy and difficulty levels.
+
+
 ```
 graph TD
     %% User Interaction
@@ -46,7 +48,8 @@ graph TD
     Store --> SupabaseDB
     Store --> Frontend[Display Files/QA]
     Frontend --> User
-    ```
+```
+
 ## 🛠 Tech Stack
 * **Frontend:** Next.js 15, Tailwind CSS, TypeScript.
 * **Backend:** FastAPI (Python), Google Gemini 3 (Flash & Pro).
