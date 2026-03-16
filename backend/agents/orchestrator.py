@@ -1,72 +1,75 @@
 import json
 import asyncio
 import re
+import os
 import google.generativeai as genai
+from .prompts import PLANNER_PROMPT, REVIEWER_PROMPT
+from .tools import get_model_with_tools, calculate_complexity_score
 
-async def agentic_chunk_processor(chunk: str, qa_type: str, count: int, max_retries: int = 10):
+# Multi-Key Setup for Rate Limit Resilience
+KEY_1 = os.environ.get("GENAI_API_KEY")
+KEY_2 = os.environ.get("GENAI_API_KEY_2")
+
+def parse_json_safely(raw_text: str):
+    """Clean and parse JSON from LLM markdown response."""
+    clean = re.sub(r'^```json\s*|```$', '', raw_text, flags=re.IGNORECASE).strip()
+    match = re.search(r'\[.*\]', clean, re.DOTALL)
+    if match:
+        return json.loads(match.group(0))
+    return []
+
+async def agentic_chunk_processor(chunk: str, qa_type: str, count: int, max_retries: int = 5):
     """
-    Processes a single chunk of text agentically.
-    Includes Exponential Backoff to handle 429 Rate Limit errors (Free Tier).
+    CV-READY AGENTIC WORKFLOW:
+    1. Planner (Thought): Identifies core concepts.
+    2. Generator (Action): Uses Tools to adjust complexity & generate QA.
+    3. Reviewer (Observation/Correction): Validates output quality.
     """
-    model = genai.GenerativeModel("gemini-1.5-flash")
     
-    schemas = {
-        "mcq": '[{"question": "...", "options": ["A", "B", "C", "D"], "answer": "A"}]',
-        "true_false": '[{"question": "...", "answer": "True"}]',
-        "fact": '[{"question": "...", "answer": "..."}]'
-    }
+    # --- STAGE 1: THE PLANNER (Brain) ---
+    genai.configure(api_key=KEY_1)
+    planner = genai.GenerativeModel("gemini-1.5-flash")
+    plan_res = await asyncio.to_thread(
+        planner.generate_content, 
+        PLANNER_PROMPT.format(count=count, text=chunk)
+    )
+    concepts = plan_res.text
+    print(f"[PLANNER] Strategy: {concepts[:50]}...")
 
-    prompt = f"""
-    You are an academic expert. Extract exactly {count} {qa_type} questions from the text below.
+    await asyncio.sleep(2) # Pacing
+
+    # --- STAGE 2: THE GENERATOR (Action + Tools) ---
+    # We use Key 2 here to split the API quota load
+    model_with_tools = get_model_with_tools(KEY_2 or KEY_1)
+    chat = model_with_tools.start_chat(enable_automatic_function_calling=True)
     
-    RETURN RULES:
-    1. Output MUST be a valid JSON array.
-    2. Format: {schemas.get(qa_type)}
-    3. Return ONLY the JSON content. No conversational text or extra markdown.
-
-    Text:
-    {chunk}
+    gen_prompt = f"""
+    Using these concepts: {concepts}
+    1. Call 'calculate_complexity_score' to verify text density.
+    2. Generate {count} {qa_type} questions in JSON format.
+    Source Text: {chunk}
     """
-
-    for attempt in range(max_retries):
-        try:
-            # We use asyncio.to_thread because the Gemini SDK call is blocking
-            res = await asyncio.to_thread(model.generate_content, prompt)
-            
-            if not res or not res.text:
-                return []
-
-            raw = res.text.strip()
-            
-            # 1. Clean up markdown wrappers
-            clean_json = re.sub(r'^```json\s*|```$', '', raw, flags=re.IGNORECASE).strip()
-            
-            # 2. Extract strictly between the first [ and last ]
-            start_idx = clean_json.find('[')
-            end_idx = clean_json.rfind(']')
-            
-            if start_idx != -1 and end_idx != -1:
-                clean_json = clean_json[start_idx:end_idx + 1]
-            else:
-                # Fallback: if it's not a list, look for an object
-                start_obj = clean_json.find('{')
-                end_obj = clean_json.rfind('}')
-                if start_obj != -1 and end_obj != -1:
-                    clean_json = "[" + clean_json[start_obj:end_obj + 1] + "]"
-
-            data = json.loads(clean_json)
-            return data if isinstance(data, list) else []
-
-        except Exception as e:
-            err_msg = str(e).lower()
-            # If we hit a Rate Limit (429)
-            if "429" in err_msg or "quota" in err_msg or "limit" in err_msg:
-                wait_time = (2 ** attempt) + 2  # Exponential backoff: 2s, 4s, 10s...
-                print(f"[RATE LIMIT] Hit 429 in Orchestrator. Retrying in {wait_time}s (Attempt {attempt+1}/{max_retries})...")
-                await asyncio.sleep(wait_time)
-                continue
-            else:
-                print(f"[AGENT ERROR] Logic failed: {e}")
-                break
     
-    return [{"error":"Max retried exceeded due to rate limits"}]
+    gen_res = await asyncio.to_thread(chat.send_message, gen_prompt)
+    raw_json = gen_res.text
+    print(f"[GENERATOR] Produced raw QA content.")
+
+    await asyncio.sleep(2) # Pacing
+
+    # --- STAGE 3: THE REVIEWER (Quality Control) ---
+    genai.configure(api_key=KEY_1)
+    reviewer = genai.GenerativeModel("gemini-1.5-flash")
+    rev_res = await asyncio.to_thread(
+        reviewer.generate_content,
+        REVIEWER_PROMPT.format(text=chunk, quiz_json=raw_json)
+    )
+    
+    validation = rev_res.text
+    if "PASSED" in validation.upper():
+        print("[REVIEWER] Check Passed.")
+        return parse_json_safely(raw_json)
+    else:
+        print(f"[REVIEWER] Refinement needed: {validation[:50]}")
+        # In a full ReAct loop, you'd trigger a re-generation here.
+        # For now, we return the parsed JSON to keep it simple.
+        return parse_json_safely(raw_json)

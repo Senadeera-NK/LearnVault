@@ -3,7 +3,7 @@ import httpx
 import time
 
 # Change this to your local URL or your Render URL
-BASE_URL = "https://learnvault-jdbg.onrender.com" 
+BASE_URL = os.environ.get("BASE_URL")
 
 async def test_qa_generation():
     payload = {
