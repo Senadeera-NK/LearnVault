@@ -3,7 +3,7 @@ import asyncio
 import re
 import google.generativeai as genai
 
-async def agentic_chunk_processor(chunk: str, qa_type: str, count: int, max_retries: int = 5):
+async def agentic_chunk_processor(chunk: str, qa_type: str, count: int, max_retries: int = 10):
     """
     Processes a single chunk of text agentically.
     Includes Exponential Backoff to handle 429 Rate Limit errors (Free Tier).
