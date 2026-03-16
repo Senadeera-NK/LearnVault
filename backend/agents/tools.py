@@ -39,6 +39,9 @@ STUDY_TOOLS = [
 ]
 
 # services/tools.py (or wherever it is located)
-def get_model_with_tools(api_key: str, model_name: str = "models/gemini-1.5-flash"):
+# services/tools.py
+def get_model_with_tools(api_key: str, model_name: str = "gemini-1.5-flash"):
     genai.configure(api_key=api_key)
+    # Try removing the "models/" prefix here if you added it, 
+    # or adding it if you didn't. Some SDK versions prefer one over the other.
     return genai.GenerativeModel(model_name=model_name, tools=[calculate_complexity_score])

@@ -11,7 +11,7 @@ KEY_1 = os.environ.get("GENAI_API_KEY")
 KEY_2 = os.environ.get("GENAI_API_KEY_2") 
 
 # The specific model string required by the current SDK version
-MODEL_ID = "models/gemini-1.5-flash"
+MODEL_ID = "models/gemini-2.5-flash"
 
 def parse_json_safely(raw_text: str):
     """Clean and parse JSON from LLM markdown response."""
