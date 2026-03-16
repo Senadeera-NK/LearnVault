@@ -14,7 +14,7 @@ SUPABASE_URL=os.getenv("SUPABASE_URL")
 SUPABASE_KEY=os.getenv("SUPABASE_KEY")
 
 if not SUPABASE_URL or SUPABASE_KEY:
-    print(f"DEBUG: URL is {SUPABASE_URL}, KEY exists: {boot(SUPABASE_KEY)}")
+    print(f"DEBUG: URL is {SUPABASE_URL}, KEY exists: {bool(SUPABASE_KEY)}")
     raise ValueError("Supabase credentials missing. check your env file")
 
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
