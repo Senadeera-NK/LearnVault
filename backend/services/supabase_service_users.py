@@ -1,8 +1,21 @@
 # backend/services/supabase_service_users.py
+# for the local run
+import os
+from dotenv import load_dotenv
+load_dotenv()
+# --------------------------------
 import hashlib
 from supabase import create_client
 from services.supabase_config import SUPABASE_URL, SUPABASE_KEY
 import logging
+
+# for local run
+SUPABASE_URL=os.getenv("SUPABASE_URL")
+SUPABASE_KEY=os.getenv("SUPABASE_KEY")
+
+if not SUPABASE_URL or SUPABASE_KEY:
+    print(f"DEBUG: URL is {SUPABASE_URL}, KEY exists: {boot(SUPABASE_KEY)}")
+    raise ValueError("Supabase credentials missing. check your env file")
 
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 

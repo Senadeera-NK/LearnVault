@@ -1,11 +1,18 @@
+# to run locally----------------
+import os
+from dotenv import load_dotenv
+
+# ✅ Load variables from .env BEFORE importing other services
+load_dotenv()
+# ------------------------------
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from services import supabase_service_users
 from services import supabase_service_users_usage
 from routers import users_files_classification, users_attachFiles, users, users_usage, users_signed_upload, qa_selection, users_temp_upload, qa_check_existanse
-import os
 import uvicorn
-
+ 
 app = FastAPI()
 
 # ✅ Debug print to confirm assigned port
