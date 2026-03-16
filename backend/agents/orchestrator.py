@@ -1,5 +1,6 @@
 import json
 import asyncio
+import re
 import google.generativeai as genai
 
 async def agentic_chunk_processor(chunk: str, qa_type: str, count: int):
@@ -8,34 +9,51 @@ async def agentic_chunk_processor(chunk: str, qa_type: str, count: int):
     """
     model = genai.GenerativeModel("gemini-2.0-flash")
     
-    # Define schemas for the agent to follow
     schemas = {
         "mcq": '[{"question": "...", "options": ["A", "B", "C", "D"], "answer": "A"}]',
         "true_false": '[{"question": "...", "answer": "True"}]',
         "fact": '[{"question": "...", "answer": "..."}]'
     }
 
+    # Enhanced Prompt to force valid JSON only
     prompt = f"""
-    You are an academic assistant. Extract exactly {count} {qa_type} questions from the text below.
-    Format your response as a VALID JSON array: {schemas.get(qa_type)}
+    Extract exactly {count} {qa_type} questions from the text below.
     
-    Text: {chunk}
+    REQUIRED JSON FORMAT:
+    {schemas.get(qa_type)}
+
+    RULES:
+    1. Return ONLY the JSON array.
+    2. No markdown, no "Here is your JSON", no explanations.
+    3. Ensure the facts are strictly from the text provided.
+
+    Text to process:
+    {chunk}
     """
 
     try:
-        # We use a shorter timeout/retry logic for Render stability
         res = await asyncio.to_thread(model.generate_content, prompt)
+        if not res.text:
+            return []
+
+        # Robust cleaning
         raw = res.text.strip()
-        
-        # Fast JSON cleaning
         clean_json = re.sub(r'^```json\s*|```$', '', raw, flags=re.IGNORECASE).strip()
+        
+        # If Gemini still adds noise before/after the [ ], find the boundaries
+        start_idx = clean_json.find('[')
+        end_idx = clean_json.rfind(']')
+        if start_idx != -1 and end_idx != -1:
+            clean_json = clean_json[start_idx:end_idx + 1]
+
         data = json.loads(clean_json)
         
-        # Agent Logic: Internal validation
-        if isinstance(data, list) and len(data) > 0:
+        if isinstance(data, list):
             return data
+            
     except Exception as e:
-        print(f"[AGENT ERROR] Chunk processing failed: {e}")
+        # Check your Render logs - you will see this error now
+        print(f"[AGENT ERROR] Logic failed: {e}")
         return []
     
     return []
