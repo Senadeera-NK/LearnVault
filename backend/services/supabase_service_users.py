@@ -10,13 +10,16 @@ from services.supabase_config import SUPABASE_URL, SUPABASE_KEY
 import logging
 
 # for local run
-SUPABASE_URL=os.getenv("SUPABASE_URL")
-SUPABASE_KEY=os.getenv("SUPABASE_KEY")
+# for local run
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 
-if not SUPABASE_URL or SUPABASE_KEY:
+# Change 'or SUPABASE_KEY' to 'or not SUPABASE_KEY'
+if not SUPABASE_URL or not SUPABASE_KEY:
     print(f"DEBUG: URL is {SUPABASE_URL}, KEY exists: {bool(SUPABASE_KEY)}")
-    raise ValueError("Supabase credentials missing. check your env file")
+    raise ValueError("Supabase credentials missing. Check your .env file")
 
+# If it gets here, it means both exist!
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 def hash_password(password: str) -> str:
