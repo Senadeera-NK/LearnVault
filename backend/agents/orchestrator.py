@@ -69,4 +69,4 @@ async def agentic_chunk_processor(chunk: str, qa_type: str, count: int, max_retr
                 print(f"[AGENT ERROR] Logic failed: {e}")
                 break
     
-    return []
+    return [{"error":"Max retried exceeded due to rate limits"}]
