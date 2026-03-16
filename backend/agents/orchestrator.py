@@ -8,7 +8,7 @@ async def agentic_chunk_processor(chunk: str, qa_type: str, count: int, max_retr
     Processes a single chunk of text agentically.
     Includes Exponential Backoff to handle 429 Rate Limit errors (Free Tier).
     """
-    model = genai.GenerativeModel("gemini-2.0-flash")
+    model = genai.GenerativeModel("gemini-1.5-flash")
     
     schemas = {
         "mcq": '[{"question": "...", "options": ["A", "B", "C", "D"], "answer": "A"}]',
