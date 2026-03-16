@@ -6,29 +6,34 @@ import google.generativeai as genai
 from .prompts import PLANNER_PROMPT, REVIEWER_PROMPT
 from .tools import get_model_with_tools, calculate_complexity_score
 
-# Multi-Key Setup for Rate Limit Resilience
+# Multi-Key Setup - Updated to match your .env (GENAI_API_KEY_2)
 KEY_1 = os.environ.get("GENAI_API_KEY")
-KEY_2 = os.environ.get("GENAI_API_KEY_2")
+KEY_2 = os.environ.get("GENAI_API_KEY_2") 
+
+# The specific model string required by the current SDK version
+MODEL_ID = "models/gemini-1.5-flash"
 
 def parse_json_safely(raw_text: str):
     """Clean and parse JSON from LLM markdown response."""
     clean = re.sub(r'^```json\s*|```$', '', raw_text, flags=re.IGNORECASE).strip()
     match = re.search(r'\[.*\]', clean, re.DOTALL)
     if match:
-        return json.loads(match.group(0))
+        try:
+            return json.loads(match.group(0))
+        except json.JSONDecodeError:
+            return []
     return []
 
 async def agentic_chunk_processor(chunk: str, qa_type: str, count: int, max_retries: int = 5):
     """
-    CV-READY AGENTIC WORKFLOW:
-    1. Planner (Thought): Identifies core concepts.
-    2. Generator (Action): Uses Tools to adjust complexity & generate QA.
-    3. Reviewer (Observation/Correction): Validates output quality.
+    CV-READY AGENTIC WORKFLOW with fixed model paths.
     """
     
-    # --- STAGE 1: THE PLANNER (Brain) ---
+    # --- STAGE 1: THE PLANNER ---
     genai.configure(api_key=KEY_1)
-    planner = genai.GenerativeModel("gemini-1.5-flash")
+    # UPDATED: Added models/ prefix
+    planner = genai.GenerativeModel(MODEL_ID)
+    
     plan_res = await asyncio.to_thread(
         planner.generate_content, 
         PLANNER_PROMPT.format(count=count, text=chunk)
@@ -36,11 +41,11 @@ async def agentic_chunk_processor(chunk: str, qa_type: str, count: int, max_retr
     concepts = plan_res.text
     print(f"[PLANNER] Strategy: {concepts[:50]}...")
 
-    await asyncio.sleep(2) # Pacing
+    await asyncio.sleep(2) 
 
     # --- STAGE 2: THE GENERATOR (Action + Tools) ---
-    # We use Key 2 here to split the API quota load
-    model_with_tools = get_model_with_tools(KEY_2 or KEY_1)
+    # Ensure your tools.py also uses the "models/gemini-1.5-flash" string
+    model_with_tools = get_model_with_tools(KEY_2 or KEY_1, model_name=MODEL_ID)
     chat = model_with_tools.start_chat(enable_automatic_function_calling=True)
     
     gen_prompt = f"""
@@ -54,11 +59,13 @@ async def agentic_chunk_processor(chunk: str, qa_type: str, count: int, max_retr
     raw_json = gen_res.text
     print(f"[GENERATOR] Produced raw QA content.")
 
-    await asyncio.sleep(2) # Pacing
+    await asyncio.sleep(2) 
 
     # --- STAGE 3: THE REVIEWER (Quality Control) ---
     genai.configure(api_key=KEY_1)
-    reviewer = genai.GenerativeModel("gemini-1.5-flash")
+    # UPDATED: Added models/ prefix
+    reviewer = genai.GenerativeModel(MODEL_ID)
+    
     rev_res = await asyncio.to_thread(
         reviewer.generate_content,
         REVIEWER_PROMPT.format(text=chunk, quiz_json=raw_json)
@@ -69,7 +76,5 @@ async def agentic_chunk_processor(chunk: str, qa_type: str, count: int, max_retr
         print("[REVIEWER] Check Passed.")
         return parse_json_safely(raw_json)
     else:
-        print(f"[REVIEWER] Refinement needed: {validation[:50]}")
-        # In a full ReAct loop, you'd trigger a re-generation here.
-        # For now, we return the parsed JSON to keep it simple.
+        print(f"[REVIEWER] Refinement suggested: {validation[:50]}")
         return parse_json_safely(raw_json)

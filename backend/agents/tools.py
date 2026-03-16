@@ -38,12 +38,7 @@ STUDY_TOOLS = [
     # We can add more tools here (e.g., PDF parsers, DB lookups)
 ]
 
-def get_model_with_tools(api_key: str, model_name: str = "gemini-1.5-flash"):
-    """
-    Helper to initialize a model with the registered tools attached.
-    """
+# services/tools.py (or wherever it is located)
+def get_model_with_tools(api_key: str, model_name: str = "models/gemini-1.5-flash"):
     genai.configure(api_key=api_key)
-    return genai.GenerativeModel(
-        model_name=model_name,
-        tools=STUDY_TOOLS
-    )
+    return genai.GenerativeModel(model_name=model_name, tools=[calculate_complexity_score])
