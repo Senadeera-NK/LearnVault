@@ -12,7 +12,7 @@ The system follows a **Planner-Reviewer pattern** to minimize LLM hallucinations
 * **Reviewer Agent:** Cross-references generated questions against the source text to validate factual accuracy and difficulty levels.
 
 
-```
+```mermaid
 graph TD
     %% User Interaction
     User((User)) -->|Uploads PDF/Text| FastAPI[FastAPI Server]
