@@ -188,6 +188,11 @@ export async function send_qa_selection(
 
     //  If not existing, generate QA
     console.log("DEBUG: Sending QA generation request to:", `${API_URL}/qa/selection`);
+    
+    //Abortcontrller to set a long timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(()=>controller.abort(),300000);
+    
     const res = await fetch(`${API_URL}/qa/selection`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -197,10 +202,16 @@ export async function send_qa_selection(
         category,
         num_questions
       }),
+      signal:controller.signal
     });
+    clearTimeout(timeoutId);
 
     if (!res.ok) {
       const errorText = await res.text();
+//specifying for the 502 error
+      if(res.status==502){
+        throw new Error("server is taking too long to respond. Please check the backend logs");
+      }
       throw new Error(`Failed to send data: ${errorText}`);
     }
 
