@@ -60,6 +60,8 @@ async def generate_qa_from_file(
             break
             
         print(f"[DEBUG] Processing large chunk {idx+1}/{len(chunks)}")
+
+        await asyncio.sleep(3.0)
         
         # --- OPTIMIZATION 2: SMART DELAY ---
         # Increased to 4s but happens fewer times due to larger chunks.
