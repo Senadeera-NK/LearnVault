@@ -10,7 +10,43 @@ The system follows a **Planner-Reviewer pattern** to minimize LLM hallucinations
 * **Planner Agent:** Parses PDF structure and determines the optimal extraction strategy.
 * **Generator Agent:** Executes the content extraction and formats structured Q&A pairs.
 * **Reviewer Agent:** Cross-references generated questions against the source text to validate factual accuracy and difficulty levels.
+```
+graph TD
+    %% User Interaction
+    User((User)) -->|Uploads PDF/Text| FastAPI[FastAPI Server]
+    
+    subgraph "Service: Ingestion"
+        FastAPI -->|Check Duplicates| SupabaseDB[(Supabase PostgreSQL)]
+        FastAPI -->|Temp Storage| SupabaseStorage[[Supabase Storage]]
+        FastAPI -->|Trigger| Threading[threading.Thread]
+    end
 
+    subgraph "Service: Background Worker"
+        Threading -->|download_file_from_url| OCR[OCR / pdfplumber]
+        OCR -->|extract_text| Classifier[rule_based_check / classify_document]
+        Classifier -->|Update status + category| SupabaseDB
+    end
+
+    %% User selection process
+    User -->|Selects Doc + Category| FastAPI
+    
+    subgraph "Service: QA Generation"
+        FastAPI -->|qa_selection| QAParser[QA Parser Service]
+        QAParser -->|Prompt + Context| Gemini[Gemini 2.5 Flash API]
+        Gemini -->|parse_qa_to_json| FinalQA[QA Validation Stage]
+    end
+
+    %% Agentic Refinement Loop
+    subgraph "Agentic Flow (Self-Correction)"
+        FinalQA -.->|Evaluation| Reviewer{Reviewer Agent}
+        Reviewer -- "Fail (Provide Critique)" --> QAParser
+        Reviewer -- "Pass" --> Store[save_qa_incremental]
+    end
+
+    Store --> SupabaseDB
+    Store --> Frontend[Display Files/QA]
+    Frontend --> User
+    ```
 ## 🛠 Tech Stack
 * **Frontend:** Next.js 15, Tailwind CSS, TypeScript.
 * **Backend:** FastAPI (Python), Google Gemini 3 (Flash & Pro).
