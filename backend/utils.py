@@ -26,7 +26,7 @@ def download_file_from_url(file_url, save_dir="/tmp"):
         print("DEBUG: File downloaded successfully")
         return local_filename
     except Exception as e:
-        print("❌ Error downloading file:", str(e))
+        print("Error downloading file:", str(e))
         return None
 
 # add extract_text
@@ -36,14 +36,14 @@ def extract_text(file_path):
 
     try:
         if ext == "pdf":
-            # 1️⃣ pdfplumber
+            #  pdfplumber
             try:
                 with pdfplumber.open(file_path) as pdf:
                     for page in pdf.pages:
                         text += page.extract_text() or ""
             except: pass
 
-            # 2️⃣ fitz fallback
+            # fitz fallback
             if not text.strip():
                 try:
                     doc = fitz.open(file_path)
@@ -51,7 +51,7 @@ def extract_text(file_path):
                         text += page.get_text("text")
                 except: pass
 
-            # 3️⃣ OCR fallback
+            # OCR fallback
             if not text.strip():
                 try:
                     pages = convert_from_path(file_path)
@@ -75,7 +75,7 @@ def extract_text(file_path):
             return "UNSUPPORTED"
 
     except Exception as e:
-        print(f"⚠️ Could not read {file_path}: {e}")
+        print(f"Could not read {file_path}: {e}")
         return "READ_ERROR"
 
     return text.strip() if text.strip() else "EMPTY"

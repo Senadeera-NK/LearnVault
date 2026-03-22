@@ -25,7 +25,7 @@ async def upload_file(user_id: int = Form(...), file: UploadFile = Form(...)):
         if not signed_path:
             raise HTTPException(status_code=500, detail="Failed to generate signed URL")
 
-        # ✅ Prepend full storage URL
+        # Prepend full storage URL
         full_signed_url = f"{SUPABASE_URL}/storage/v1/{signed_path.lstrip('/')}"
 
         # Upload file

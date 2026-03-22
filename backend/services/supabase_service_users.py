@@ -19,7 +19,7 @@ if not SUPABASE_URL or not SUPABASE_KEY:
     print(f"DEBUG: URL is {SUPABASE_URL}, KEY exists: {bool(SUPABASE_KEY)}")
     raise ValueError("Supabase credentials missing. Check your .env file")
 
-# If it gets here, it means both exist!
+# If it gets here, it means both exist
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 def hash_password(password: str) -> str:
@@ -56,16 +56,16 @@ def signin_user(email: str, password: str):
     else:
         return {"error": "Invalid email or password"}
 
-# ✅ Test and print users
+#  Test and print users
 def test_connection_and_users():
     try:
         response = supabase.table("users").select("*").execute()
         if response.data:
-            print("✅ Connected to Supabase successfully")
-            print("📌 Existing users:")
+            print("Connected to Supabase successfully")
+            print("Existing users:")
             for u in response.data:
                 print(f"- ID: {u.get('id')}, Name: {u.get('name')}, Email: {u.get('email')}")
         else:
-            print("⚠️ Connected, but no users found in users table")
+            print("Connected, but no users found in users table")
     except Exception as e:
-        print("❌ Failed to connect to Supabase:", str(e))
+        print("Failed to connect to Supabase:", str(e))

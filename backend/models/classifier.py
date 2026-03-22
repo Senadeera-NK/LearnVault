@@ -45,7 +45,7 @@ def classify_text_with_hf(text: str):
         best_idx = max(range(len(response)), key=lambda i: response[i]['score'])
         return category_names[best_idx]
     except Exception as e:
-        print("❌ Hugging Face classification error:", str(e))
+        print("Hugging Face classification error:", str(e))
         return "HF_ERROR"
 
 def classify_document(file_path: str):

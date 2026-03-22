@@ -16,9 +16,9 @@ def insert_user_usage(user_id: str, pageName: str, durationseconds: int):
         }
 
         # Print to console before sending to Supabase
-        print("📤 Sending payload to Supabase:", payload)
+        print("Sending payload to Supabase:", payload)
 
-        # First check if a record exists for (user, page, date)
+        # check if a record exists
         existing = (
             supabase.table("users_usage")
             .select("id, hours")
@@ -53,7 +53,7 @@ def insert_user_usage(user_id: str, pageName: str, durationseconds: int):
             return {"success": True, "usage": new_usage.data}
 
     except Exception as e:
-        print("❌ Error during insert/update:", str(e))
+        print("Error during insert/update:", str(e))
         return {"success": False, "error": str(e)}
 
 

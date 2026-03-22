@@ -16,8 +16,8 @@ def download_file_from_url(file_url, save_dir="."):
     with open(local_filename, "wb") as f:
         for chunk in response.iter_content(8192):
             f.write(chunk)
-    print("✅ File saved to:", local_filename)
-    return local_filename  # ✅ ADD THIS LINE
+    print("File saved to:", local_filename)
+    return local_filename  #  ADD THIS LINE
 
 
 # test with your public Supabase file URL

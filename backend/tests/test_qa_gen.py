@@ -2,7 +2,6 @@ import asyncio
 import httpx
 import time
 
-# Change this to your local URL or your Render URL
 BASE_URL = os.environ.get("BASE_URL")
 
 async def test_qa_generation():
@@ -13,7 +12,7 @@ async def test_qa_generation():
         "num_questions": 10
     }
 
-    print(f"🚀 Starting Rate Limit Test at {time.strftime('%X')}...")
+    print(f" Starting Rate Limit Test at {time.strftime('%X')}...")
     
     async with httpx.AsyncClient(timeout=300.0) as client:
         try:
@@ -24,15 +23,15 @@ async def test_qa_generation():
             if response.status_code == 200:
                 data = response.json()
                 results_count = len(data.get("results", []))
-                print(f"✅ Success! Received {results_count} questions.")
-                print(f"⏱️ Total processing time: {duration:.2f} seconds.")
-                # If duration is > 10-15 seconds, our intentional delays are working!
+                print(f"Success! Received {results_count} questions.")
+                print(f"Total processing time: {duration:.2f} seconds.")
+                
             else:
-                print(f"❌ Failed with status: {response.status_code}")
+                print(f" Failed with status: {response.status_code}")
                 print(f"Detail: {response.text}")
 
         except Exception as e:
-            print(f"⚠️ Test Error: {e}")
+            print(f" Test Error: {e}")
 
 if __name__ == "__main__":
     asyncio.run(test_qa_generation())
