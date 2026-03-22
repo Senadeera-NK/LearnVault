@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 
 interface TrueFalseItem {
   question: string;
-  answer: string;
+  answer: string | boolean;
 }
 
 interface TrueFalseSkeletonProps {
@@ -35,10 +35,12 @@ export default function TrueFalseSkeleton({
 
     data.forEach((qa, index) => {
       const userAnswer = selectedAnswer[index];
+      // converting qa.answer for a safer comparison
+      const formattedCorrectAnswer = String(qa.answer).toLowerCase();
 
       if (!userAnswer) {
         newResults[index] = "skipped";
-      } else if (userAnswer.toLowerCase() === qa.answer.toLowerCase()) {
+      } else if (userAnswer.toLowerCase() === formattedCorrectAnswer) {
         newResults[index] = "correct";
       } else {
         newResults[index] = "wrong";

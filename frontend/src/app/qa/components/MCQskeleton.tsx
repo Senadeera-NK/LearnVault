@@ -6,7 +6,7 @@ import { useState, useEffect } from "react";
 interface MCQItem {
   question: string;
   options: string[];
-  answer: string;
+  answer: string | boolean;
 }
 
 interface MCQskeletonProps {
