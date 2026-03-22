@@ -37,9 +37,11 @@ export default function MCQskeleton({ data, checkAnswerTrigger,refreshTrigger }:
     data.forEach((qa, index) => {
       const userAnswer = selectedAnswer[index];
     //   find the correct letter for the answer
-    const selectedLetter = letters[qa.options.findIndex(opt=>opt===userAnswer)];
-
-    newResults[index]=selectedLetter===qa.answer;
+    const selectedIndex = qa.options.findIndex(opt=>opt===userAnswer);
+    const selectedLetter = letters[selectedIndex];
+    
+    const isCorrect = selectedLetter === String(qa.answer).toUpperCase() || userAnswer === qa.answer;
+    newResults[index]=isCorrect;
     });
     setResult(newResults);
   };
@@ -56,6 +58,7 @@ useEffect(()=>{
         const userAnswer = selectedAnswer[index];
         const isCorrect = result[index];
         const letters = ["A", "B","C","D"]
+
 
         return (
           <Box

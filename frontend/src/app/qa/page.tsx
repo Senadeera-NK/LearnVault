@@ -9,6 +9,7 @@ import TrueFalseSkeleton from "./components/TrueFalseSkeleton";
 import FactQAskeleton from "./components/FactQAskeleton";
 import { fetch_user_pdfs, send_qa_selection } from "../../../api/api";
 import { useAuth } from "@/components/AuthContext";
+import { itemAxisPredicate } from "recharts/types/state/selectors/axisSelectors";
 
 
 export default function QA() {
@@ -56,12 +57,30 @@ const handleDoneFromShelf = async (file: { id: string; name: string; url: string
 
     // Normalize response
     let qaData: any[]=[];
-    if(backendCategory=="fact"){
-      qaData = result?.results|| result?.cachedQA||[];
+    if(backendCategory=="fact" || backendCategory=="true_false"){
+      qaData = result?.results|| result?.qa_content|| result?.cachedQA||[];
     }else{
-    qaData = result?.qa_content || result?.cachedQA || [];
+    qaData = result?.qa_content || result?.results || result?.cachedQA || [];
     }
-    setQaContent(qaData);
+    // normalizing the data here
+  const normalizedData = qaData.map((item: any) => {
+    let finalOptions: string[] = [];
+
+    if (Array.isArray(item.options)) {
+      finalOptions = item.options;
+    } else if (typeof item.options === 'object' && item.options !== null) {
+      // Converts {A: "Choice 1", B: "Choice 2"} into ["Choice 1", "Choice 2"]
+      finalOptions = [item.options.A, item.options.B, item.options.C, item.options.D].filter(Boolean);
+    }
+
+    return {
+      question: item.question,
+      options: finalOptions,
+      // Keep it uppercase to match your MCQ logic 'A', 'B', etc.
+      answer: String(item.answer ?? item.correct_answer ?? "").toUpperCase()
+    };
+  });
+  setQaContent(normalizedData);
 
   } catch (err) {
     console.error(err);
