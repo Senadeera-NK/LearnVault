@@ -1,9 +1,7 @@
 import os
 import google.generativeai as genai
 
-# ---------------------------------------------------------
-# TOOL DEFINITIONS (The "Actions" the Agent can take)
-# ---------------------------------------------------------
+# the actions agent can take
 
 def calculate_complexity_score(text: str) -> int:
     """
@@ -14,7 +12,7 @@ def calculate_complexity_score(text: str) -> int:
         An integer representing the recommended question count.
     """
     word_count = len(text.split())
-    # Engineering logic: 1 question per 100 words for technical depth
+    # 1 question per 100 words
     return max(1, word_count // 100)
 
 def search_academic_context(query: str) -> str:
@@ -28,20 +26,14 @@ def search_academic_context(query: str) -> str:
     # handled in the orchestrator.
     return f"Search result for: {query}"
 
-# ---------------------------------------------------------
-# TOOL REGISTRATION (For the Gemini Model)
-# ---------------------------------------------------------
 
-# This list is passed to the GenerativeModel 'tools' parameter
+# tool registration for the gemini model
 STUDY_TOOLS = [
     calculate_complexity_score,
-    # We can add more tools here (e.g., PDF parsers, DB lookups)
+    # TODO: Add more tools(optinal)
 ]
 
-# services/tools.py (or wherever it is located)
-# services/tools.py
+
 def get_model_with_tools(api_key: str, model_name: str = "gemini-1.5-flash"):
     genai.configure(api_key=api_key)
-    # Try removing the "models/" prefix here if you added it, 
-    # or adding it if you didn't. Some SDK versions prefer one over the other.
     return genai.GenerativeModel(model_name=model_name, tools=[calculate_complexity_score])

@@ -5,9 +5,7 @@ from services.qa_json import parse_qa_to_json
 
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
-# ----------------------------------------------------
-# Check if file already processed enough
-# ----------------------------------------------------
+
 async def check_file_processed(user_id: int, file_url: str, category: str, min_questions: int = 1) -> bool:
     try:
         resp = (
@@ -32,9 +30,6 @@ async def check_file_processed(user_id: int, file_url: str, category: str, min_q
         return False
 
 
-# ----------------------------------------------------
-# SIMPLE SAVE FUNCTION — EACH UPLOAD = NEW ROW
-# ----------------------------------------------------
 async def save_qa_incremental(
     user_id: int,
     file_url: str,
@@ -109,9 +104,8 @@ async def save_qa_incremental(
         return {"error": str(e)}
 
 
-# ----------------------------------------------------
 # FETCH existing QA
-# ----------------------------------------------------
+
 async def get_existing_qa_for_user(user_id: int, file_url: str, category: str, num_questions: int = 20):
     try:
         resp = (

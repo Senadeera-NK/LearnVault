@@ -17,10 +17,10 @@ def download_file_from_url(file_url, save_dir="."):
         for chunk in response.iter_content(8192):
             f.write(chunk)
     print("File saved to:", local_filename)
-    return local_filename  #  ADD THIS LINE
+    return local_filename 
 
 
-# test with your public Supabase file URL
+# testing with the public Supabase file URL
 file_url = "https://uomksagzyiittforjxsb.supabase.co/storage/v1/object/public/user_pdfs/user_2/eom%20u01introtobiology.pdf"
 local_path = download_file_from_url(file_url)
 print(local_path)

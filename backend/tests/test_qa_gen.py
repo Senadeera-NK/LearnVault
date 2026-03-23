@@ -4,6 +4,7 @@ import time
 
 BASE_URL = os.environ.get("BASE_URL")
 
+# testing - counting how long it takes to generate qa for a file
 async def test_qa_generation():
     payload = {
         "user_id": 2,

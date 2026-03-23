@@ -29,9 +29,9 @@ async def agentic_chunk_processor(chunk: str, qa_type: str, count: int, max_retr
     CV-READY AGENTIC WORKFLOW with fixed model paths.
     """
     
-    # --- STAGE 1: THE PLANNER ---
+    #the planner
     genai.configure(api_key=KEY_1)
-    # UPDATED: Added models/ prefix
+    # Added models/ prefix
     planner = genai.GenerativeModel(MODEL_ID)
     
     plan_res = await asyncio.to_thread(
@@ -43,7 +43,7 @@ async def agentic_chunk_processor(chunk: str, qa_type: str, count: int, max_retr
 
     await asyncio.sleep(2) 
 
-    # --- STAGE 2: THE GENERATOR (Action + Tools) ---
+    # THE GENERATOR (Action + Tools)
     # Ensure your tools.py also uses the "models/gemini-1.5-flash" string
     model_with_tools = get_model_with_tools(KEY_2 or KEY_1, model_name=MODEL_ID)
     chat = model_with_tools.start_chat(enable_automatic_function_calling=True)
@@ -61,9 +61,9 @@ async def agentic_chunk_processor(chunk: str, qa_type: str, count: int, max_retr
 
     await asyncio.sleep(2) 
 
-    # --- STAGE 3: THE REVIEWER (Quality Control) ---
+    # THE REVIEWER (Quality Control)
     genai.configure(api_key=KEY_1)
-    # UPDATED: Added models/ prefix
+    # Added models/ prefix
     reviewer = genai.GenerativeModel(MODEL_ID)
     
     rev_res = await asyncio.to_thread(

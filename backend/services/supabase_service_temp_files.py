@@ -6,7 +6,7 @@ from urllib.parse import urlparse
 import re
 
 supabase = create_client(SUPABASE_URL,SUPABASE_KEY)
-
+# WARNING - not needed for now - cause not doing temp files anymore, only uploaded files to the system will be able to use other functionalities
 async def upload_temp_file(user_id:int, file):
     try:
         temp_dir = tempfile.gettempdir()

@@ -33,7 +33,7 @@ def insert_user_usage(user_id: str, pageName: str, durationseconds: int):
             new_hours = existing.data[0]["hours"] + payload["hours"]
 
             update_payload = {"hours": new_hours}
-            print("♻️ Updating existing record:", update_payload)
+            print("Updating existing record:", update_payload)
 
             updated = (
                 supabase.table("users_usage")
@@ -44,7 +44,7 @@ def insert_user_usage(user_id: str, pageName: str, durationseconds: int):
             return {"success": True, "usage": updated.data}
 
         else:
-            print("➕ Inserting new record:", payload)
+            print("Inserting new record:", payload)
             new_usage = (
                 supabase.table("users_usage")
                 .insert(payload)

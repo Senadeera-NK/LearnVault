@@ -33,7 +33,7 @@ async def generate_qa_from_file(
     num_questions_total: int = 20,
     user_id: int = None
 ):
-    # --- 1. Check Cache ---
+    # --- 1. Check the db ---
     if await check_file_processed(user_id, file_url, qa_type, num_questions_total):
         print(f"[DEBUG] Cache hit for user={user_id}")
         cached = await get_existing_qa_for_user(user_id, file_url, qa_type, num_questions_total)
