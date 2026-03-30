@@ -6,11 +6,10 @@ import google.generativeai as genai
 from .prompts import PLANNER_PROMPT, REVIEWER_PROMPT
 from .tools import get_model_with_tools, calculate_complexity_score
 
-# Multi-Key Setup - Updated to match your .env (GENAI_API_KEY_2)
+# Multi-Key Setup
 KEY_1 = os.environ.get("GENAI_API_KEY")
 KEY_2 = os.environ.get("GENAI_API_KEY_2") 
 
-# The specific model string required by the current SDK version
 MODEL_ID = "models/gemini-2.5-flash"
 
 def parse_json_safely(raw_text: str):
@@ -43,8 +42,7 @@ async def agentic_chunk_processor(chunk: str, qa_type: str, count: int, max_retr
 
     await asyncio.sleep(2) 
 
-    # THE GENERATOR (Action + Tools)
-    # Ensure your tools.py also uses the "models/gemini-1.5-flash" string
+    # THE GENERATOR
     model_with_tools = get_model_with_tools(KEY_2 or KEY_1, model_name=MODEL_ID)
     chat = model_with_tools.start_chat(enable_automatic_function_calling=True)
     
